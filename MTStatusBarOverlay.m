@@ -8,6 +8,37 @@
 
 #import "MTStatusBarOverlay.h"
 
+// duration of the animation to show next status message in seconds
+#define kNextStatusAnimationDuration	0.8
+// x-offset of the child-views of the background when status bar is in small mode
+#define kSmallXOffset					50
+// default-width of the small-mode
+#define kWidthSmall						80
+
+
+//=========================================================== 
+#pragma mark -
+#pragma mark Helper Functions
+//=========================================================== 
+
+BOOL IsIPad() {
+    static BOOL hasCheckediPadStatus = NO;
+	static BOOL isRunningOniPad = NO;
+	
+	if (!hasCheckediPadStatus) {
+		if ([[UIDevice currentDevice] respondsToSelector:@selector(userInterfaceIdiom)]) {
+			if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+				isRunningOniPad = YES;
+			}
+		}
+        
+		hasCheckediPadStatus = YES;
+	}
+	
+	return isRunningOniPad;
+}
+
+
 
 //=========================================================== 
 #pragma mark -
@@ -49,6 +80,9 @@ unsigned int statusBarBackgroundGrey_png_len = 220;
 @property (nonatomic, retain) UIActivityIndicatorView *activityIndicator;
 @property (nonatomic, retain) UIImageView *statusBarBackgroundImageView;
 @property (nonatomic, retain) UIImage *grayStatusBarImage;
+@property (nonatomic, retain) UILabel *statusLabel1;
+@property (nonatomic, retain) UILabel *statusLabel2;
+@property (nonatomic, assign) UILabel *hiddenStatusLabel;
 
 - (IBAction)contentViewClicked:(id)sender;
 
@@ -64,7 +98,9 @@ unsigned int statusBarBackgroundGrey_png_len = 220;
 //=========================================================== 
 @synthesize backgroundView = backgroundView_;
 @synthesize statusBarBackgroundImageView = statusBarBackgroundImageView_;
-@synthesize statusLabel = statusLabel_;
+@synthesize statusLabel1 = statusLabel1_;
+@synthesize statusLabel2 = statusLabel2_;
+@synthesize hiddenStatusLabel = hiddenStatusLabel_;
 @synthesize activityIndicator = activityIndicator_;
 @synthesize smallRect = smallRect_;
 @synthesize grayStatusBarImage = grayStatusBarImage_;
@@ -81,11 +117,10 @@ unsigned int statusBarBackgroundGrey_png_len = 220;
         self.windowLevel = UIWindowLevelStatusBar+1.0f;
         self.frame = [UIApplication sharedApplication].statusBarFrame;
 		
-		int width = 30;
-		smallRect_ = CGRectMake(self.frame.size.width - width, 0.0f, width, self.frame.size.height);
+		smallRect_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 		
         // Create view that stores all the content
-        backgroundView_ = [[UIControl alloc] initWithFrame:smallRect_];
+        backgroundView_ = [[UIControl alloc] initWithFrame:self.frame];
 		[backgroundView_ addTarget:self action:@selector(contentViewClicked:) forControlEvents:UIControlEventTouchUpInside];
 		backgroundView_.clipsToBounds = YES;
 		
@@ -104,11 +139,21 @@ unsigned int statusBarBackgroundGrey_png_len = 220;
 		activityIndicator_.hidesWhenStopped = YES;
 		[self addSubviewToBackgroundView:activityIndicator_];
 		
-		// Status Label
-		statusLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(35.0f, 0.0f, 200.0f, self.frame.size.height-1)];
-		statusLabel_.backgroundColor = [UIColor clearColor];
-		statusLabel_.font = [UIFont boldSystemFontOfSize:12.0f];
-		[backgroundView_ addSubview:statusLabel_];
+		// Status Label 1 is first visible
+		statusLabel1_ = [[UILabel alloc] initWithFrame:CGRectMake(35.0f, 0.0f, 200.0f, self.frame.size.height-1)];
+		statusLabel1_.backgroundColor = [UIColor clearColor];
+		statusLabel1_.font = [UIFont boldSystemFontOfSize:12.0f];
+		[self addSubviewToBackgroundView:statusLabel1_];
+		
+		// Status Label 2 is hidden
+		statusLabel2_ = [[UILabel alloc] initWithFrame:CGRectMake(35.0f, self.frame.size.height, 200.0f, self.frame.size.height-1)];
+		statusLabel2_.backgroundColor = [UIColor clearColor];
+		statusLabel2_.font = [UIFont boldSystemFontOfSize:12.0f];
+		statusLabel2_.text = @"hidden";
+		[self addSubviewToBackgroundView:statusLabel2_];
+		
+		// the hidden status label at the beggining
+		hiddenStatusLabel_ = statusLabel2_;
 		
         [self addSubview:backgroundView_];
     }
@@ -120,7 +165,8 @@ unsigned int statusBarBackgroundGrey_png_len = 220;
 - (void)dealloc {
 	[backgroundView_ release], backgroundView_ = nil;
 	[statusBarBackgroundImageView_ release], statusBarBackgroundImageView_ = nil;
-	[statusLabel_ release], statusLabel_ = nil;
+	[statusLabel1_ release], statusLabel1_ = nil;
+	[statusLabel2_ release], statusLabel2_ = nil;
 	[activityIndicator_ release], activityIndicator_ = nil;
 	[grayStatusBarImage_ release], grayStatusBarImage_ = nil;
 	
@@ -142,23 +188,74 @@ unsigned int statusBarBackgroundGrey_png_len = 220;
 		return;
 	}
 	
-	// set appearance depending on StatusBarStyle
-	if ([UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault) {
-		self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
-		self.statusLabel.textColor = [UIColor blackColor];
-		self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
-	} else {
-		self.statusBarBackgroundImageView.image = nil;
-		self.statusLabel.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
-		self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhite;
+	// if status bar is currently hidden, show it
+	if (self.hidden) {
+		// set background image, if we have a gray status bar
+		if ([UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault && !IsIPad()) {
+			self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
+			self.statusLabel1.textColor = [UIColor blackColor];
+			self.statusLabel2.textColor = [UIColor blackColor];
+			self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
+		} else {
+			self.statusBarBackgroundImageView.image = nil;
+			self.statusLabel1.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
+			self.statusLabel2.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
+			self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhite;
+		}
+		
+		// set text of visible status label
+		self.statusLabel1.text = message;
+		// start activity indicator
+		[self.activityIndicator startAnimating];
+		// show status bar overlay
+		self.hidden = NO;
 	}
 	
-	// set label text
-	self.statusLabel.text = message;
-	// indicate activity
-	[self.activityIndicator startAnimating];
-	// show
-	self.hidden = NO;
+	// already visible, animate to new text
+	else {
+		// set text of currently not visible label to new text
+		if (self.hiddenStatusLabel == self.statusLabel1) {
+			self.statusLabel1.text = message;
+			
+			// position under visible status label
+			self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x, 
+												 self.frame.size.height,
+												 self.statusLabel1.frame.size.width, 
+												 self.statusLabel1.frame.size.height);
+		} else {
+			self.statusLabel2.text = message;
+			
+			// position under visible status label
+			self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x, 
+												 self.frame.size.height,
+												 self.statusLabel2.frame.size.width, 
+												 self.statusLabel2.frame.size.height);
+		}
+		
+		// animate not visible label into user view
+		[UIView animateWithDuration:kNextStatusAnimationDuration 
+							  delay:0 
+							options:UIViewAnimationOptionCurveEaseInOut 
+						 animations:^{
+							 // move both status labels up
+							 self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x, 
+																  self.statusLabel1.frame.origin.y - self.frame.size.height,
+																  self.statusLabel1.frame.size.width, 
+																  self.statusLabel1.frame.size.height);
+							 self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x, 
+																  self.statusLabel2.frame.origin.y - self.frame.size.height,
+																  self.statusLabel2.frame.size.width, 
+																  self.statusLabel2.frame.size.height);
+						 } 
+						 completion:^(BOOL finished) {
+							 // after animation, set new hidden status label indicator
+							 if (self.hiddenStatusLabel == self.statusLabel1) {
+								 self.hiddenStatusLabel = self.statusLabel2;
+							 } else {
+								 self.hiddenStatusLabel = self.statusLabel1;
+							 }
+						 }];
+	}
 }
 
 - (void)hide {
@@ -173,12 +270,30 @@ unsigned int statusBarBackgroundGrey_png_len = 220;
 //===========================================================
 
 - (IBAction)contentViewClicked:(id)sender {	
-	// changes the size of the StatusBar to only overlap battery-icon
 	[UIView animateWithDuration:0.3 animations:^{
+		// if size is small size, make it bigger
 		if (CGRectEqualToRect(self.backgroundView.frame, self.smallRect)) {
 			self.backgroundView.frame = self.frame;
-		} else {
+			
+			// move activity indicator and statusLabel to the left
+			self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x - kSmallXOffset, self.activityIndicator.frame.origin.y,
+													  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
+			self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x - kSmallXOffset, self.statusLabel1.frame.origin.y,
+												 self.statusLabel1.frame.size.width, self.statusLabel1.frame.size.height);
+			self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x - kSmallXOffset, self.statusLabel2.frame.origin.y,
+												 self.statusLabel2.frame.size.width, self.statusLabel2.frame.size.height);
+		} 
+		// else make it smaller
+		else {
 			self.backgroundView.frame = self.smallRect;
+			
+			// move activity indicator and statusLabel to the right
+			self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x + kSmallXOffset, self.activityIndicator.frame.origin.y,
+													  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
+			self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x + kSmallXOffset, self.statusLabel1.frame.origin.y,
+												 self.statusLabel1.frame.size.width, self.statusLabel1.frame.size.height);
+			self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x + kSmallXOffset, self.statusLabel2.frame.origin.y,
+												 self.statusLabel2.frame.size.width, self.statusLabel2.frame.size.height);
 		}
 	}];
 }

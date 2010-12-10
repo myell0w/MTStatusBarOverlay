@@ -1,0 +1,15 @@
+Read Me
+=====================
+
+This class provides a custom iOS status bar overlay window known from Apps like Reeder.
+
+![Reeder Status Bar on Flickr](http://farm5.static.flickr.com/4074/4754736484_8fc1ef9639_o.png "Reeder Status Bar on Flickr")
+
+It currently supports touch-handling to shrink and expand and also black and gray status bar styles. Device rotation is currently not supported, but will be added in a future version.
+
+You can use the custom status bar like this:
+
+MTStatusBarOverlay overlay = [[MTStatusBarOverlay alloc] initWithFrame:CGRectZero];
+[overlay showWithMessage:@"Following @myell0w on Twitter..."];
+
+if you call showWithMessage when the custom status bar is already visible, the new text is set animated. Known Bugs: During animation of new text, the custom status bar can't be shrinked.

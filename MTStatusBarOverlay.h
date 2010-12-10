@@ -16,7 +16,9 @@
 	// background of Status Bar Black or gray
 	UIImageView *statusBarBackgroundImageView_;
 	// for displaying Text information
-	UILabel* statusLabel_;
+	UILabel* statusLabel1_;
+	UILabel* statusLabel2_;
+	UILabel *hiddenStatusLabel_;
 	// for displaying activity indication
 	UIActivityIndicatorView* activityIndicator_;
 	
@@ -32,11 +34,8 @@
 #pragma mark Properties
 //=========================================================== 
 @property (nonatomic, retain) UIControl *backgroundView;
-@property (nonatomic, retain) UILabel *statusLabel;
 @property (nonatomic, assign) CGRect smallRect;
 
-// adds a subview to the overlay and automatically sets its user interaction to disabled
-// so that the user interaction is handled by the backgroundView
 - (void)addSubviewToBackgroundView:(UIView *)view;
 
 - (void)showWithMessage:(NSString *)message;
