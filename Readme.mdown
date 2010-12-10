@@ -9,7 +9,9 @@ It currently supports touch-handling to shrink and expand and also black and gra
 
 You can use the custom status bar like this:
 
-MTStatusBarOverlay overlay = [[MTStatusBarOverlay alloc] initWithFrame:CGRectZero];
-[overlay showWithMessage:@"Following @myell0w on Twitter..."];
+     MTStatusBarOverlay overlay = [[MTStatusBarOverlay alloc] initWithFrame:CGRectZero];   
+     [overlay showWithMessage:@"Following @myell0w on Twitter..."];     
 
-if you call showWithMessage when the custom status bar is already visible, the new text is set animated. Known Bugs: During animation of new text, the custom status bar can't be shrinked.
+if you call showWithMessage when the custom status bar is already visible, the new text is set animated. 
+
+Known Limitations: During animation of new text, the custom status bar can't be shrinked.
