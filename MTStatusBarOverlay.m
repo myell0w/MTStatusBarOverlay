@@ -175,6 +175,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (nonatomic, assign) UILabel *hiddenStatusLabel;
 
 - (IBAction)contentViewClicked:(id)sender;
+- (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style;
+- (void)setLabelUIForStatusBarStyle:(UIStatusBarStyle)style;
 
 @end
 
@@ -195,6 +197,16 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize smallRect = smallRect_;
 @synthesize grayStatusBarImage = grayStatusBarImage_;
 @synthesize grayStatusBarImageSmall = grayStatusBarImageSmall_;
+
+
+//=========================================================== 
+#pragma mark -
+#pragma mark Class Methods
+//=========================================================== 
+
++ (MTStatusBarOverlay *)statusBarOverlay {
+	return [[[MTStatusBarOverlay alloc] initWithFrame:CGRectZero] autorelease];
+}
 
 
 //=========================================================== 
@@ -270,7 +282,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 //=========================================================== 
 #pragma mark -
-#pragma mark Change Status Bar Appearance and 
+#pragma mark Change status bar appearance and behavior
 //===========================================================
 
 - (void)addSubviewToBackgroundView:(UIView *)view {
@@ -278,40 +290,26 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self.backgroundView addSubview:view];
 }
 
-- (void)showWithMessage:(NSString *)message {
-	if (message == nil) {
+- (void)show {
+	// start activity indicator
+	[self.activityIndicator startAnimating];
+	// show status bar overlay
+	self.hidden = NO;
+}
+
+- (void)hide {
+	[self.activityIndicator stopAnimating];
+	self.hidden = YES;
+}
+
+- (void)setMessage:(NSString *)message animated:(BOOL)animated {
+	// status bar not visible in the moment, just show it
+	if (self.hidden) {
+		[self showWithMessage:message];
 		return;
 	}
 	
-	// if status bar is currently hidden, show it
-	if (self.hidden) {
-		// set background image, if we have a gray status bar
-		if ([UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault && !IsIPad()) {
-			if (CGRectEqualToRect(self.backgroundView.frame, self.smallRect)) {
-				self.statusBarBackgroundImageView.image = [self.grayStatusBarImageSmall stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
-			} else {
-				self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
-			}
-			self.statusLabel1.textColor = [UIColor blackColor];
-			self.statusLabel2.textColor = [UIColor blackColor];
-			self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
-		} else {
-			self.statusBarBackgroundImageView.image = nil;
-			self.statusLabel1.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
-			self.statusLabel2.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
-			self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhite;
-		}
-		
-		// set text of visible status label
-		self.statusLabel1.text = message;
-		// start activity indicator
-		[self.activityIndicator startAnimating];
-		// show status bar overlay
-		self.hidden = NO;
-	}
-	
-	// already visible, animate to new text
-	else {
+	if (animated) {
 		// set text of currently not visible label to new text
 		if (self.hiddenStatusLabel == self.statusLabel1) {
 			self.statusLabel1.text = message;
@@ -356,30 +354,56 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 						 }];
 	}
 	
-	
+	// w/o animation
+	else {
+		if (self.hiddenStatusLabel == self.statusLabel1) {
+			self.statusLabel2.text = message;
+		} else {
+			self.statusLabel1.text = message;
+		}
+	}
 }
 
-- (void)hide {
-	[self.activityIndicator stopAnimating];
-	self.hidden = YES;
+- (void)showWithMessage:(NSString *)message {
+	if (message == nil) {
+		return;
+	}
+	
+	// if status bar is currently hidden, show it
+	if (self.hidden) {
+		// update status bar background
+		[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+		
+		// update label-UI depending on status bar style
+		[self setLabelUIForStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+		
+		// set text of visible status label
+		self.statusLabel1.text = message;
+		
+		[self show];
+	}
+	
+	// already visible, animate to new text
+	else {
+		[self setMessage:message animated:YES];
+	}
 }
 
 
 //=========================================================== 
 #pragma mark -
-#pragma mark Action Methods
+#pragma mark Private Methods
 //===========================================================
 
 - (IBAction)contentViewClicked:(id)sender {	
 	[UIView animateWithDuration:0.3 animations:^{
+		// update status bar background
+		[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+		
 		// if size is small size, make it bigger
 		if (CGRectEqualToRect(self.backgroundView.frame, self.smallRect)) {
 			self.backgroundView.frame = self.frame;
 			
-			// set image to big one
-			if (self.statusBarBackgroundImageView.image != nil) {
-				self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
-			} 
 			// move activity indicator and statusLabel to the left
 			self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x - kSmallXOffset, self.activityIndicator.frame.origin.y,
 													  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
@@ -392,11 +416,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		else {
 			self.backgroundView.frame = self.smallRect;
 			
-			// set image to small one
-			if (self.statusBarBackgroundImageView.image != nil) {
-				self.statusBarBackgroundImageView.image = [self.grayStatusBarImageSmall stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
-			} 
-			
 			// move activity indicator and statusLabel to the right
 			self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x + kSmallXOffset, self.activityIndicator.frame.origin.y,
 													  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
@@ -406,6 +425,35 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 												 self.statusLabel2.frame.size.width, self.statusLabel2.frame.size.height);
 		}
 	}];
+}
+
+- (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style {
+	// gray status bar?
+	if (style == UIStatusBarStyleDefault && IsIPad()) {
+		// choose image depending on size
+		if (CGRectEqualToRect(size, self.smallRect)) {
+			self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
+		} else {
+			self.statusBarBackgroundImageView.image = [self.grayStatusBarImageSmall stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
+		}
+	} 
+	
+	// black status bar? -> no image
+	else {
+		self.statusBarBackgroundImageView.image = nil;
+	}
+}
+
+- (void)setLabelUIForStatusBarStyle:(UIStatusBarStyle)style {
+	if (style == UIStatusBarStyleDefault && !IsIPad()) {
+		self.statusLabel1.textColor = [UIColor blackColor];
+		self.statusLabel2.textColor = [UIColor blackColor];
+		self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
+	} else {
+		self.statusLabel1.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
+		self.statusLabel2.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
+		self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhite;
+	}
 }
 
 @end

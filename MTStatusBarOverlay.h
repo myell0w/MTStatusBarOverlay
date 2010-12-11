@@ -44,9 +44,27 @@
 @property (nonatomic, retain) UIControl *backgroundView;
 @property (nonatomic, assign) CGRect smallRect;
 
+//=========================================================== 
+#pragma mark -
+#pragma mark Class Methods
+//=========================================================== 
+
+// convenience-constructor
++ (MTStatusBarOverlay *)statusBarOverlay;
+
+//=========================================================== 
+#pragma mark -
+#pragma mark Instance Methods
+//=========================================================== 
+
+// for customizing appearance, automatically disabled userInteractionEnabled on view
 - (void)addSubviewToBackgroundView:(UIView *)view;
 
-- (void)showWithMessage:(NSString *)message;
+- (void)show;
 - (void)hide;
+// convenience-method, set Message and show
+- (void)showWithMessage:(NSString *)message;
+
+- (void)setMessage:(NSString *)message animated:(BOOL)animated;
 
 @end
