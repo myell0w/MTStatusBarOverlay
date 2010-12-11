@@ -3,12 +3,15 @@
 //  MTHelper
 //
 //  Created by Matthias Tretter on 27.09.10.
-//  Copyright 2010 YellowSoft. All rights reserved.
+//  Copyright 2010 @myell0w. All rights reserved.
 //
 
 // Credits go to: 
+// -------------------------------
 // http://stackoverflow.com/questions/2833724/adding-view-on-statusbar-in-iphone
 // http://cocoabyss.com/2010/ios-custom-status-bar/
+// @reederapp
+// -------------------------------
 
 #import <Foundation/Foundation.h>
 
@@ -31,6 +34,7 @@
 	
 	// Image of gray Status Bar
 	UIImage *grayStatusBarImage_;
+	UIImage *grayStatusBarImageSmall_;
 }
 
 //=========================================================== 
