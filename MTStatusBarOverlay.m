@@ -228,6 +228,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
         backgroundView_ = [[UIControl alloc] initWithFrame:self.frame];
 		[backgroundView_ addTarget:self action:@selector(contentViewClicked:) forControlEvents:UIControlEventTouchUpInside];
 		backgroundView_.clipsToBounds = YES;
+		backgroundView_.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 		
 		// Image of gray status bar
 		NSData *pngData = [NSData dataWithBytesNoCopy:statusBarBackgroundGrey_png length:statusBarBackgroundGrey_png_len freeWhenDone:NO];
@@ -264,6 +265,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		hiddenStatusLabel_ = statusLabel2_;
 		
         [self addSubview:backgroundView_];
+		
+		[[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications]; 
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(didRotate:)
+													 name:UIDeviceOrientationDidChangeNotification object:nil];
     }
 	
 	return self;
@@ -271,6 +277,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 
 - (void)dealloc {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	
 	[backgroundView_ release], backgroundView_ = nil;
 	[statusBarBackgroundImageView_ release], statusBarBackgroundImageView_ = nil;
 	[statusLabel1_ release], statusLabel1_ = nil;
@@ -371,14 +379,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		return;
 	}
 	
+	// update status bar background
+	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+	// update label-UI depending on status bar style
+	[self setLabelUIForStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+	
 	// if status bar is currently hidden, show it
 	if (self.hidden) {
-		// update status bar background
-		[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
-		
-		// update label-UI depending on status bar style
-		[self setLabelUIForStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
-		
 		// set text of visible status label
 		self.statusLabel1.text = message;
 		
@@ -391,6 +398,23 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 }
 
+
+//=========================================================== 
+#pragma mark -
+#pragma mark Rotation Notification
+//===========================================================
+
+- (void) didRotate:(NSNotification *)notification {	
+	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+	
+	NSLog(@"Orientation: %d, Frame:(%f,%f,%f,%f)", orientation, [UIApplication sharedApplication].statusBarFrame.origin.x,
+		  [UIApplication sharedApplication].statusBarFrame.origin.y,
+		  [UIApplication sharedApplication].statusBarFrame.size.width,
+		  [UIApplication sharedApplication].statusBarFrame.size.height);
+	
+	// TODO: update frame for current orientation
+	//self.frame = [UIApplication sharedApplication].statusBarFrame;
+}
 
 //=========================================================== 
 #pragma mark -
