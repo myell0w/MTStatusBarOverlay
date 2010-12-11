@@ -15,6 +15,16 @@
 
 #import <Foundation/Foundation.h>
 
+// what happens when the user touches the status bar?
+typedef enum MTStatusBarOverlayAnimation {
+	// nothing happens
+	MTStatusBarOverlayAnimationNone,
+	// the status bar shrinks to the right side and only shows the activity indicator
+	MTStatusBarOverlayAnimationShrink,
+	// the status bar falls down and displays more information
+	MTStatusBarOverlayAnimationFallDown
+} MTStatusBarOverlayAnimation;
+
 
 @interface MTStatusBarOverlay : UIWindow {
 	// holds all subviews, is touchable to change size of Status Bar
@@ -29,12 +39,14 @@
 	// for displaying activity indication
 	UIActivityIndicatorView* activityIndicator_;
 	
-	// Small size of Status Bar
-	CGRect smallRect_;
-	
 	// Image of gray Status Bar
 	UIImage *grayStatusBarImage_;
 	UIImage *grayStatusBarImageSmall_;
+	
+	// Animation-Type
+	MTStatusBarOverlayAnimation animation_;
+	// Small size of Status Bar
+	CGRect smallRect_;
 }
 
 //=========================================================== 
@@ -43,6 +55,7 @@
 //=========================================================== 
 @property (nonatomic, retain) UIControl *backgroundView;
 @property (nonatomic, assign) CGRect smallRect;
+@property (nonatomic, assign) MTStatusBarOverlayAnimation animation;
 
 //=========================================================== 
 #pragma mark -

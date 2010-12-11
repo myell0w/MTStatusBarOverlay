@@ -194,9 +194,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize statusLabel2 = statusLabel2_;
 @synthesize hiddenStatusLabel = hiddenStatusLabel_;
 @synthesize activityIndicator = activityIndicator_;
-@synthesize smallRect = smallRect_;
 @synthesize grayStatusBarImage = grayStatusBarImage_;
 @synthesize grayStatusBarImageSmall = grayStatusBarImageSmall_;
+@synthesize smallRect = smallRect_;
+@synthesize animation = animation_;
 
 
 //=========================================================== 
@@ -221,6 +222,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
         self.frame = [UIApplication sharedApplication].statusBarFrame;
 		
 		smallRect_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
+		animation_ = MTStatusBarOverlayAnimationNone;
 		
         // Create view that stores all the content
         backgroundView_ = [[UIControl alloc] initWithFrame:self.frame];
@@ -396,35 +398,43 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 //===========================================================
 
 - (IBAction)contentViewClicked:(id)sender {	
-	[UIView animateWithDuration:0.3 animations:^{
-		// update status bar background
-		[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
-		
-		// if size is small size, make it bigger
-		if (CGRectEqualToRect(self.backgroundView.frame, self.smallRect)) {
-			self.backgroundView.frame = self.frame;
+	switch (self.animation) {
+		case MTStatusBarOverlayAnimationShrink:
+			[UIView animateWithDuration:0.3 animations:^{
+				// update status bar background
+				[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+				
+				// if size is small size, make it bigger
+				if (CGRectEqualToRect(self.backgroundView.frame, self.smallRect)) {
+					self.backgroundView.frame = self.frame;
+					
+					// move activity indicator and statusLabel to the left
+					self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x - kSmallXOffset, self.activityIndicator.frame.origin.y,
+															  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
+					self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x - kSmallXOffset, self.statusLabel1.frame.origin.y,
+														 self.statusLabel1.frame.size.width, self.statusLabel1.frame.size.height);
+					self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x - kSmallXOffset, self.statusLabel2.frame.origin.y,
+														 self.statusLabel2.frame.size.width, self.statusLabel2.frame.size.height);
+				} 
+				// else make it smaller
+				else {
+					self.backgroundView.frame = self.smallRect;
+					
+					// move activity indicator and statusLabel to the right
+					self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x + kSmallXOffset, self.activityIndicator.frame.origin.y,
+															  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
+					self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x + kSmallXOffset, self.statusLabel1.frame.origin.y,
+														 self.statusLabel1.frame.size.width, self.statusLabel1.frame.size.height);
+					self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x + kSmallXOffset, self.statusLabel2.frame.origin.y,
+														 self.statusLabel2.frame.size.width, self.statusLabel2.frame.size.height);
+				}
+			}];
+			break;
 			
-			// move activity indicator and statusLabel to the left
-			self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x - kSmallXOffset, self.activityIndicator.frame.origin.y,
-													  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
-			self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x - kSmallXOffset, self.statusLabel1.frame.origin.y,
-												 self.statusLabel1.frame.size.width, self.statusLabel1.frame.size.height);
-			self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x - kSmallXOffset, self.statusLabel2.frame.origin.y,
-												 self.statusLabel2.frame.size.width, self.statusLabel2.frame.size.height);
-		} 
-		// else make it smaller
-		else {
-			self.backgroundView.frame = self.smallRect;
-			
-			// move activity indicator and statusLabel to the right
-			self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x + kSmallXOffset, self.activityIndicator.frame.origin.y,
-													  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
-			self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x + kSmallXOffset, self.statusLabel1.frame.origin.y,
-												 self.statusLabel1.frame.size.width, self.statusLabel1.frame.size.height);
-			self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x + kSmallXOffset, self.statusLabel2.frame.origin.y,
-												 self.statusLabel2.frame.size.width, self.statusLabel2.frame.size.height);
-		}
-	}];
+		case MTStatusBarOverlayAnimationFallDown:
+			// TODO: implement, display another UIView that shows further information (like Android StatusBar)
+			break;
+	}
 }
 
 - (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style {
