@@ -33,11 +33,12 @@ typedef enum MTStatusBarOverlayAnimation {
 	// background of Status Bar Black or gray
 	UIImageView *statusBarBackgroundImageView_;
 	// for displaying Text information
-	UILabel* statusLabel1_;
-	UILabel* statusLabel2_;
+	UILabel *statusLabel1_;
+	UILabel *statusLabel2_;
 	UILabel *hiddenStatusLabel_;
 	// for displaying activity indication
-	UIActivityIndicatorView* activityIndicator_;
+	UIActivityIndicatorView *activityIndicator_;
+	UILabel *finishedLabel_;
 	
 	// Image of gray Status Bar
 	UIImage *grayStatusBarImage_;
@@ -77,6 +78,7 @@ typedef enum MTStatusBarOverlayAnimation {
 - (void)hide;
 // convenience-method, set Message and show
 - (void)showWithMessage:(NSString *)message;
+- (void)finishWithMessage:(NSString *)message;
 
 - (void)setMessage:(NSString *)message animated:(BOOL)animated;
 

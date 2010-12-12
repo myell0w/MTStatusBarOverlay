@@ -173,6 +173,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (nonatomic, retain) UILabel *statusLabel1;
 @property (nonatomic, retain) UILabel *statusLabel2;
 @property (nonatomic, assign) UILabel *hiddenStatusLabel;
+@property (nonatomic, retain) UILabel *finishedLabel;
 
 - (IBAction)contentViewClicked:(id)sender;
 - (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style;
@@ -194,6 +195,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize statusLabel2 = statusLabel2_;
 @synthesize hiddenStatusLabel = hiddenStatusLabel_;
 @synthesize activityIndicator = activityIndicator_;
+@synthesize finishedLabel = finishedLabel_;
 @synthesize grayStatusBarImage = grayStatusBarImage_;
 @synthesize grayStatusBarImageSmall = grayStatusBarImageSmall_;
 @synthesize smallRect = smallRect_;
@@ -220,6 +222,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
         // Place the window on the correct level and position
         self.windowLevel = UIWindowLevelStatusBar+1.0f;
         self.frame = [UIApplication sharedApplication].statusBarFrame;
+		//self.backgroundColor = [UIColor redColor];
 		
 		smallRect_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 		animation_ = MTStatusBarOverlayAnimationNone;
@@ -240,6 +243,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// Background-Image of the Content View
 		statusBarBackgroundImageView_ = [[UIImageView alloc] initWithFrame:self.frame];
 		statusBarBackgroundImageView_.backgroundColor = [UIColor blackColor];
+		statusBarBackgroundImageView_.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 		[self addSubviewToBackgroundView:statusBarBackgroundImageView_];
 		
 		// Activity Indicator
@@ -248,17 +252,28 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		activityIndicator_.hidesWhenStopped = YES;
 		[self addSubviewToBackgroundView:activityIndicator_];
 		
+		// Finished-Label
+		finishedLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(8,0,self.frame.size.height, self.frame.size.height)];
+		finishedLabel_.backgroundColor = [UIColor clearColor];
+		finishedLabel_.hidden = YES;
+		finishedLabel_.text = @"✔";
+		finishedLabel_.font = [UIFont boldSystemFontOfSize:14.f];
+		[self addSubviewToBackgroundView:finishedLabel_];
+		
 		// Status Label 1 is first visible
-		statusLabel1_ = [[UILabel alloc] initWithFrame:CGRectMake(35.0f, 0.0f, 200.0f, self.frame.size.height-1)];
+		statusLabel1_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, 0.0f, self.frame.size.width - 60.0f, self.frame.size.height-1)];
 		statusLabel1_.backgroundColor = [UIColor clearColor];
 		statusLabel1_.font = [UIFont boldSystemFontOfSize:12.0f];
+		statusLabel1_.textAlignment = UITextAlignmentCenter;
+		statusLabel1_.lineBreakMode = UILineBreakModeTailTruncation;
 		[self addSubviewToBackgroundView:statusLabel1_];
 		
 		// Status Label 2 is hidden
-		statusLabel2_ = [[UILabel alloc] initWithFrame:CGRectMake(35.0f, self.frame.size.height, 200.0f, self.frame.size.height-1)];
+		statusLabel2_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, self.frame.size.height,self.frame.size.width - 60.0f , self.frame.size.height-1)];
 		statusLabel2_.backgroundColor = [UIColor clearColor];
 		statusLabel2_.font = [UIFont boldSystemFontOfSize:12.0f];
-		statusLabel2_.text = @"hidden";
+		statusLabel2_.textAlignment = UITextAlignmentCenter;
+		statusLabel2_.lineBreakMode = UILineBreakModeTailTruncation;
 		[self addSubviewToBackgroundView:statusLabel2_];
 		
 		// the hidden status label at the beggining
@@ -284,6 +299,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[statusLabel1_ release], statusLabel1_ = nil;
 	[statusLabel2_ release], statusLabel2_ = nil;
 	[activityIndicator_ release], activityIndicator_ = nil;
+	[finishedLabel_ release], finishedLabel_ = nil;
 	[grayStatusBarImage_ release], grayStatusBarImage_ = nil;
 	[grayStatusBarImageSmall_ release], grayStatusBarImageSmall_ = nil;
 	
@@ -313,6 +329,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)setMessage:(NSString *)message animated:(BOOL)animated {
+	self.finishedLabel.hidden = YES;
+	self.activityIndicator.hidden = NO;
+	
 	// status bar not visible in the moment, just show it
 	if (self.hidden) {
 		[self showWithMessage:message];
@@ -398,6 +417,12 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 }
 
+- (void)finishWithMessage:(NSString *)message {
+	[self showWithMessage:message];
+	
+	self.activityIndicator.hidden = YES;
+	self.finishedLabel.hidden = NO;
+}
 
 //=========================================================== 
 #pragma mark -
@@ -413,6 +438,17 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		  [UIApplication sharedApplication].statusBarFrame.size.height);
 	
 	// TODO: update frame for current orientation
+	if (orientation == UIDeviceOrientationPortrait) {
+		self.frame = CGRectMake(0,0,320,20);
+	}else if (orientation == UIDeviceOrientationLandscapeLeft) {
+		self.frame = CGRectMake(300,0, 20, 480);
+	} else if (orientation == UIDeviceOrientationLandscapeRight) {
+		self.frame = CGRectMake(0,0, 20, 480);
+	} else if (orientation == UIDeviceOrientationPortraitUpsideDown) {
+		self.frame = CGRectMake(0,460,320,20);
+	}
+	
+	
 	//self.frame = [UIApplication sharedApplication].statusBarFrame;
 }
 
@@ -482,10 +518,12 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	if (style == UIStatusBarStyleDefault && !IsIPad()) {
 		self.statusLabel1.textColor = [UIColor blackColor];
 		self.statusLabel2.textColor = [UIColor blackColor];
+		self.finishedLabel.textColor = [UIColor blackColor];
 		self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
 	} else {
 		self.statusLabel1.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
 		self.statusLabel2.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
+		self.finishedLabel.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
 		self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhite;
 	}
 }
