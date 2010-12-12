@@ -78,7 +78,7 @@ typedef enum MTStatusBarOverlayAnimation {
 - (void)hide;
 // convenience-method, set Message and show
 - (void)showWithMessage:(NSString *)message;
-- (void)finishWithMessage:(NSString *)message;
+- (void)finishWithMessage:(NSString *)message duration:(NSTimeInterval)duration;
 
 - (void)setMessage:(NSString *)message animated:(BOOL)animated;
 

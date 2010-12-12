@@ -417,11 +417,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 }
 
-- (void)finishWithMessage:(NSString *)message {
+- (void)finishWithMessage:(NSString *)message duration:(NSTimeInterval)duration {
 	[self showWithMessage:message];
 	
 	self.activityIndicator.hidden = YES;
 	self.finishedLabel.hidden = NO;
+	
+	[self performSelector:@selector(hide) withObject:nil afterDelay:duration];
 }
 
 //=========================================================== 
