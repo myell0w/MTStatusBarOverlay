@@ -47,7 +47,8 @@ typedef enum MTStatusBarOverlayAnimation {
 	// Animation-Type
 	MTStatusBarOverlayAnimation animation_;
 	// Small size of Status Bar
-	CGRect smallRect_;
+	CGRect smallFrame_;
+	CGRect oldBackgroundViewFrame_;
 }
 
 //=========================================================== 
@@ -55,7 +56,7 @@ typedef enum MTStatusBarOverlayAnimation {
 #pragma mark Properties
 //=========================================================== 
 @property (nonatomic, retain) UIControl *backgroundView;
-@property (nonatomic, assign) CGRect smallRect;
+@property (nonatomic, assign) CGRect smallFrame;
 @property (nonatomic, assign) MTStatusBarOverlayAnimation animation;
 
 //=========================================================== 

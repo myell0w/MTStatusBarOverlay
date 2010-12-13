@@ -169,6 +169,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (nonatomic, retain) UILabel *statusLabel2;
 @property (nonatomic, assign) UILabel *hiddenStatusLabel;
 @property (nonatomic, retain) UILabel *finishedLabel;
+@property (nonatomic, assign) CGRect oldBackgroundViewFrame;
 
 - (IBAction)contentViewClicked:(id)sender;
 - (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style;
@@ -193,7 +194,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize finishedLabel = finishedLabel_;
 @synthesize grayStatusBarImage = grayStatusBarImage_;
 @synthesize grayStatusBarImageSmall = grayStatusBarImageSmall_;
-@synthesize smallRect = smallRect_;
+@synthesize smallFrame = smallFrame_;
+@synthesize oldBackgroundViewFrame = oldBackgroundViewFrame_;
 @synthesize animation = animation_;
 
 
@@ -218,7 +220,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
         self.windowLevel = UIWindowLevelStatusBar+1.0f;
         self.frame = [UIApplication sharedApplication].statusBarFrame;
 		
-		smallRect_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
+		smallFrame_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 		animation_ = MTStatusBarOverlayAnimationNone;
 		
         // Create view that stores all the content
@@ -433,16 +435,19 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	if (orientation == UIDeviceOrientationPortrait) {
 		self.transform = CGAffineTransformIdentity;
 		self.frame = CGRectMake(0,0,320,20);		
+		self.smallFrame = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 	}else if (orientation == UIDeviceOrientationLandscapeLeft) {
 		self.transform = CGAffineTransformMakeRotation(M_PI * (90) / 180.0);
 		self.frame = CGRectMake(300,0, 20, 480);
+		self.smallFrame = CGRectMake(480-kWidthSmall,0,kWidthSmall,20);
 	} else if (orientation == UIDeviceOrientationLandscapeRight) {
-		//Rotate 90° if iPhone
 		self.transform = CGAffineTransformMakeRotation(M_PI * (-90) / 180.0);
 		self.frame = CGRectMake(0,0, 20, 480);
+		self.smallFrame = CGRectMake(480-kWidthSmall,0, kWidthSmall, 20);
 	} else if (orientation == UIDeviceOrientationPortraitUpsideDown) {
 		self.transform = CGAffineTransformMakeRotation(M_PI);
 		self.frame = CGRectMake(0,460,320,20);
+		self.smallFrame = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 	}
 }
 
@@ -459,8 +464,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 				[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
 				
 				// if size is small size, make it bigger
-				if (CGRectEqualToRect(self.backgroundView.frame, self.smallRect)) {
-					self.backgroundView.frame = self.frame;
+				if (CGRectEqualToRect(self.backgroundView.frame, self.smallFrame)) {
+					self.backgroundView.frame = self.oldBackgroundViewFrame;
 					
 					// move activity indicator and statusLabel to the left
 					self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x - kSmallXOffset, self.activityIndicator.frame.origin.y,
@@ -472,7 +477,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 				} 
 				// else make it smaller
 				else {
-					self.backgroundView.frame = self.smallRect;
+					self.oldBackgroundViewFrame = self.backgroundView.frame;
+					self.backgroundView.frame = self.smallFrame;
 					
 					// move activity indicator and statusLabel to the right
 					self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x + kSmallXOffset, self.activityIndicator.frame.origin.y,
@@ -495,7 +501,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// gray status bar?
 	if (style == UIStatusBarStyleDefault && IsIPad) {
 		// choose image depending on size
-		if (CGRectEqualToRect(size, self.smallRect)) {
+		if (CGRectEqualToRect(size, self.smallFrame)) {
 			self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
 		} else {
 			self.statusBarBackgroundImageView.image = [self.grayStatusBarImageSmall stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
