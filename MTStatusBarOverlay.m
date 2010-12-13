@@ -28,9 +28,10 @@
 
 //=========================================================== 
 #pragma mark -
-#pragma mark Macros
+#pragma mark Defines
 //=========================================================== 
 
+#define kPI 3.141592 
 #define IsIPad UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
 
 
@@ -260,6 +261,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		statusLabel1_.font = [UIFont boldSystemFontOfSize:12.0f];
 		statusLabel1_.textAlignment = UITextAlignmentCenter;
 		statusLabel1_.lineBreakMode = UILineBreakModeTailTruncation;
+		statusLabel1_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[self addSubviewToBackgroundView:statusLabel1_];
 		
 		// Status Label 2 is hidden
@@ -268,6 +270,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		statusLabel2_.font = [UIFont boldSystemFontOfSize:12.0f];
 		statusLabel2_.textAlignment = UITextAlignmentCenter;
 		statusLabel2_.lineBreakMode = UILineBreakModeTailTruncation;
+		statusLabel2_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[self addSubviewToBackgroundView:statusLabel2_];
 		
 		// the hidden status label at the beggining
@@ -428,19 +431,19 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void) didRotate:(NSNotification *)notification {	
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
 	
-	NSLog(@"Orientation: %d, Frame:(%f,%f,%f,%f)", orientation, [UIApplication sharedApplication].statusBarFrame.origin.x,
-		  [UIApplication sharedApplication].statusBarFrame.origin.y,
-		  [UIApplication sharedApplication].statusBarFrame.size.width,
-		  [UIApplication sharedApplication].statusBarFrame.size.height);
 	
-	// TODO: update frame for current orientation
 	if (orientation == UIDeviceOrientationPortrait) {
+		self.transform = CGAffineTransformIdentity;
 		self.frame = CGRectMake(0,0,320,20);
 	}else if (orientation == UIDeviceOrientationLandscapeLeft) {
+		self.transform = CGAffineTransformMakeRotation(kPI * (90) / 180.0);
 		self.frame = CGRectMake(300,0, 20, 480);
 	} else if (orientation == UIDeviceOrientationLandscapeRight) {
+		//Rotate 90° if iPhone
+		self.transform = CGAffineTransformMakeRotation(kPI * (-90) / 180.0);
 		self.frame = CGRectMake(0,0, 20, 480);
 	} else if (orientation == UIDeviceOrientationPortraitUpsideDown) {
+		self.transform = CGAffineTransformMakeRotation(kPI);
 		self.frame = CGRectMake(0,460,320,20);
 	}
 	
