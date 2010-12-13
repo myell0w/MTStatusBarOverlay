@@ -8,6 +8,16 @@
 
 #import "MTStatusBarOverlay.h"
 
+//=========================================================== 
+#pragma mark -
+#pragma mark Customize Section
+//=========================================================== 
+
+// Text color for UIStatusBarStyleDefault
+#define kStatusBarStyleDefaultTextColor [UIColor blackColor]
+// Text color for UIStatusBarStyleBlack
+#define kStatusBarStyleBlackTextColor [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0]
+
 // duration of the animation to show next status message in seconds
 #define kNextStatusAnimationDuration	0.8
 // x-offset of the child-views of the background when status bar is in small mode
@@ -18,25 +28,10 @@
 
 //=========================================================== 
 #pragma mark -
-#pragma mark Helper Functions
+#pragma mark Macros
 //=========================================================== 
 
-BOOL IsIPad() {
-    static BOOL hasCheckediPadStatus = NO;
-	static BOOL isRunningOniPad = NO;
-	
-	if (!hasCheckediPadStatus) {
-		if ([[UIDevice currentDevice] respondsToSelector:@selector(userInterfaceIdiom)]) {
-			if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-				isRunningOniPad = YES;
-			}
-		}
-        
-		hasCheckediPadStatus = YES;
-	}
-	
-	return isRunningOniPad;
-}
+#define IsIPad UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
 
 
 
@@ -222,7 +217,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
         // Place the window on the correct level and position
         self.windowLevel = UIWindowLevelStatusBar+1.0f;
         self.frame = [UIApplication sharedApplication].statusBarFrame;
-		//self.backgroundColor = [UIColor redColor];
 		
 		smallRect_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 		animation_ = MTStatusBarOverlayAnimationNone;
@@ -501,7 +495,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style {
 	// gray status bar?
-	if (style == UIStatusBarStyleDefault && IsIPad()) {
+	if (style == UIStatusBarStyleDefault && IsIPad) {
 		// choose image depending on size
 		if (CGRectEqualToRect(size, self.smallRect)) {
 			self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
@@ -517,15 +511,15 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)setLabelUIForStatusBarStyle:(UIStatusBarStyle)style {
-	if (style == UIStatusBarStyleDefault && !IsIPad()) {
-		self.statusLabel1.textColor = [UIColor blackColor];
-		self.statusLabel2.textColor = [UIColor blackColor];
-		self.finishedLabel.textColor = [UIColor blackColor];
+	if (style == UIStatusBarStyleDefault && !IsIPad) {
+		self.statusLabel1.textColor = kStatusBarStyleDefaultTextColor;
+		self.statusLabel2.textColor = kStatusBarStyleDefaultTextColor;
+		self.finishedLabel.textColor = kStatusBarStyleDefaultTextColor;
 		self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
 	} else {
-		self.statusLabel1.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
-		self.statusLabel2.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
-		self.finishedLabel.textColor = [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0];
+		self.statusLabel1.textColor = kStatusBarStyleBlackTextColor;
+		self.statusLabel2.textColor = kStatusBarStyleBlackTextColor;
+		self.finishedLabel.textColor = kStatusBarStyleBlackTextColor;
 		self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhite;
 	}
 }
