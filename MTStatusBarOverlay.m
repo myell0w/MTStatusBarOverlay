@@ -31,7 +31,6 @@
 #pragma mark Defines
 //=========================================================== 
 
-#define kPI 3.141592 
 #define IsIPad UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
 
 
@@ -430,25 +429,21 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (void) didRotate:(NSNotification *)notification {	
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-	
-	
+		
 	if (orientation == UIDeviceOrientationPortrait) {
 		self.transform = CGAffineTransformIdentity;
-		self.frame = CGRectMake(0,0,320,20);
+		self.frame = CGRectMake(0,0,320,20);		
 	}else if (orientation == UIDeviceOrientationLandscapeLeft) {
-		self.transform = CGAffineTransformMakeRotation(kPI * (90) / 180.0);
+		self.transform = CGAffineTransformMakeRotation(M_PI * (90) / 180.0);
 		self.frame = CGRectMake(300,0, 20, 480);
 	} else if (orientation == UIDeviceOrientationLandscapeRight) {
 		//Rotate 90° if iPhone
-		self.transform = CGAffineTransformMakeRotation(kPI * (-90) / 180.0);
+		self.transform = CGAffineTransformMakeRotation(M_PI * (-90) / 180.0);
 		self.frame = CGRectMake(0,0, 20, 480);
 	} else if (orientation == UIDeviceOrientationPortraitUpsideDown) {
-		self.transform = CGAffineTransformMakeRotation(kPI);
+		self.transform = CGAffineTransformMakeRotation(M_PI);
 		self.frame = CGRectMake(0,460,320,20);
 	}
-	
-	
-	//self.frame = [UIApplication sharedApplication].statusBarFrame;
 }
 
 //=========================================================== 
