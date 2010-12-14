@@ -528,7 +528,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style {
 	// gray status bar?
-	if (style == UIStatusBarStyleDefault && IsIPad) {
+	if (style == UIStatusBarStyleDefault) {
 		// choose image depending on size
 		if (CGRectEqualToRect(size, self.smallFrame)) {
 			self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
