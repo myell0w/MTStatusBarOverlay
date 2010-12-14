@@ -448,8 +448,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 //===========================================================
 
 - (void) didRotate:(NSNotification *)notification {	
+	// current device orientation
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-		
+	// store a flag, if the StatusBar is currently shrinked
+	BOOL currentlyShrinked = CGRectEqualToRect(self.backgroundView.frame, self.smallFrame);
+	
 	if (orientation == UIDeviceOrientationPortrait) {
 		self.transform = CGAffineTransformIdentity;
 		self.frame = CGRectMake(0,0,kScreenWidth,kStatusBarHeight);		
@@ -466,6 +469,14 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		self.transform = CGAffineTransformMakeRotation(M_PI);
 		self.frame = CGRectMake(0,kScreenHeight - kStatusBarHeight,kScreenWidth,kStatusBarHeight);
 		self.smallFrame = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
+	}
+	
+	// if the statusBar is currently shrinked, update the frames for the new rotation state
+	if (currentlyShrinked) {
+		// the oldBackgroundViewFrame is the frame of the whole StatusBar
+		self.oldBackgroundViewFrame = CGRectMake(0,0,UIInterfaceOrientationIsPortrait(orientation) ? kScreenWidth : kScreenHeight,kStatusBarHeight);
+		// the backgroundView gets the newly computed smallFrame
+		self.backgroundView.frame = self.smallFrame;		
 	}
 }
 
