@@ -190,6 +190,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (IBAction)contentViewClicked:(id)sender;
 - (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style;
 - (void)setLabelUIForStatusBarStyle:(UIStatusBarStyle)style;
+- (UIViewController *)currentVisibleViewController;
 
 @end
 
@@ -447,9 +448,19 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 #pragma mark Rotation Notification
 //===========================================================
 
-- (void) didRotate:(NSNotification *)notification {	
+- (void) didRotate:(NSNotification *)notification {
 	// current device orientation
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+	// current visible view controller
+	UIViewController *visibleViewController = [self currentVisibleViewController];
+	
+	// check if we should rotate
+	if (visibleViewController == nil ||
+		![visibleViewController respondsToSelector:@selector(shouldAutorotateToInterfaceOrientation:)] ||
+		![visibleViewController shouldAutorotateToInterfaceOrientation:orientation]) {
+		return;
+	}
+		
 	// store a flag, if the StatusBar is currently shrinked
 	BOOL currentlyShrinked = CGRectEqualToRect(self.backgroundView.frame, self.smallFrame);
 	
@@ -557,6 +568,33 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		self.statusLabel2.textColor = kStatusBarStyleBlackTextColor;
 		self.finishedLabel.textColor = kStatusBarStyleBlackTextColor;
 		self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhite;
+	}
+}
+
+- (UIViewController *)currentVisibleViewController {
+	// Credits go to ShareKit: https://github.com/ideashower/ShareKit
+
+	// Try to find the root view controller programmically
+	// Find the top window (that is not an alert view or other window)
+	UIWindow *topWindow = [[UIApplication sharedApplication] keyWindow];
+
+	if (topWindow.windowLevel != UIWindowLevelNormal) {
+		NSArray *windows = [[UIApplication sharedApplication] windows];
+
+		for(topWindow in windows) {
+			if (topWindow.windowLevel == UIWindowLevelNormal)
+				break;
+		}
+	}
+	
+	UIView *rootView = [[topWindow subviews] objectAtIndex:0];	
+	id nextResponder = [rootView nextResponder];
+	
+	if ([nextResponder isKindOfClass:[UIViewController class]]) {
+		return nextResponder;
+	} else {
+		NSLog(@"MTStatusBarOverlay: Could not find a root view controller, will not rotate!");
+		return nil;
 	}
 }
 
