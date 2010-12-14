@@ -527,8 +527,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style {
-	// gray status bar?
-	if (style == UIStatusBarStyleDefault) {
+	// gray status bar? 
+	// on iPad the Default Status Bar Style is black too
+	if (style == UIStatusBarStyleDefault && !IsIPad) {
 		// choose image depending on size
 		if (CGRectEqualToRect(size, self.smallFrame)) {
 			self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
@@ -544,6 +545,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)setLabelUIForStatusBarStyle:(UIStatusBarStyle)style {
+	// gray status bar? 
+	// on iPad the Default Status Bar Style is black too
 	if (style == UIStatusBarStyleDefault && !IsIPad) {
 		self.statusLabel1.textColor = kStatusBarStyleDefaultTextColor;
 		self.statusLabel2.textColor = kStatusBarStyleDefaultTextColor;
