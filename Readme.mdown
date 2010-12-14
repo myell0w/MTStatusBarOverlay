@@ -19,3 +19,4 @@ Known Limitations:
 
 * During animation of new text, the custom status bar can't be shrinked.
 * Device-Rotation currently doesn't check if active ViewController rotates
+* Device-Rotation only works on iPhone, not iPad
