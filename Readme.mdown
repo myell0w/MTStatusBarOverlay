@@ -11,7 +11,9 @@ You can use the custom status bar like this:
 
      MTStatusBarOverlay overlay = [MTStatusBarOverlay statusBarOverlay];   
 	 overlay.animation = MTStatusBarOverlayAnimationShrink;
-     [overlay showWithMessage:@"Following @myell0w on Twitter..."];  
+     [overlay showWithMessage:@"Following @myell0w on Twitter..."]; 
+ 	 // ...
+     [overlay showWithMessage:@"Following myell0w on Github..."];  
    	 // ...
      [overlay finishWithMessage:@"Following was a good idea!" duration:2.0];
 
