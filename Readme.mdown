@@ -9,7 +9,7 @@ It currently supports touch-handling to shrink and expand and also black and gra
 
 You can use the custom status bar like this:
 
-     MTStatusBarOverlay overlay = [MTStatusBarOverlay statusBarOverlay];   
+     MTStatusBarOverlay overlay = [MTStatusBarOverlay sharedInstance];   
 	 overlay.animation = MTStatusBarOverlayAnimationShrink;
      [overlay showWithMessage:@"Following @myell0w on Twitter..."]; 
  	 // ...
