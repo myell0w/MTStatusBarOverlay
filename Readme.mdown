@@ -11,12 +11,14 @@ You can use the custom status bar like this:
 
      MTStatusBarOverlay overlay = [MTStatusBarOverlay statusBarOverlay];   
 	 overlay.animation = MTStatusBarOverlayAnimationShrink;
-     [overlay showWithMessage:@"Following @myell0w on Twitter..."];     
+     [overlay showWithMessage:@"Following @myell0w on Twitter..."];  
+   	 // ...
+     [overlay finishWithMessage:@"Following was a good idea!" duration:2.0];
 
 if you call showWithMessage when the custom status bar is already visible, the new text is set animated. 
 
 Known Limitations: 
 
 * During animation of new text, the custom status bar can't be shrinked.
-* Device-Rotation currently doesn't check if active ViewController rotates
-* Device-Rotation only works on iPhone, not iPad
+* Device-Rotation currently only works on iPhone, not iPad
+* Only MTStatusBarOverlayAnimationShrink is currently implemented
