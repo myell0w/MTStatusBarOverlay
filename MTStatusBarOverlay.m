@@ -346,6 +346,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (void)setMessage:(NSString *)message animated:(BOOL)animated {
   //DDLogInfo(@"message: %@", message);
+  self.hideInProgress = NO;
   [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
 	self.finishedLabel.hidden = YES;
 	self.activityIndicator.hidden = NO;
