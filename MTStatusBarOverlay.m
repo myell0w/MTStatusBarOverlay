@@ -539,6 +539,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(MTStatusBarOverlay);
 		case MTStatusBarOverlayAnimationFallDown:
 			// TODO: implement, display another UIView that shows further information (like Android StatusBar)
 			break;
+    case MTStatusBarOverlayAnimationNone:
+      // ignore
+      break;
 	}
 }
 
