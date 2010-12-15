@@ -414,14 +414,16 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(MTStatusBarOverlay);
 }
 
 - (void)showWithMessage:(NSString *)message {
-	if (message == nil) {
+  // don't duplicate animation if already displaying with text
+	if (message == nil || (!self.hidden &&  [self.statusLabel1.text isEqualToString:message])) {
 		return;
 	}
 
 	// update status bar background
-	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+  UIStatusBarStyle statusBarStyle = statusBarStyle;
+	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:statusBarStyle];
 	// update label-UI depending on status bar style
-	[self setLabelUIForStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+	[self setLabelUIForStatusBarStyle:statusBarStyle];
 
 	// if status bar is currently hidden, show it
 	if (self.hidden) {
