@@ -189,6 +189,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (nonatomic, assign) UILabel *hiddenStatusLabel;
 @property (nonatomic, retain) UILabel *finishedLabel;
 @property (nonatomic, assign) CGRect oldBackgroundViewFrame;
+@property (nonatomic, assign, getter=isHideInProgress) BOOL hideInProgress;
 
 // is called when the user touches the statusbar
 - (IBAction)contentViewClicked:(id)sender;
@@ -221,7 +222,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize smallFrame = smallFrame_;
 @synthesize oldBackgroundViewFrame = oldBackgroundViewFrame_;
 @synthesize animation = animation_;
-
+@synthesize hideInProgress = hideInProgress_;
 
 //===========================================================
 #pragma mark -
@@ -340,9 +341,12 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)hide {
 	[self.activityIndicator stopAnimating];
 	self.hidden = YES;
+  self.hideInProgress = NO;
 }
 
 - (void)setMessage:(NSString *)message animated:(BOOL)animated {
+  //DDLogInfo(@"message: %@", message);
+  [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
 	self.finishedLabel.hidden = YES;
 	self.activityIndicator.hidden = NO;
 
@@ -439,6 +443,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	self.activityIndicator.hidden = YES;
 	self.finishedLabel.hidden = NO;
 
+  self.hideInProgress = YES;
 	[self performSelector:@selector(hide) withObject:nil afterDelay:duration];
 }
 

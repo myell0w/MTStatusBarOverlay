@@ -58,6 +58,8 @@ typedef enum MTStatusBarOverlayAnimation {
 	CGRect smallFrame_;
 	// temporary variable used for rotation
 	CGRect oldBackgroundViewFrame_;
+
+  BOOL hideInProgress_;
 }
 
 //===========================================================
@@ -94,5 +96,7 @@ typedef enum MTStatusBarOverlayAnimation {
 - (void)finishWithMessage:(NSString *)message duration:(NSTimeInterval)duration;
 // enables you to change the display Message on the status bar animated or w/o animation
 - (void)setMessage:(NSString *)message animated:(BOOL)animated;
+// shows if finishWithMessage was currently called
+- (BOOL)isHideInProgress;
 
 @end
