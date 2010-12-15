@@ -20,7 +20,6 @@
 // -------------------------------
 
 #import "MTStatusBarOverlay.h"
-#import "SynthesizeSingleton.h"
 
 //===========================================================
 #pragma mark -
@@ -224,11 +223,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize animation = animation_;
 
 
-// make this class a Sigleton
-SYNTHESIZE_SINGLETON_FOR_CLASS(MTStatusBarOverlay);
-
-
-
 //===========================================================
 #pragma mark -
 #pragma mark Lifecycle
@@ -420,7 +414,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(MTStatusBarOverlay);
 	}
 
 	// update status bar background
-  UIStatusBarStyle statusBarStyle = statusBarStyle;
+  UIStatusBarStyle statusBarStyle = [UIApplication sharedApplication].statusBarStyle;
 	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:statusBarStyle];
 	// update label-UI depending on status bar style
 	[self setLabelUIForStatusBarStyle:statusBarStyle];
@@ -604,6 +598,55 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(MTStatusBarOverlay);
 		NSLog(@"MTStatusBarOverlay: Could not find a root view controller, will not rotate!");
 		return nil;
 	}
+}
+
+//===========================================================
+#pragma mark -
+#pragma mark Singleton definitons
+//===========================================================
+
+static MTStatusBarOverlay *sharedMTStatusBarOverlay = nil;
++ (MTStatusBarOverlay *)sharedInstance {
+  @synchronized(self)
+  {
+    if (sharedMTStatusBarOverlay == nil) {
+      sharedMTStatusBarOverlay = [[self alloc] init];
+    }
+  }
+
+  return sharedMTStatusBarOverlay;
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+  @synchronized(self)
+  {
+    if (sharedMTStatusBarOverlay == nil)
+    {
+      sharedMTStatusBarOverlay = [super allocWithZone:zone];
+      return sharedMTStatusBarOverlay;
+    }
+  }
+
+  return nil;
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+  return self;
+}
+
+- (id)retain {
+  return self;
+}
+
+- (NSUInteger)retainCount {
+  return NSUIntegerMax;
+}
+
+- (void)release {
+}
+
+- (id)autorelease {
+  return self;
 }
 
 @end
