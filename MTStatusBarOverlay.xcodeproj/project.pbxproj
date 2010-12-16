@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		39025B4912B828DC000D8331 /* SynthesizeSingleton.h in Headers */ = {isa = PBXBuildFile; fileRef = 39025B4812B828DC000D8331 /* SynthesizeSingleton.h */; };
 		39847F2412B2CE5E006F8A53 /* MTStatusBarOverlay.h in Headers */ = {isa = PBXBuildFile; fileRef = 39847F2212B2CE5E006F8A53 /* MTStatusBarOverlay.h */; };
 		39847F2512B2CE5E006F8A53 /* MTStatusBarOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 39847F2312B2CE5E006F8A53 /* MTStatusBarOverlay.m */; };
 		AA747D9F0F9514B9006C5449 /* MTStatusBarOverlay_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* MTStatusBarOverlay_Prefix.pch */; };
@@ -15,7 +14,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		39025B4812B828DC000D8331 /* SynthesizeSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SynthesizeSingleton.h; sourceTree = "<group>"; };
 		39847F2212B2CE5E006F8A53 /* MTStatusBarOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTStatusBarOverlay.h; sourceTree = "<group>"; };
 		39847F2312B2CE5E006F8A53 /* MTStatusBarOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTStatusBarOverlay.m; sourceTree = "<group>"; };
 		AA747D9E0F9514B9006C5449 /* MTStatusBarOverlay_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTStatusBarOverlay_Prefix.pch; sourceTree = SOURCE_ROOT; };
@@ -67,7 +65,6 @@
 			children = (
 				39847F2212B2CE5E006F8A53 /* MTStatusBarOverlay.h */,
 				39847F2312B2CE5E006F8A53 /* MTStatusBarOverlay.m */,
-				39025B4812B828DC000D8331 /* SynthesizeSingleton.h */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -89,7 +86,6 @@
 			files = (
 				AA747D9F0F9514B9006C5449 /* MTStatusBarOverlay_Prefix.pch in Headers */,
 				39847F2412B2CE5E006F8A53 /* MTStatusBarOverlay.h in Headers */,
-				39025B4912B828DC000D8331 /* SynthesizeSingleton.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

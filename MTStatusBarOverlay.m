@@ -341,13 +341,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)hide {
 	[self.activityIndicator stopAnimating];
 	self.hidden = YES;
-  self.hideInProgress = NO;
+	self.hideInProgress = NO;
 }
 
 - (void)setMessage:(NSString *)message animated:(BOOL)animated {
-  //DDLogInfo(@"message: %@", message);
-  self.hideInProgress = NO;
-  [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
+	//DDLogInfo(@"message: %@", message);
+	self.hideInProgress = NO;
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
 	self.finishedLabel.hidden = YES;
 	self.activityIndicator.hidden = NO;
 
@@ -413,13 +413,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)showWithMessage:(NSString *)message {
-  // don't duplicate animation if already displaying with text
+	// don't duplicate animation if already displaying with text
 	if (message == nil || (!self.hidden &&  [self.statusLabel1.text isEqualToString:message])) {
 		return;
 	}
 
 	// update status bar background
-  UIStatusBarStyle statusBarStyle = [UIApplication sharedApplication].statusBarStyle;
+	UIStatusBarStyle statusBarStyle = [UIApplication sharedApplication].statusBarStyle;
 	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:statusBarStyle];
 	// update label-UI depending on status bar style
 	[self setLabelUIForStatusBarStyle:statusBarStyle];
@@ -444,7 +444,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	self.activityIndicator.hidden = YES;
 	self.finishedLabel.hidden = NO;
 
-  self.hideInProgress = YES;
+	self.hideInProgress = YES;
 	[self performSelector:@selector(hide) withObject:nil afterDelay:duration];
 }
 
@@ -539,9 +539,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		case MTStatusBarOverlayAnimationFallDown:
 			// TODO: implement, display another UIView that shows further information (like Android StatusBar)
 			break;
-    case MTStatusBarOverlayAnimationNone:
-      // ignore
-      break;
+		case MTStatusBarOverlayAnimationNone:
+			// ignore
+			break;
 	}
 }
 
@@ -612,47 +612,46 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 //===========================================================
 
 static MTStatusBarOverlay *sharedMTStatusBarOverlay = nil;
-+ (MTStatusBarOverlay *)sharedInstance {
-  @synchronized(self)
-  {
-    if (sharedMTStatusBarOverlay == nil) {
-      sharedMTStatusBarOverlay = [[self alloc] init];
-    }
-  }
 
-  return sharedMTStatusBarOverlay;
++ (MTStatusBarOverlay *)sharedInstance {
+	@synchronized(self) {
+		if (sharedMTStatusBarOverlay == nil) {
+			sharedMTStatusBarOverlay = [[self alloc] initWithFrame:CGRectZero];
+		}
+	}
+
+	return sharedMTStatusBarOverlay;
 }
 
 + (id)allocWithZone:(NSZone *)zone {
-  @synchronized(self)
-  {
-    if (sharedMTStatusBarOverlay == nil)
-    {
-      sharedMTStatusBarOverlay = [super allocWithZone:zone];
-      return sharedMTStatusBarOverlay;
-    }
-  }
+	@synchronized(self) {
+		if (sharedMTStatusBarOverlay == nil) {
+			sharedMTStatusBarOverlay = [super allocWithZone:zone];
 
-  return nil;
+			return sharedMTStatusBarOverlay;
+		}
+	}
+
+	return nil;
 }
 
 - (id)copyWithZone:(NSZone *)zone {
-  return self;
+	return self;
 }
 
 - (id)retain {
-  return self;
+	return self;
 }
 
 - (NSUInteger)retainCount {
-  return NSUIntegerMax;
+	return NSUIntegerMax;
 }
 
 - (void)release {
 }
 
 - (id)autorelease {
-  return self;
+	return self;
 }
 
 @end
