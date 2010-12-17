@@ -332,6 +332,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)show {
+	// don't show if status bar is hidden
+	if ([UIApplication sharedApplication].statusBarHidden) {
+		return;
+	}
+
 	// start activity indicator
 	[self.activityIndicator startAnimating];
 	// show status bar overlay
@@ -345,6 +350,12 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)setMessage:(NSString *)message animated:(BOOL)animated {
+	// don't show if status bar is hidden
+	if ([UIApplication sharedApplication].statusBarHidden) {
+		return;
+	}
+
+
 	//DDLogInfo(@"message: %@", message);
 	self.hideInProgress = NO;
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
