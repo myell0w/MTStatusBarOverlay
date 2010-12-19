@@ -37,6 +37,7 @@
 
 // duration of the animation to show next status message in seconds
 #define kNextStatusAnimationDuration	0.8
+#define kAppearAnimationDuration		0.5
 // x-offset of the child-views of the background when status bar is in small mode
 #define kSmallXOffset					50
 // default-width of the small-mode
@@ -190,6 +191,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (nonatomic, retain) UILabel *finishedLabel;
 @property (nonatomic, assign) CGRect oldBackgroundViewFrame;
 @property (nonatomic, assign, getter=isHideInProgress) BOOL hideInProgress;
+// read out hidden-state using alpha-value and hidden-property
+@property (nonatomic, readonly, getter=isReallyHidden) BOOL reallyHidden;
 
 // is called when the user touches the statusbar
 - (IBAction)contentViewClicked:(id)sender;
@@ -199,6 +202,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)setLabelUIForStatusBarStyle:(UIStatusBarStyle)style;
 // tries to retrieve the current visible view controller of the app and returns it, used for rotation
 - (UIViewController *)currentVisibleViewController;
+
+// set hidden-state using alpha-value instead of hidden-property
+- (void)setHidden:(BOOL)hidden useAlpha:(BOOL)animated;
 
 @end
 
@@ -234,6 +240,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
         // Place the window on the correct level and position
         self.windowLevel = UIWindowLevelStatusBar+1.0f;
         self.frame = [UIApplication sharedApplication].statusBarFrame;
+		self.alpha = 0.0f;
+		self.hidden = NO;
 
 		// Default Small size: just show Activity Indicator
 		smallFrame_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
@@ -321,6 +329,25 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[super dealloc];
 }
 
+
+//===========================================================
+#pragma mark -
+#pragma mark Custom Hide-Methods using alpha instead of hidden-property (for animation)
+//===========================================================
+
+- (void)setHidden:(BOOL)hidden useAlpha:(BOOL)useAlpha {
+	if (useAlpha) {
+		self.alpha = hidden ? 0.0f : 1.0f;
+	} else {
+		self.hidden = hidden;
+	}
+}
+
+- (BOOL)isReallyHidden {
+	return self.alpha == 0.0f || self.hidden;
+}
+
+
 //===========================================================
 #pragma mark -
 #pragma mark Change status bar appearance and behavior
@@ -339,14 +366,21 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 	// start activity indicator
 	[self.activityIndicator startAnimating];
-	// show status bar overlay
-	self.hidden = NO;
+	// show status bar overlay with animation
+	[UIView animateWithDuration:kAppearAnimationDuration animations:^{
+		[self setHidden:NO useAlpha:YES];
+	}];
 }
 
 - (void)hide {
 	[self.activityIndicator stopAnimating];
-	self.hidden = YES;
-	self.hideInProgress = NO;
+
+	// hide status bar overlay with animation
+	[UIView animateWithDuration:kAppearAnimationDuration animations:^{
+		[self setHidden:YES useAlpha:YES];
+	} completion:^(BOOL finished) {
+		self.hideInProgress = NO;
+	}];
 }
 
 - (void)setMessage:(NSString *)message animated:(BOOL)animated {
@@ -355,15 +389,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		return;
 	}
 
-
-	//DDLogInfo(@"message: %@", message);
 	self.hideInProgress = NO;
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
 	self.finishedLabel.hidden = YES;
 	self.activityIndicator.hidden = NO;
 
 	// status bar not visible in the moment, just show it
-	if (self.hidden) {
+	if (self.reallyHidden) {
 		[self showWithMessage:message];
 		return;
 	}
@@ -425,7 +457,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (void)showWithMessage:(NSString *)message {
 	// don't duplicate animation if already displaying with text
-	if (message == nil || (!self.hidden &&  [self.statusLabel1.text isEqualToString:message])) {
+	if (message == nil || (!self.reallyHidden && [self.statusLabel1.text isEqualToString:message])) {
 		return;
 	}
 
@@ -438,7 +470,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self setLabelUIForStatusBarStyle:statusBarStyle];
 
 	// if status bar is currently hidden, show it
-	if (self.hidden) {
+	if (self.reallyHidden) {
 		// set text of visible status label
 		if (self.statusLabel2 == self.hiddenStatusLabel) {
 			self.statusLabel1.text = message;
