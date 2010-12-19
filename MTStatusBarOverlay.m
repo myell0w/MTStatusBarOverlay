@@ -429,6 +429,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		return;
 	}
 
+	self.finishedLabel.hidden = YES;
+
 	// update status bar background
 	UIStatusBarStyle statusBarStyle = [UIApplication sharedApplication].statusBarStyle;
 	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:statusBarStyle];
@@ -438,7 +440,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// if status bar is currently hidden, show it
 	if (self.hidden) {
 		// set text of visible status label
-		self.statusLabel1.text = message;
+		if (self.statusLabel2 == self.hiddenStatusLabel) {
+			self.statusLabel1.text = message;
+		} else {
+			self.statusLabel2.text = message;
+		}
 
 		[self show];
 	}

@@ -1,0 +1,25 @@
+# This is initially compiled from the following sources:
+#     
+#     http://christopherroach.com/archives/35
+#     http://stackoverflow.com/questions/236151/best-practices-for-using-version-controlling-on-cocoa-projects
+#     http://boredzo.org/blog/archives/2008-03-20/hgignore-for-mac-os-x-applications
+#     http://shanesbrain.net/2008/7/9/using-xcode-with-git
+#     http://www.bluishcoder.co.nz/2007/09/git-binary-files-and-cherry-picking.html
+#     
+
+build
+
+*.pbxuser
+*.mode1v3
+*.mode2v3
+!default.pbxuser
+!default.mode1v3
+!default.mode2v3
+
+*.perspective
+*.perspectivev3
+
+*.swp
+*~.nib
+*~.xib
+*.DS_Store
