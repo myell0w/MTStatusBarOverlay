@@ -9,7 +9,7 @@ Description
 -----------------
 
 This class provides a custom iOS status bar overlay window known from Apps like Reeder.
-It currently supports touch-handling and three different animation modes:
+It currently supports touch-handling, queuing of messages as well as three different animation modes:
  
 * MTStatusBarOverlayAnimationShrink: When the user touches the overlay the overlay shrinks and only covers the battery-icon on the right side
 * MTStatusBarOverlayAnimationFallDown: When the user touches the overlay a detail view falls down where additional information can be displayed
