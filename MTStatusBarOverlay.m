@@ -20,6 +20,7 @@
 // -------------------------------
 
 #import "MTStatusBarOverlay.h"
+#import <QuartzCore/QuartzCore.h>
 
 //===========================================================
 #pragma mark -
@@ -39,6 +40,12 @@
 #define kNextStatusAnimationDuration			0.8
 // duration the statusBarOverlay takes to appear when it was hidden
 #define kAppearAnimationDuration				0.5
+
+// animation duration of animation mode shrink
+#define kAnimationDurationShrink				0.3
+// animation duration of animation mode fallDown
+#define kAnimationDurationFallDown				0.5
+
 // value that is added to [UIApplication sharedApplication].statusBarOrientationAnimationDuration to
 // make delay appearance of StatusBarOverlay after rotation
 #define kStatusBarOrientationAppearTimeDelta	0.2
@@ -203,6 +210,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 // read out hidden-state using alpha-value and hidden-property
 @property (nonatomic, readonly, getter=isReallyHidden) BOOL reallyHidden;
 
+
 // is called when the user touches the statusbar
 - (IBAction)contentViewClicked:(id)sender;
 // updates the current status bar background image for the given size and style
@@ -226,6 +234,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 #pragma mark Synthesizing
 //===========================================================
 @synthesize backgroundView = backgroundView_;
+@synthesize detailView = detailView_;
 @synthesize statusBarBackgroundImageView = statusBarBackgroundImageView_;
 @synthesize statusLabel1 = statusLabel1_;
 @synthesize statusLabel2 = statusLabel2_;
@@ -235,6 +244,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize grayStatusBarImage = grayStatusBarImage_;
 @synthesize grayStatusBarImageSmall = grayStatusBarImageSmall_;
 @synthesize smallFrame = smallFrame_;
+@synthesize detailViewFrame = detailViewFrame_;
 @synthesize oldBackgroundViewFrame = oldBackgroundViewFrame_;
 @synthesize animation = animation_;
 @synthesize hideInProgress = hideInProgress_;
@@ -254,8 +264,26 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 		// Default Small size: just show Activity Indicator
 		smallFrame_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
+		// Default Detail-View frame size
+		detailViewFrame_ = CGRectMake(20, 10, 280, 100);
+
 		// Default Animation-Mode
 		animation_ = MTStatusBarOverlayAnimationNone;
+
+
+		// the detail view that is shown when the user touches the status bar in animation mode "FallDown"
+		detailView_ = [[UIControl alloc] initWithFrame:CGRectMake(detailViewFrame_.origin.x, - detailViewFrame_.size.height,
+																  detailViewFrame_.size.width, detailViewFrame_.size.height)];
+		detailView_.backgroundColor = [UIColor blackColor];
+		detailView_.alpha = 0.6;
+
+		CALayer *l = [detailView_ layer];
+		l.masksToBounds = YES;
+		l.cornerRadius = 10.0;
+		l.borderWidth = 1.0;
+		l.borderColor = [[UIColor darkGrayColor] CGColor];
+
+		[self addSubview:detailView_];
 
         // Create view that stores all the content
         backgroundView_ = [[UIControl alloc] initWithFrame:self.frame];
@@ -313,6 +341,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
         [self addSubview:backgroundView_];
 
+
 		[[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(didRotate:)
@@ -327,6 +356,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
 	[backgroundView_ release], backgroundView_ = nil;
+	[detailView_ release], detailView_ = nil;
 	[statusBarBackgroundImageView_ release], statusBarBackgroundImageView_ = nil;
 	[statusLabel1_ release], statusLabel1_ = nil;
 	[statusLabel2_ release], statusLabel2_ = nil;
@@ -336,24 +366,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[grayStatusBarImageSmall_ release], grayStatusBarImageSmall_ = nil;
 
 	[super dealloc];
-}
-
-
-//===========================================================
-#pragma mark -
-#pragma mark Custom Hide-Methods using alpha instead of hidden-property (for animation)
-//===========================================================
-
-- (void)setHidden:(BOOL)hidden useAlpha:(BOOL)useAlpha {
-	if (useAlpha) {
-		self.alpha = hidden ? 0.0f : 1.0f;
-	} else {
-		self.hidden = hidden;
-	}
-}
-
-- (BOOL)isReallyHidden {
-	return self.alpha == 0.0f || self.hidden;
 }
 
 
@@ -432,7 +444,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// animate not visible label into user view
 		[UIView animateWithDuration:kNextStatusAnimationDuration
 							  delay:0
-							options:UIViewAnimationOptionCurveEaseInOut
+							options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionAllowUserInteraction
 						 animations:^{
 							 // move both status labels up
 							 self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x,
@@ -528,7 +540,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self setHidden:YES useAlpha:YES];
 
 	// store a flag, if the StatusBar is currently shrinked
-	BOOL currentlyShrinked = CGRectEqualToRect(self.backgroundView.frame, self.smallFrame);
+	BOOL currentlyShrinked = self.shrinked;
 
 	if (orientation == UIDeviceOrientationPortrait) {
 		self.transform = CGAffineTransformIdentity;
@@ -564,18 +576,31 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 //===========================================================
 #pragma mark -
+#pragma mark Getter
+//===========================================================
+
+- (BOOL)isShrinked {
+	return CGRectEqualToRect(self.backgroundView.frame, self.smallFrame);
+}
+
+- (BOOL)isDetailViewShown {
+	return self.detailView.hidden == NO && self.detailView.alpha > 0.0 && CGRectEqualToRect(self.detailView.frame, self.detailViewFrame);
+}
+
+//===========================================================
+#pragma mark -
 #pragma mark Private Methods
 //===========================================================
 
 - (IBAction)contentViewClicked:(id)sender {
 	switch (self.animation) {
 		case MTStatusBarOverlayAnimationShrink:
-			[UIView animateWithDuration:0.3 animations:^{
+			[UIView animateWithDuration:kAnimationDurationShrink animations:^{
 				// update status bar background
 				[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
 
 				// if size is small size, make it bigger
-				if (CGRectEqualToRect(self.backgroundView.frame, self.smallFrame)) {
+				if (self.shrinked) {
 					self.backgroundView.frame = self.oldBackgroundViewFrame;
 
 					// move activity indicator and statusLabel to the left
@@ -604,6 +629,22 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 		case MTStatusBarOverlayAnimationFallDown:
 			// TODO: implement, display another UIView that shows further information (like Android StatusBar)
+
+			if (self.detailViewShown) {
+				[UIView animateWithDuration:kAnimationDurationFallDown animations:^{
+					self.detailView.frame = CGRectMake(self.detailViewFrame.origin.x, - self.detailViewFrame.size.height,
+													   self.detailViewFrame.size.width, self.detailViewFrame.size.height);
+				}];
+			} else {
+				[UIView animateWithDuration:kAnimationDurationFallDown
+									  delay:0
+									options:UIViewAnimationOptionCurveEaseInOut
+								 animations:^{
+									 self.detailView.frame = self.detailViewFrame;
+								 }
+								 completion:NULL];
+			}
+
 			break;
 		case MTStatusBarOverlayAnimationNone:
 			// ignore
@@ -616,7 +657,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// on iPad the Default Status Bar Style is black too
 	if (style == UIStatusBarStyleDefault && !IsIPad) {
 		// choose image depending on size
-		if (CGRectEqualToRect(size, self.smallFrame)) {
+		if (self.shrinked) {
 			self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
 		} else {
 			self.statusBarBackgroundImageView.image = [self.grayStatusBarImageSmall stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
@@ -670,6 +711,23 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		NSLog(@"MTStatusBarOverlay: Could not find a root view controller, will not rotate!");
 		return nil;
 	}
+}
+
+//===========================================================
+#pragma mark -
+#pragma mark Custom Hide-Methods using alpha instead of hidden-property (for animation)
+//===========================================================
+
+- (void)setHidden:(BOOL)hidden useAlpha:(BOOL)useAlpha {
+	if (useAlpha) {
+		self.alpha = hidden ? 0.0f : 1.0f;
+	} else {
+		self.hidden = hidden;
+	}
+}
+
+- (BOOL)isReallyHidden {
+	return self.alpha == 0.0f || self.hidden;
 }
 
 //===========================================================

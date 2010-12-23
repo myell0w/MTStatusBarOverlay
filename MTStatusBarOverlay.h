@@ -37,6 +37,8 @@ typedef enum MTStatusBarOverlayAnimation {
 @interface MTStatusBarOverlay : UIWindow {
 	// holds all subviews, is touchable to change size of Status Bar
 	UIControl *backgroundView_;
+	// the view that is shown in animation mode "FallDown" when the user touches the status bar
+	UIControl *detailView_;
 
 	// background of Status Bar Black or gray
 	UIImageView *statusBarBackgroundImageView_;
@@ -56,10 +58,13 @@ typedef enum MTStatusBarOverlayAnimation {
 	MTStatusBarOverlayAnimation animation_;
 	// Small size of Status Bar
 	CGRect smallFrame_;
+	// Frame of the detail view when it is shown
+	CGRect detailViewFrame_;
 	// temporary variable used for rotation
 	CGRect oldBackgroundViewFrame_;
-
-  BOOL hideInProgress_;
+	// is set when finishWithMessage is called and the statusBar is set to be hidden
+	// after a specified amount of time
+	BOOL hideInProgress_;
 }
 
 //===========================================================
@@ -67,8 +72,14 @@ typedef enum MTStatusBarOverlayAnimation {
 #pragma mark Properties
 //===========================================================
 @property (nonatomic, retain) UIControl *backgroundView;
+@property (nonatomic, retain) UIControl *detailView;
 @property (nonatomic, assign) CGRect smallFrame;
+@property (nonatomic, assign) CGRect detailViewFrame;
 @property (nonatomic, assign) MTStatusBarOverlayAnimation animation;
+// detect if status bar is currently shrinked
+@property (nonatomic, readonly, getter=isShrinked) BOOL shrinked;
+// detect if detailView is currently shown
+@property (nonatomic, readonly, getter=isDetailViewShown) BOOL detailViewShown;
 
 //===========================================================
 #pragma mark -
