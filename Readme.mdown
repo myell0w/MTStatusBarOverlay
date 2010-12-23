@@ -1,6 +1,10 @@
 Read Me
 =====================
 
+UIStatusBarStyleDefault (left: full size, right: shrinked)
+
+![Default style](https://img.skitch.com/20101223-r1ddre3u4sjmn4htkqw3bhp84j.jpg "Default style")
+
 Description
 -----------------
 
@@ -39,12 +43,8 @@ Known Limitations
 * When using UIStatusBarStyleBlackTranslutient the overlay is black opaque
 
 
-Screenshots
+More Screenshots
 ------------------------
-
-UIStatusBarStyleDefault (left: full size, right: shrinked)
-
-![Default style](https://img.skitch.com/20101223-r1ddre3u4sjmn4htkqw3bhp84j.jpg "Default style")
 
 UIStatusBarStyleBlackOpaque (left: activity indicator, right: finished-indicator)
 
