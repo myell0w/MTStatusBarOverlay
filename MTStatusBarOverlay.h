@@ -73,6 +73,7 @@ typedef enum MTStatusBarOverlayAnimation {
 @property (nonatomic, retain) UIControl *backgroundView;
 @property (nonatomic, assign) CGRect smallFrame;
 @property (nonatomic, assign) MTStatusBarOverlayAnimation animation;
+@property (nonatomic, retain) UILabel *finishedLabel;
 
 //===========================================================
 #pragma mark -
