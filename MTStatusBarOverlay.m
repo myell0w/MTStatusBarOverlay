@@ -207,7 +207,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (nonatomic, retain) UILabel *statusLabel1;
 @property (nonatomic, retain) UILabel *statusLabel2;
 @property (nonatomic, assign) UILabel *hiddenStatusLabel;
-@property (nonatomic, retain) UILabel *finishedLabel;
 @property (nonatomic, assign) CGRect oldBackgroundViewFrame;
 @property (nonatomic, assign, getter=isHideInProgress) BOOL hideInProgress;
 // read out hidden-state using alpha-value and hidden-property

@@ -73,6 +73,7 @@ typedef enum MTStatusBarOverlayAnimation {
 @property (nonatomic, retain) UIControl *detailView;
 @property (nonatomic, assign) CGRect smallFrame;
 @property (nonatomic, assign) MTStatusBarOverlayAnimation animation;
+@property (nonatomic, retain) UILabel *finishedLabel;
 // detect if status bar is currently shrinked
 @property (nonatomic, readonly, getter=isShrinked) BOOL shrinked;
 // detect if detailView is currently shown
