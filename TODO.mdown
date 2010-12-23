@@ -6,4 +6,3 @@ TODO
 * listen for Notification when status bar-Visibility changes (is there any)?
 * implement more animationmodes
 * overthink concept for iPad, not really needed to overlay whole status bar
-* make Animation possible during animation of new text

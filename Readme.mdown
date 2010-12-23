@@ -1,11 +1,23 @@
 Read Me
 =====================
 
+Description
+-----------------
+
 This class provides a custom iOS status bar overlay window known from Apps like Reeder.
+It currently supports touch-handling and three different animation modes:
+ 
+* MTStatusBarOverlayAnimationShrink: When the user touches the overlay the overlay shrinks and only covers the battery-icon on the right side
+* MTStatusBarOverlayAnimationFallDown: When the user touches the overlay a detail view falls down where additional information can be displayed
+* MTStatusBarOverlayAnimationNone: Nothing happens, when the user touches the overlay
 
-![Reeder Status Bar on Flickr](http://farm5.static.flickr.com/4074/4754736484_8fc1ef9639_o.png "Reeder Status Bar on Flickr")
+MTStatusBarOverlay currently supports two different status bar styles, which also can be changed in your app (MTStatusBarOverlay will adopt the style and will be updated the next time you show it):
 
-It currently supports touch-handling to shrink and expand and also black and gray status bar styles.
+* UIStatusBarStyleDefault
+* UIStatusBarStyleBlackOpaque
+
+Usage
+------------------
 
 You can use the custom status bar like this:
 
@@ -19,8 +31,29 @@ You can use the custom status bar like this:
 
 if you call showWithMessage when the custom status bar is already visible, the new text is set animated. 
 
-Known Limitations: 
+Known Limitations
+----------------------- 
 
-* During animation of new text, the custom status bar can't be shrinked.
 * Device-Rotation currently only works on iPhone, not iPad
-* Only MTStatusBarOverlayAnimationShrink is currently implemented
+* MTStatusBarOverlayAnimationFallDown is only basically implemented yet
+* When using UIStatusBarStyleBlackTranslutient the overlay is black opaque
+
+
+Screenshots
+------------------------
+
+UIStatusBarStyleDefault (left: full size, right: shrinked)
+
+![Default style](https://img.skitch.com/20101223-r1ddre3u4sjmn4htkqw3bhp84j.jpg "Default style")
+
+UIStatusBarStyleBlackOpaque (left: activity indicator, right: finished-indicator)
+
+![Black style](https://img.skitch.com/20101223-rj8s32db61cb29w7k3fbpahktg.jpg "Black style")
+
+UIStatusBarStyleDefault, Landscape
+
+![Default style landscape](https://img.skitch.com/20101223-8ibm6egd7mu3fd8andgmtw9by5.jpg "Default style landscape")
+
+UIStatusBarStyleDefault, detail view visible
+
+![Default style with detail view](https://img.skitch.com/20101223-pgyq41gs36c9gnumjtwnit7a15.jpg "Default style with detail view")

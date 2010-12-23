@@ -56,7 +56,7 @@
 #define kWidthSmall						80
 
 // default frame of detail view when it is hidden
-#define kDefaultDetailViewFrame CGRectMake(20, -100, 280, 100)
+#define kDefaultDetailViewFrame CGRectMake(20, -150, 280, 150)
 
 //===========================================================
 #pragma mark -
@@ -276,6 +276,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		detailView_.alpha = 0.7;
 		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 
+		// add rounded corners to detail-view
 		CALayer *l = [detailView_ layer];
 		l.masksToBounds = YES;
 		l.cornerRadius = 10.0;
@@ -633,8 +634,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			break;
 
 		case MTStatusBarOverlayAnimationFallDown:
-			// TODO: implement, display another UIView that shows further information (like Android StatusBar)
-
 			if (self.detailViewVisible) {
 				[UIView animateWithDuration:kAnimationDurationFallDown animations:^{
 					self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
