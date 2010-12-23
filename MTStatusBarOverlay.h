@@ -75,7 +75,7 @@ typedef enum MTStatusBarOverlayAnimation {
 #pragma mark Class Methods
 //===========================================================
 
-// convenience-constructor
+// Singleton
 + (MTStatusBarOverlay *)sharedInstance;
 
 //===========================================================

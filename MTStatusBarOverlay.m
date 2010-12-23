@@ -53,9 +53,13 @@
 #pragma mark Defines
 //===========================================================
 
+// macro for checking if we are on the iPad
 #define IsIPad UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
+// the height of the status bar
 #define kStatusBarHeight 20
+// width of the screen in portrait-orientation
 #define kScreenWidth [UIScreen mainScreen].bounds.size.width
+// height of the screen in portrait-orientation
 #define kScreenHeight [UIScreen mainScreen].bounds.size.height
 
 
