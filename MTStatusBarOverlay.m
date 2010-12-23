@@ -55,6 +55,9 @@
 // default-width of the small-mode
 #define kWidthSmall						80
 
+// default frame of detail view when it is hidden
+#define kDefaultDetailViewFrame CGRectMake(20, -100, 280, 100)
+
 //===========================================================
 #pragma mark -
 #pragma mark Defines
@@ -244,7 +247,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize grayStatusBarImage = grayStatusBarImage_;
 @synthesize grayStatusBarImageSmall = grayStatusBarImageSmall_;
 @synthesize smallFrame = smallFrame_;
-@synthesize detailViewFrame = detailViewFrame_;
 @synthesize oldBackgroundViewFrame = oldBackgroundViewFrame_;
 @synthesize animation = animation_;
 @synthesize hideInProgress = hideInProgress_;
@@ -264,18 +266,15 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 		// Default Small size: just show Activity Indicator
 		smallFrame_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
-		// Default Detail-View frame size
-		detailViewFrame_ = CGRectMake(20, 10, 280, 100);
 
 		// Default Animation-Mode
 		animation_ = MTStatusBarOverlayAnimationNone;
 
-
 		// the detail view that is shown when the user touches the status bar in animation mode "FallDown"
-		detailView_ = [[UIControl alloc] initWithFrame:CGRectMake(detailViewFrame_.origin.x, - detailViewFrame_.size.height,
-																  detailViewFrame_.size.width, detailViewFrame_.size.height)];
+		detailView_ = [[UIControl alloc] initWithFrame:kDefaultDetailViewFrame];
 		detailView_.backgroundColor = [UIColor blackColor];
-		detailView_.alpha = 0.6;
+		detailView_.alpha = 0.7;
+		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 
 		CALayer *l = [detailView_ layer];
 		l.masksToBounds = YES;
@@ -584,8 +583,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	return CGRectEqualToRect(self.backgroundView.frame, self.smallFrame);
 }
 
-- (BOOL)isDetailViewShown {
-	return self.detailView.hidden == NO && self.detailView.alpha > 0.0 && CGRectEqualToRect(self.detailView.frame, self.detailViewFrame);
+- (BOOL)isDetailViewVisible {
+	return self.detailView.hidden == NO && self.detailView.alpha > 0.0 &&
+		   self.detailView.frame.origin.y + self.detailView.frame.size.height >= kStatusBarHeight;
 }
 
 //===========================================================
@@ -635,18 +635,18 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		case MTStatusBarOverlayAnimationFallDown:
 			// TODO: implement, display another UIView that shows further information (like Android StatusBar)
 
-			if (self.detailViewShown) {
+			if (self.detailViewVisible) {
 				[UIView animateWithDuration:kAnimationDurationFallDown animations:^{
-					self.detailView.frame = CGRectMake(self.detailViewFrame.origin.x, - self.detailViewFrame.size.height,
-													   self.detailViewFrame.size.width, self.detailViewFrame.size.height);
+					self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
+													   self.detailView.frame.size.width, self.detailView.frame.size.height);
 				}];
 			} else {
 				[UIView animateWithDuration:kAnimationDurationFallDown
 									  delay:0
 									options:UIViewAnimationOptionCurveEaseInOut
 								 animations:^{
-									 self.detailView.frame = self.detailViewFrame;
-								 }
+									 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, 0,
+																		self.detailView.frame.size.width, self.detailView.frame.size.height);								 }
 								 completion:NULL];
 			}
 
