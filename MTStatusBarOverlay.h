@@ -63,6 +63,10 @@ typedef enum MTStatusBarOverlayAnimation {
 	// is set when finishWithMessage is called and the statusBar is set to be hidden
 	// after a specified amount of time
 	BOOL hideInProgress_;
+
+	// Queue stuff
+	NSMutableArray *queuedMessages_;
+	NSTimer *queueTimer_;
 }
 
 //===========================================================
@@ -78,6 +82,9 @@ typedef enum MTStatusBarOverlayAnimation {
 @property (nonatomic, readonly, getter=isShrinked) BOOL shrinked;
 // detect if detailView is currently shown
 @property (nonatomic, readonly, getter=isDetailViewVisible) BOOL detailViewVisible;
+// shows if finishWithMessage was currently called
+@property (readonly, getter=isHideInProgress) BOOL hideInProgress;
+
 
 //===========================================================
 #pragma mark -
@@ -105,7 +112,8 @@ typedef enum MTStatusBarOverlayAnimation {
 - (void)finishWithMessage:(NSString *)message duration:(NSTimeInterval)duration;
 // enables you to change the display Message on the status bar animated or w/o animation
 - (void)setMessage:(NSString *)message animated:(BOOL)animated;
-// shows if finishWithMessage was currently called
-- (BOOL)isHideInProgress;
+// shows the message for a specified interval before displaying the next queued item, or hiding the overlay if none are left
+- (void)queueMessage:(NSString *)message forInterval:(NSTimeInterval)interval animated:(BOOL)animated;
+- (void)queueFinalMessage:(NSString *)message forInterval:(NSTimeInterval)interval animated:(BOOL)animated;
 
 @end

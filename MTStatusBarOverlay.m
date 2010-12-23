@@ -208,9 +208,12 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (nonatomic, retain) UILabel *statusLabel2;
 @property (nonatomic, assign) UILabel *hiddenStatusLabel;
 @property (nonatomic, assign) CGRect oldBackgroundViewFrame;
-@property (nonatomic, assign, getter=isHideInProgress) BOOL hideInProgress;
+// overwrite property for read-write-access
+@property (assign, getter=isHideInProgress) BOOL hideInProgress;
 // read out hidden-state using alpha-value and hidden-property
 @property (nonatomic, readonly, getter=isReallyHidden) BOOL reallyHidden;
+@property (nonatomic, retain) NSMutableArray *queuedMessages;
+@property (nonatomic, retain) NSTimer *queueTimer;
 
 
 // is called when the user touches the statusbar
@@ -249,6 +252,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize oldBackgroundViewFrame = oldBackgroundViewFrame_;
 @synthesize animation = animation_;
 @synthesize hideInProgress = hideInProgress_;
+@synthesize queuedMessages = queuedMessages_;
+@synthesize queueTimer = queueTimer_;
 
 //===========================================================
 #pragma mark -
@@ -338,6 +343,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// the hidden status label at the beggining
 		hiddenStatusLabel_ = statusLabel2_;
 
+		queuedMessages_ = [[NSMutableArray alloc] init];
+
         [self addSubview:backgroundView_];
 
 
@@ -363,6 +370,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[finishedLabel_ release], finishedLabel_ = nil;
 	[grayStatusBarImage_ release], grayStatusBarImage_ = nil;
 	[grayStatusBarImageSmall_ release], grayStatusBarImageSmall_ = nil;
+	[queuedMessages_ release], queuedMessages_ = nil;
+	[queueTimer_ release], queueTimer_ = nil;
 
 	[super dealloc];
 }
@@ -482,6 +491,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	self.finishedLabel.hidden = YES;
+	// Kill any queued messages
+	[self.queueTimer invalidate];
 
 	// update status bar background
 	UIStatusBarStyle statusBarStyle = [UIApplication sharedApplication].statusBarStyle;
@@ -504,6 +515,53 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// already visible, animate to new text
 	else {
 		[self setMessage:message animated:YES];
+	}
+}
+
+- (void)queueMessage:(NSString *)message forInterval:(NSTimeInterval)interval animated:(BOOL)animated {
+	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:message, @"message",
+						  [NSNumber numberWithDouble:interval], @"interval",
+						  [NSNumber numberWithBool:animated], @"animated",
+						  [NSNumber numberWithBool:NO], @"final", nil];
+
+	[self.queuedMessages insertObject:dict atIndex:0];
+
+	if(self.queuedMessages.count == 1) {
+		[self setMessage:message animated:animated];
+
+		self.queueTimer = [NSTimer timerWithTimeInterval:interval target:self selector:@selector(queuedMessageDidExpire:) userInfo:nil repeats:NO];
+		[[NSRunLoop mainRunLoop] addTimer:self.queueTimer forMode:NSDefaultRunLoopMode];
+	}
+}
+
+- (void)queueFinalMessage:(NSString *)message forInterval:(NSTimeInterval)interval animated:(BOOL)animated {
+	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:message, @"message",
+						  [NSNumber numberWithDouble:interval], @"interval", [NSNumber numberWithBool:animated],
+						  @"animated", [NSNumber numberWithBool:YES], @"final", nil];
+
+	[self.queuedMessages insertObject:dict atIndex:0];
+
+	if(self.queuedMessages.count == 1) {
+		[self finishWithMessage:message duration:interval];
+	}
+}
+
+- (void)queuedMessageDidExpire:(NSTimer *)theTimer {
+	[self.queuedMessages removeLastObject];
+
+	if(self.queuedMessages.count == 0) {
+		[self hide];
+	} else {
+		NSDictionary *nextDict = [self.queuedMessages lastObject];
+
+		if([[nextDict valueForKey:@"final"] boolValue]) {
+			[self finishWithMessage:[nextDict valueForKey:@"message"] duration:[[nextDict valueForKey:@"interval"] doubleValue]];
+		} else {
+			[self setMessage:[nextDict valueForKey:@"message"] animated:[[nextDict valueForKey:@"animated"] boolValue]];
+
+			self.queueTimer = [NSTimer timerWithTimeInterval:[[nextDict valueForKey:@"interval"] doubleValue] target:self selector:@selector(queuedMessageDidExpire:) userInfo:nil repeats:NO];
+			[[NSRunLoop mainRunLoop] addTimer:self.queueTimer forMode:NSDefaultRunLoopMode];
+		}
 	}
 }
 
