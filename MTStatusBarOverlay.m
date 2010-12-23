@@ -36,8 +36,13 @@
 #define kStatusBarStyleBlackActivityIndicatorViewStyle UIActivityIndicatorViewStyleWhite
 
 // duration of the animation to show next status message in seconds
-#define kNextStatusAnimationDuration	0.8
-#define kAppearAnimationDuration		0.5
+#define kNextStatusAnimationDuration			0.8
+// duration the statusBarOverlay takes to appear when it was hidden
+#define kAppearAnimationDuration				0.5
+// value that is added to [UIApplication sharedApplication].statusBarOrientationAnimationDuration to
+// make delay appearance of StatusBarOverlay after rotation
+#define kStatusBarOrientationAppearTimeDelta	0.2
+
 // x-offset of the child-views of the background when status bar is in small mode
 #define kSmallXOffset					50
 // default-width of the small-mode
@@ -515,6 +520,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		return;
 	}
 
+	// hide and then unhide during rotation
+	[self setHidden:YES useAlpha:YES];
+
 	// store a flag, if the StatusBar is currently shrinked
 	BOOL currentlyShrinked = CGRectEqualToRect(self.backgroundView.frame, self.smallFrame);
 
@@ -543,6 +551,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// the backgroundView gets the newly computed smallFrame
 		self.backgroundView.frame = self.smallFrame;
 	}
+
+	[UIView animateWithDuration:[UIApplication sharedApplication].statusBarOrientationAnimationDuration+kStatusBarOrientationAppearTimeDelta
+					 animations:^{
+		[self setHidden:NO useAlpha:YES];
+	}];
 }
 
 //===========================================================
