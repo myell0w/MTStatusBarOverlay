@@ -536,7 +536,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		return;
 	}
 
-	// hide and then unhide during rotation
+	// hide and then unhide after rotation
 	[self setHidden:YES useAlpha:YES];
 
 	// store a flag, if the StatusBar is currently shrinked
@@ -568,6 +568,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		self.backgroundView.frame = self.smallFrame;
 	}
 
+	// make visible after given time
 	[UIView animateWithDuration:[UIApplication sharedApplication].statusBarOrientationAnimationDuration+kStatusBarOrientationAppearTimeDelta
 					 animations:^{
 		[self setHidden:NO useAlpha:YES];
@@ -606,6 +607,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 					// move activity indicator and statusLabel to the left
 					self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x - kSmallXOffset, self.activityIndicator.frame.origin.y,
 															  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
+					self.finishedLabel.frame = CGRectMake(self.finishedLabel.frame.origin.x - kSmallXOffset, self.finishedLabel.frame.origin.y,
+														  self.finishedLabel.frame.size.width, self.finishedLabel.frame.size.height);
 					self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x - kSmallXOffset, self.statusLabel1.frame.origin.y,
 														 self.statusLabel1.frame.size.width, self.statusLabel1.frame.size.height);
 					self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x - kSmallXOffset, self.statusLabel2.frame.origin.y,
@@ -619,6 +622,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 					// move activity indicator and statusLabel to the right
 					self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x + kSmallXOffset, self.activityIndicator.frame.origin.y,
 															  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
+					self.finishedLabel.frame = CGRectMake(self.finishedLabel.frame.origin.x + kSmallXOffset, self.finishedLabel.frame.origin.y,
+														  self.finishedLabel.frame.size.width, self.finishedLabel.frame.size.height);
 					self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x + kSmallXOffset, self.statusLabel1.frame.origin.y,
 														 self.statusLabel1.frame.size.width, self.statusLabel1.frame.size.height);
 					self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x + kSmallXOffset, self.statusLabel2.frame.origin.y,
