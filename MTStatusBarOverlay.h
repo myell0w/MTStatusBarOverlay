@@ -58,6 +58,10 @@ typedef enum MTStatusBarOverlayAnimation {
 	CGRect smallFrame_;
 	// temporary variable used for rotation
 	CGRect oldBackgroundViewFrame_;
+	
+	// Queue stuff
+	NSMutableArray *queuedMessages;	
+	NSTimer *queueTimer;
 
   BOOL hideInProgress_;
 }
@@ -96,6 +100,9 @@ typedef enum MTStatusBarOverlayAnimation {
 - (void)finishWithMessage:(NSString *)message duration:(NSTimeInterval)duration;
 // enables you to change the display Message on the status bar animated or w/o animation
 - (void)setMessage:(NSString *)message animated:(BOOL)animated;
+// shows the message for a specified interval before displaying the next queued item, or hiding the overlay if none are left
+- (void)queueMessage:(NSString *)message forInterval:(NSTimeInterval)interval animated:(BOOL)animated;
+- (void)queueFinalMessage:(NSString *)message forInterval:(NSTimeInterval)interval animated:(BOOL)animated;
 // shows if finishWithMessage was currently called
 - (BOOL)isHideInProgress;
 

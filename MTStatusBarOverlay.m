@@ -293,6 +293,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 		// the hidden status label at the beggining
 		hiddenStatusLabel_ = statusLabel2_;
+		
+		queuedMessages = [[[NSMutableArray alloc] init] retain];
 
         [self addSubview:backgroundView_];
 
@@ -317,6 +319,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[finishedLabel_ release], finishedLabel_ = nil;
 	[grayStatusBarImage_ release], grayStatusBarImage_ = nil;
 	[grayStatusBarImageSmall_ release], grayStatusBarImageSmall_ = nil;
+	[queuedMessages release], queuedMessages = nil;
+	[queueTimer release], queueTimer = nil;
 
 	[super dealloc];
 }
@@ -429,6 +433,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		return;
 	}
 
+	// Kill any queued messages
+	[queueTimer invalidate];
+	
 	// update status bar background
 	UIStatusBarStyle statusBarStyle = [UIApplication sharedApplication].statusBarStyle;
 	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:statusBarStyle];
@@ -446,6 +453,43 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// already visible, animate to new text
 	else {
 		[self setMessage:message animated:YES];
+	}
+}
+
+- (void)queueMessage:(NSString *)message forInterval:(NSTimeInterval)interval animated:(BOOL)animated {
+	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:message, @"message", [NSNumber numberWithDouble:interval], @"interval", [NSNumber numberWithBool:animated], @"animated", [NSNumber numberWithBool:NO], @"final", nil];
+	[queuedMessages insertObject:dict atIndex:0];
+
+	if([queuedMessages count] == 1) {
+		[self setMessage:message animated:animated];
+		queueTimer = [NSTimer timerWithTimeInterval:interval target:self selector:@selector(queuedMessageDidExpire:) userInfo:nil repeats:NO];
+		[[NSRunLoop mainRunLoop] addTimer:queueTimer forMode:NSDefaultRunLoopMode];
+	}
+}
+
+- (void)queueFinalMessage:(NSString *)message forInterval:(NSTimeInterval)interval animated:(BOOL)animated {
+	NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:message, @"message", [NSNumber numberWithDouble:interval], @"interval", [NSNumber numberWithBool:animated], @"animated", [NSNumber numberWithBool:YES], @"final", nil];
+	[queuedMessages insertObject:dict atIndex:0];
+	
+	if([queuedMessages count] == 1) {
+		[self finishWithMessage:message duration:interval];
+	}	
+}
+
+- (void)queuedMessageDidExpire:(NSTimer *)theTimer {
+	[queuedMessages removeLastObject];
+	if([queuedMessages count] == 0) {
+		[self hide];
+	} else {
+		NSDictionary *nextDict = [queuedMessages lastObject];
+		
+		if([[nextDict valueForKey:@"final"] boolValue]) {
+			[self finishWithMessage:[nextDict valueForKey:@"message"] duration:[[nextDict valueForKey:@"interval"] doubleValue]];
+		} else {
+			[self setMessage:[nextDict valueForKey:@"message"] animated:[[nextDict valueForKey:@"animated"] boolValue]];
+			queueTimer = [NSTimer timerWithTimeInterval:[[nextDict valueForKey:@"interval"] doubleValue] target:self selector:@selector(queuedMessageDidExpire:) userInfo:nil repeats:NO];
+			[[NSRunLoop mainRunLoop] addTimer:queueTimer forMode:NSDefaultRunLoopMode];
+		}		
 	}
 }
 
