@@ -110,6 +110,8 @@ typedef enum MTStatusBarOverlayAnimation {
 - (void)showWithMessage:(NSString *)message;
 // shows a checkmark instead of the activity indicator and hides the status bar after the specified duration
 - (void)finishWithMessage:(NSString *)message duration:(NSTimeInterval)duration;
+// shows a error-sign instead of the activity indicator and hides the status bar after the specified duration
+- (void)finishWithErrorMessage:(NSString *)message duration:(NSTimeInterval)duration;
 // enables you to change the display Message on the status bar animated or w/o animation
 - (void)setMessage:(NSString *)message animated:(BOOL)animated;
 // shows the message for a specified interval before displaying the next queued item, or hiding the overlay if none are left

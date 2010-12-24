@@ -27,6 +27,11 @@
 #pragma mark Customize Section
 //===========================================================
 
+// Text that is displayed in the finished-Label when the finish was successful
+#define kFinishedText @"✔"
+// Text that is displayed when an error occured
+#define kErrorText    @"x"
+
 // Text color for UIStatusBarStyleDefault
 #define kStatusBarStyleDefaultTextColor [UIColor blackColor]
 // Activity Indicator Style for UIStatusBarStyleDefault
@@ -318,7 +323,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		finishedLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(8,0,self.frame.size.height, self.frame.size.height)];
 		finishedLabel_.backgroundColor = [UIColor clearColor];
 		finishedLabel_.hidden = YES;
-		finishedLabel_.text = @"✔";
+		finishedLabel_.text = kFinishedText;
 		finishedLabel_.font = [UIFont boldSystemFontOfSize:14.f];
 		[self addSubviewToBackgroundView:finishedLabel_];
 
@@ -569,6 +574,19 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self showWithMessage:message];
 
 	self.activityIndicator.hidden = YES;
+	self.finishedLabel.text = kFinishedText;
+	self.finishedLabel.hidden = NO;
+
+	self.hideInProgress = YES;
+	[self performSelector:@selector(hide) withObject:nil afterDelay:duration];
+}
+
+
+- (void)finishWithErrorMessage:(NSString *)message duration:(NSTimeInterval)duration {
+	[self showWithMessage:message];
+
+	self.activityIndicator.hidden = YES;
+	self.finishedLabel.text = kErrorText;
 	self.finishedLabel.hidden = NO;
 
 	self.hideInProgress = YES;
