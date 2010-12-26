@@ -268,6 +268,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize hideInProgress = hideInProgress_;
 @synthesize queuedMessages = queuedMessages_;
 @synthesize queueTimer = queueTimer_;
+@synthesize historyEnabled = historyEnabled_;
 @synthesize messageHistory = messageHistory_;
 @synthesize historyTableView = historyTableView_;
 
@@ -305,6 +306,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 
 		// Message History
+		historyEnabled_ = NO;
 		messageHistory_ = [[NSMutableArray alloc] init];
 
 		historyTableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0,
@@ -317,6 +319,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// make table view-background transparent
 		historyTableView_.backgroundColor = [UIColor clearColor];
 		historyTableView_.opaque = NO;
+		historyTableView_.hidden = !historyEnabled_;
 		// background-view is only supported >= 3.2
 		if ([historyTableView_ respondsToSelector:@selector(setBackgroundView:)]) {
 			[historyTableView_ setBackgroundView:nil];
@@ -688,7 +691,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self setHidden:YES useAlpha:YES];
 
 	// store a flag, if the StatusBar is currently shrinked
-	BOOL currentlyShrinked = self.shrinked;
+	BOOL shrinkedBeforeTransformation = self.shrinked;
 
 	if (orientation == UIDeviceOrientationPortrait) {
 		self.transform = CGAffineTransformIdentity;
@@ -709,7 +712,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	// if the statusBar is currently shrinked, update the frames for the new rotation state
-	if (currentlyShrinked) {
+	if (shrinkedBeforeTransformation) {
 		// the oldBackgroundViewFrame is the frame of the whole StatusBar
 		self.oldBackgroundViewFrame = CGRectMake(0,0,UIInterfaceOrientationIsPortrait(orientation) ? kScreenWidth : kScreenHeight,kStatusBarHeight);
 		// the backgroundView gets the newly computed smallFrame
@@ -725,7 +728,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 //===========================================================
 #pragma mark -
-#pragma mark Getter
+#pragma mark Setter/Getter
 //===========================================================
 
 - (BOOL)isShrinked {
@@ -735,6 +738,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (BOOL)isDetailViewVisible {
 	return self.detailView.hidden == NO && self.detailView.alpha > 0.0 &&
 		   self.detailView.frame.origin.y + self.detailView.frame.size.height >= kStatusBarHeight;
+}
+
+- (void)setHistoryEnabled:(BOOL)historyEnabled {
+	historyEnabled_ = historyEnabled;
+	self.historyTableView.hidden = !historyEnabled;
 }
 
 
@@ -756,14 +764,18 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 	// step 2: no? -> create new cell
 	if (cell == nil) {
-		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID] autorelease];
+		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID] autorelease];
 
 		cell.textLabel.font = [UIFont boldSystemFontOfSize:10];
 		cell.textLabel.textColor = [UIColor whiteColor];
+
+		cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
+		cell.detailTextLabel.textColor = [UIColor whiteColor];
 	}
 
 	// step 3: set up cell value
 	cell.textLabel.text = [self.messageHistory objectAtIndex:indexPath.row];
+	cell.detailTextLabel.text = kFinishedText;
 
     return cell;
 }
@@ -897,7 +909,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	if ([nextResponder isKindOfClass:[UIViewController class]]) {
 		return nextResponder;
 	} else {
-		NSLog(@"MTStatusBarOverlay: Could not find a root view controller, will not rotate!");
+		NSLog(@"Warning MTStatusBarOverlay: Could not find a root view controller - will not rotate!");
 		return nil;
 	}
 }

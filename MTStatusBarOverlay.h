@@ -69,6 +69,7 @@ typedef enum MTStatusBarOverlayAnimation {
 	NSTimer *queueTimer_;
 
 	// Message history (is reset when finish is called)
+	BOOL historyEnabled_;
 	NSMutableArray *messageHistory_;
 	UITableView *historyTableView_;
 }
@@ -90,6 +91,8 @@ typedef enum MTStatusBarOverlayAnimation {
 @property (readonly, getter=isHideInProgress) BOOL hideInProgress;
 // all messages that were displayed since the last finish-call
 @property (nonatomic, retain, readonly) NSMutableArray *messageHistory;
+// enable/disable history-tracking of messages
+@property (nonatomic, assign, getter=isHistoryEnabled) BOOL historyEnabled;
 
 
 //===========================================================
