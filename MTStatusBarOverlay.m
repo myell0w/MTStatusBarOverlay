@@ -240,6 +240,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 // set hidden-state using alpha-value instead of hidden-property
 - (void)setHidden:(BOOL)hidden useAlpha:(BOOL)animated;
 
+// History-tracking
+- (void)addMessageToHistory:(NSString *)message;
 - (void)clearHistory;
 
 @end
@@ -540,10 +542,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	// add old message to history
-	if (oldMessage != nil && ![oldMessage isEqualToString:@""]) {
-		[self.messageHistory addObject:oldMessage];
-		[self.historyTableView reloadData];
-	}
+	[self addMessageToHistory:oldMessage];
 }
 
 - (void)showWithMessage:(NSString *)message {
@@ -576,11 +575,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		}
 
 		// add old message to history
-		if (oldMessage != nil && ![oldMessage isEqualToString:@""]) {
-			[self.messageHistory addObject:oldMessage];
-			[self.historyTableView reloadData];
-		}
-
+		[self addMessageToHistory:oldMessage];
 		[self show];
 	}
 
@@ -728,7 +723,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 //===========================================================
 #pragma mark -
-#pragma mark Setter/Getter
+#pragma mark Getter
 //===========================================================
 
 - (BOOL)isShrinked {
@@ -739,12 +734,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	return self.detailView.hidden == NO && self.detailView.alpha > 0.0 &&
 		   self.detailView.frame.origin.y + self.detailView.frame.size.height >= kStatusBarHeight;
 }
-
-- (void)setHistoryEnabled:(BOOL)historyEnabled {
-	historyEnabled_ = historyEnabled;
-	self.historyTableView.hidden = !historyEnabled;
-}
-
 
 //===========================================================
 #pragma mark -
@@ -911,6 +900,26 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	} else {
 		NSLog(@"Warning MTStatusBarOverlay: Could not find a root view controller - will not rotate!");
 		return nil;
+	}
+}
+
+//===========================================================
+#pragma mark -
+#pragma mark History Tracking
+//===========================================================
+
+- (void)setHistoryEnabled:(BOOL)historyEnabled {
+	historyEnabled_ = historyEnabled;
+	self.historyTableView.hidden = !historyEnabled;
+}
+
+- (void)addMessageToHistory:(NSString *)message {
+	if (self.historyEnabled	&& message != nil
+		&& [message stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0) {
+		[self.messageHistory addObject:message];
+		[self.historyTableView reloadData];
+		[self.historyTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:self.messageHistory.count-1 inSection:0]
+									 atScrollPosition:UITableViewScrollPositionTop animated:YES];
 	}
 }
 
