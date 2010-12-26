@@ -45,6 +45,7 @@ Known Limitations
 
 * Device-Rotation currently only works on iPhone, not iPad
 * When using UIStatusBarStyleBlackTranslutient the overlay is black opaque
+* user interaction in detail view is not possible yet
 
 
 More Screenshots
@@ -60,4 +61,4 @@ UIStatusBarStyleDefault, Landscape
 
 UIStatusBarStyleDefault, detail view visible
 
-![Default style with detail view](https://img.skitch.com/20101223-pgyq41gs36c9gnumjtwnit7a15.jpg "Default style with detail view")
+![History tracking:](https://img.skitch.com/20101226-b1k5hjbmfyepd2mh6nbdbgw6a4.jpg "History tracking")
