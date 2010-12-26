@@ -28,21 +28,21 @@
 //===========================================================
 
 ///////////////////////////////////////////////////////
-// Dark Theme (for UIStatusBarStyleBlackeOpaque
+// Light Theme (for UIStatusBarStyleDefault)
 ///////////////////////////////////////////////////////
 
-#define kDarkThemeTextColor						[UIColor blackColor]
-#define kDarkThemeActivityIndicatorViewStyle	UIActivityIndicatorViewStyleGray
-#define kDarkThemeDetailViewBackgroundColor		[UIColor blackColor]
+#define kLightThemeTextColor						[UIColor blackColor]
+#define kLightThemeActivityIndicatorViewStyle	UIActivityIndicatorViewStyleGray
+#define kLightThemeDetailViewBackgroundColor		[UIColor blackColor]
 
 
 ///////////////////////////////////////////////////////
-// Light Theme (for UIStatusBarStyleBlackeOpaque
+// Dark Theme (for UIStatusBarStyleBlackOpaque)
 ///////////////////////////////////////////////////////
 
-#define kLightThemeTextColor					[UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0]
-#define kLightThemeActivityIndicatorViewStyle	UIActivityIndicatorViewStyleWhite
-#define kLightThemeDetailViewBackgroundColor	[UIColor darkGrayColor]
+#define kDarkThemeTextColor					[UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0]
+#define kDarkThemeActivityIndicatorViewStyle	UIActivityIndicatorViewStyleWhite
+#define kDarkThemeDetailViewBackgroundColor	[UIColor darkGrayColor]
 
 
 ///////////////////////////////////////////////////////
@@ -79,6 +79,19 @@
 
 
 ///////////////////////////////////////////////////////
+// Detail View
+///////////////////////////////////////////////////////
+
+#define kHistoryTableRowHeight 25
+#define kDetailViewAlpha	   0.9
+
+// default frame of detail view when it is hidden
+#define kDefaultDetailViewFrame CGRectMake(kStatusBarHeight, - kHistoryTableRowHeight * 6 - kStatusBarHeight, 280, \
+kHistoryTableRowHeight * 6 + kStatusBarHeight)
+
+
+
+///////////////////////////////////////////////////////
 // Size
 ///////////////////////////////////////////////////////
 
@@ -90,12 +103,6 @@
 // default-width of the small-mode
 #define kWidthSmall						80
 
-// History
-#define kHistoryTableRowHeight 25
-
-// default frame of detail view when it is hidden
-#define kDefaultDetailViewFrame CGRectMake(kStatusBarHeight, - kHistoryTableRowHeight * 6 - kStatusBarHeight, 280, \
-										   kHistoryTableRowHeight * 6 + kStatusBarHeight)
 
 
 
@@ -329,7 +336,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// the detail view that is shown when the user touches the status bar in animation mode "FallDown"
 		detailView_ = [[UIControl alloc] initWithFrame:kDefaultDetailViewFrame];
 		detailView_.backgroundColor = [UIColor blackColor];
-		detailView_.alpha = 0.9;
+		detailView_.alpha = kDetailViewAlpha;
 		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 
 		// add rounded corners to detail-view
@@ -791,10 +798,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID] autorelease];
 
 		cell.textLabel.font = [UIFont boldSystemFontOfSize:10];
-		cell.textLabel.textColor = kLightThemeTextColor;
+		cell.textLabel.textColor = [UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault ? kDarkThemeTextColor : kLightThemeTextColor;
 
 		cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
-		cell.detailTextLabel.textColor = kLightThemeTextColor;
+		cell.detailTextLabel.textColor = [UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault ? kDarkThemeTextColor : kLightThemeTextColor;
 	}
 
 	// step 3: set up cell value
@@ -899,17 +906,17 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// gray status bar?
 	// on iPad the Default Status Bar Style is black too
 	if (style == UIStatusBarStyleDefault && !IsIPad) {
-		self.statusLabel1.textColor = kDarkThemeTextColor;
-		self.statusLabel2.textColor = kDarkThemeTextColor;
-		self.finishedLabel.textColor = kDarkThemeTextColor;
-		self.activityIndicator.activityIndicatorViewStyle = kDarkThemeActivityIndicatorViewStyle;
-		self.detailView.backgroundColor = kDarkThemeDetailViewBackgroundColor;
-	} else {
 		self.statusLabel1.textColor = kLightThemeTextColor;
 		self.statusLabel2.textColor = kLightThemeTextColor;
 		self.finishedLabel.textColor = kLightThemeTextColor;
 		self.activityIndicator.activityIndicatorViewStyle = kLightThemeActivityIndicatorViewStyle;
 		self.detailView.backgroundColor = kLightThemeDetailViewBackgroundColor;
+	} else {
+		self.statusLabel1.textColor = kDarkThemeTextColor;
+		self.statusLabel2.textColor = kDarkThemeTextColor;
+		self.finishedLabel.textColor = kDarkThemeTextColor;
+		self.activityIndicator.activityIndicatorViewStyle = kDarkThemeActivityIndicatorViewStyle;
+		self.detailView.backgroundColor = kDarkThemeDetailViewBackgroundColor;
 	}
 }
 
