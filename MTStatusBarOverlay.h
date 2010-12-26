@@ -34,7 +34,7 @@ typedef enum MTStatusBarOverlayAnimation {
 
 // This class provides an overlay over the iOS Status Bar that can display information
 // and perform an animation when you touch it
-@interface MTStatusBarOverlay : UIWindow {
+@interface MTStatusBarOverlay : UIWindow <UITableViewDataSource> {
 	// holds all subviews, is touchable to change size of Status Bar
 	UIControl *backgroundView_;
 	// the view that is shown in animation mode "FallDown" when the user touches the status bar
@@ -67,6 +67,10 @@ typedef enum MTStatusBarOverlayAnimation {
 	// Queue stuff
 	NSMutableArray *queuedMessages_;
 	NSTimer *queueTimer_;
+
+	// Message history (is reset when finish is called)
+	NSMutableArray *messageHistory_;
+	UITableView *historyTableView_;
 }
 
 //===========================================================
@@ -84,6 +88,8 @@ typedef enum MTStatusBarOverlayAnimation {
 @property (nonatomic, readonly, getter=isDetailViewVisible) BOOL detailViewVisible;
 // shows if finishWithMessage was currently called
 @property (readonly, getter=isHideInProgress) BOOL hideInProgress;
+// all messages that were displayed since the last finish-call
+@property (nonatomic, retain, readonly) NSMutableArray *messageHistory;
 
 
 //===========================================================

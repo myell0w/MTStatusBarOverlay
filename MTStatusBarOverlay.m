@@ -34,6 +34,8 @@
 #define kErrorText    @"✗"
 #define kErrorFontSize 19.f
 
+// Size of the text in the status labels
+#define kStatusLabelSize 12.f
 // Text color for UIStatusBarStyleDefault
 #define kStatusBarStyleDefaultTextColor [UIColor blackColor]
 // Activity Indicator Style for UIStatusBarStyleDefault
@@ -51,7 +53,7 @@
 // animation duration of animation mode shrink
 #define kAnimationDurationShrink				0.3
 // animation duration of animation mode fallDown
-#define kAnimationDurationFallDown				0.5
+#define kAnimationDurationFallDown				0.4
 
 // value that is added to [UIApplication sharedApplication].statusBarOrientationAnimationDuration to
 // make delay appearance of StatusBarOverlay after rotation
@@ -221,6 +223,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (nonatomic, readonly, getter=isReallyHidden) BOOL reallyHidden;
 @property (nonatomic, retain) NSMutableArray *queuedMessages;
 @property (nonatomic, retain) NSTimer *queueTimer;
+// overwrite property for read-write-access
+@property (nonatomic, retain) NSMutableArray *messageHistory;
+@property (nonatomic, retain) UITableView *historyTableView;
 
 
 // is called when the user touches the statusbar
@@ -261,6 +266,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize hideInProgress = hideInProgress_;
 @synthesize queuedMessages = queuedMessages_;
 @synthesize queueTimer = queueTimer_;
+@synthesize messageHistory = messageHistory_;
+@synthesize historyTableView = historyTableView_;
 
 //===========================================================
 #pragma mark -
@@ -281,11 +288,33 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// Default Animation-Mode
 		animation_ = MTStatusBarOverlayAnimationNone;
 
+
+
 		// the detail view that is shown when the user touches the status bar in animation mode "FallDown"
 		detailView_ = [[UIControl alloc] initWithFrame:kDefaultDetailViewFrame];
 		detailView_.backgroundColor = [UIColor blackColor];
-		detailView_.alpha = 0.7;
+		//detailView_.alpha = 0.8;
 		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+
+		// Message History
+		messageHistory_ = [[NSMutableArray alloc] init];
+
+		historyTableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0,
+																		  kStatusBarHeight,
+																		  kDefaultDetailViewFrame.size.width,
+																		  kDefaultDetailViewFrame.size.height - kStatusBarHeight)];
+		historyTableView_.dataSource = self;
+		historyTableView_.delegate = nil;
+		historyTableView_.rowHeight = 20;
+		// make table view-background transparent
+		historyTableView_.backgroundColor = [UIColor clearColor];
+		historyTableView_.opaque = NO;
+		// background-view is only supported >= 3.2
+		if ([historyTableView_ respondsToSelector:@selector(setBackgroundView:)]) {
+			[historyTableView_ setBackgroundView:nil];
+		}
+
+		[detailView_ addSubview:historyTableView_];
 
 		// add rounded corners to detail-view
 		CALayer *l = [detailView_ layer];
@@ -333,8 +362,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// Status Label 1 is first visible
 		statusLabel1_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, 0.0f, self.frame.size.width - 60.0f, self.frame.size.height-1)];
 		statusLabel1_.backgroundColor = [UIColor clearColor];
-		statusLabel1_.font = [UIFont boldSystemFontOfSize:12.0f];
+		statusLabel1_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
 		statusLabel1_.textAlignment = UITextAlignmentCenter;
+		statusLabel1_.numberOfLines = 1;
 		statusLabel1_.lineBreakMode = UILineBreakModeTailTruncation;
 		statusLabel1_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[self addSubviewToBackgroundView:statusLabel1_];
@@ -342,8 +372,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// Status Label 2 is hidden
 		statusLabel2_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, self.frame.size.height,self.frame.size.width - 60.0f , self.frame.size.height-1)];
 		statusLabel2_.backgroundColor = [UIColor clearColor];
-		statusLabel2_.font = [UIFont boldSystemFontOfSize:12.0f];
+		statusLabel2_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
 		statusLabel2_.textAlignment = UITextAlignmentCenter;
+		statusLabel2_.numberOfLines = 1;
 		statusLabel2_.lineBreakMode = UILineBreakModeTailTruncation;
 		statusLabel2_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[self addSubviewToBackgroundView:statusLabel2_];
@@ -380,6 +411,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[grayStatusBarImageSmall_ release], grayStatusBarImageSmall_ = nil;
 	[queuedMessages_ release], queuedMessages_ = nil;
 	[queueTimer_ release], queueTimer_ = nil;
+	[messageHistory_ release], messageHistory_ = nil;
 
 	[super dealloc];
 }
@@ -411,6 +443,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (void)hide {
 	[self.activityIndicator stopAnimating];
+	self.statusLabel1.text = @"";
+	self.statusLabel2.text = @"";
 
 	// hide status bar overlay with animation
 	[UIView animateWithDuration:kAppearAnimationDuration animations:^{
@@ -427,7 +461,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	self.hideInProgress = NO;
+
+	// cancel previous hide- and clear requests
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
+	[NSObject cancelPreviousPerformRequestsWithTarget:self.messageHistory selector:@selector(removeAllObjects) object:nil];
+
 	self.finishedLabel.hidden = YES;
 	self.activityIndicator.hidden = NO;
 
@@ -490,6 +528,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			self.statusLabel1.text = message;
 		}
 	}
+
+	// add message to history
+	[self.messageHistory addObject:message];
+	[self.historyTableView reloadData];
 }
 
 - (void)showWithMessage:(NSString *)message {
@@ -507,7 +549,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:statusBarStyle];
 	// update label-UI depending on status bar style
 	[self setLabelUIForStatusBarStyle:statusBarStyle];
-
 	// if status bar is currently hidden, show it
 	if (self.reallyHidden) {
 		// set text of visible status label
@@ -516,6 +557,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		} else {
 			self.statusLabel2.text = message;
 		}
+
+
+		// add message to history
+		[self.messageHistory addObject:message];
+		[self.historyTableView reloadData];
 
 		[self show];
 	}
@@ -582,7 +628,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	self.finishedLabel.hidden = NO;
 
 	self.hideInProgress = YES;
+
+	// hide after duration
 	[self performSelector:@selector(hide) withObject:nil afterDelay:duration];
+	// clear history after duration
+	[self.messageHistory performSelector:@selector(removeAllObjects) withObject:nil afterDelay:duration];
 }
 
 
@@ -595,7 +645,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	self.finishedLabel.hidden = NO;
 
 	self.hideInProgress = YES;
+
 	[self performSelector:@selector(hide) withObject:nil afterDelay:duration];
+	// clear history after duration
+	[self.messageHistory performSelector:@selector(removeAllObjects) withObject:nil afterDelay:duration];
 }
 
 //===========================================================
@@ -603,7 +656,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 #pragma mark Rotation Notification
 //===========================================================
 
-- (void) didRotate:(NSNotification *)notification {
+- (void)didRotate:(NSNotification *)notification {
 	// current device orientation
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
 	// current visible view controller
@@ -669,6 +722,38 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		   self.detailView.frame.origin.y + self.detailView.frame.size.height >= kStatusBarHeight;
 }
 
+
+//===========================================================
+#pragma mark -
+#pragma mark Table View Data Source
+//===========================================================
+
+- (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+	return self.messageHistory.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+	static NSString *cellID = @"HistoryCellID";
+	UITableViewCell *cell = nil;
+
+	// step 1: is there a reusable cell?
+	cell = [tableView dequeueReusableCellWithIdentifier:cellID];
+
+	// step 2: no? -> create new cell
+	if (cell == nil) {
+		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID] autorelease];
+
+		cell.textLabel.font = [UIFont boldSystemFontOfSize:10];
+		cell.textLabel.textColor = [UIColor whiteColor];
+	}
+
+	// step 3: set up cell value
+	cell.textLabel.text = [self.messageHistory objectAtIndex:indexPath.row];
+
+    return cell;
+}
+
+
 //===========================================================
 #pragma mark -
 #pragma mark Private Methods
@@ -715,17 +800,22 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 		case MTStatusBarOverlayAnimationFallDown:
 			if (self.detailViewVisible) {
-				[UIView animateWithDuration:kAnimationDurationFallDown animations:^{
-					self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
-													   self.detailView.frame.size.width, self.detailView.frame.size.height);
-				}];
+				[UIView animateWithDuration:kAnimationDurationFallDown
+									  delay:0
+									options:UIViewAnimationOptionCurveEaseOut
+								 animations: ^{
+									 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
+																		self.detailView.frame.size.width, self.detailView.frame.size.height);
+								 }
+								 completion:NULL];
 			} else {
 				[UIView animateWithDuration:kAnimationDurationFallDown
 									  delay:0
-									options:UIViewAnimationOptionCurveEaseInOut
-								 animations:^{
+									options:UIViewAnimationOptionCurveEaseIn
+								 animations: ^{
 									 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, 0,
-																		self.detailView.frame.size.width, self.detailView.frame.size.height);								 }
+																		self.detailView.frame.size.width, self.detailView.frame.size.height);
+								 }
 								 completion:NULL];
 			}
 
