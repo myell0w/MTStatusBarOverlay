@@ -27,36 +27,63 @@
 #pragma mark Customize Section
 //===========================================================
 
-// Text that is displayed in the finished-Label when the finish was successful
-#define kFinishedText @"✔"
-#define kFinishedFontSize 22.f
-// Text that is displayed when an error occured
-#define kErrorText    @"✗"
-#define kErrorFontSize 19.f
+///////////////////////////////////////////////////////
+// Dark Theme (for UIStatusBarStyleBlackeOpaque
+///////////////////////////////////////////////////////
 
-// Size of the text in the status labels
-#define kStatusLabelSize 12.f
-// Text color for UIStatusBarStyleDefault
-#define kStatusBarStyleDefaultTextColor [UIColor blackColor]
-// Activity Indicator Style for UIStatusBarStyleDefault
-#define kStatusBarStyleDefaultActivityIndicatorViewStyle UIActivityIndicatorViewStyleGray
-// Text color for UIStatusBarStyleBlackOpaque
-#define kStatusBarStyleBlackTextColor [UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0]
-// Activity Indicator Style for UIStatusBarStyleBlackOpaque
-#define kStatusBarStyleBlackActivityIndicatorViewStyle UIActivityIndicatorViewStyleWhite
+#define kDarkThemeTextColor						[UIColor blackColor]
+#define kDarkThemeActivityIndicatorViewStyle	UIActivityIndicatorViewStyleGray
+#define kDarkThemeDetailViewBackgroundColor		[UIColor blackColor]
+
+
+///////////////////////////////////////////////////////
+// Light Theme (for UIStatusBarStyleBlackeOpaque
+///////////////////////////////////////////////////////
+
+#define kLightThemeTextColor					[UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0]
+#define kLightThemeActivityIndicatorViewStyle	UIActivityIndicatorViewStyleWhite
+#define kLightThemeDetailViewBackgroundColor	[UIColor darkGrayColor]
+
+
+///////////////////////////////////////////////////////
+// Animations
+///////////////////////////////////////////////////////
 
 // duration of the animation to show next status message in seconds
 #define kNextStatusAnimationDuration			0.8
+
 // duration the statusBarOverlay takes to appear when it was hidden
 #define kAppearAnimationDuration				0.5
 
 // animation duration of animation mode shrink
 #define kAnimationDurationShrink				0.3
+
 // animation duration of animation mode fallDown
 #define kAnimationDurationFallDown				0.4
 
 // duration of appearance of StatusBarOverlay after rotation
 #define kStatusBarOrientationAppearDuration	 [UIApplication sharedApplication].statusBarOrientationAnimationDuration + 0.2
+
+
+///////////////////////////////////////////////////////
+// Text
+///////////////////////////////////////////////////////
+
+// Text that is displayed in the finished-Label when the finish was successful
+#define kFinishedText		@"✔"
+#define kFinishedFontSize	22.f
+
+// Text that is displayed when an error occured
+#define kErrorText			@"✗"
+#define kErrorFontSize		19.f
+
+
+///////////////////////////////////////////////////////
+// Size
+///////////////////////////////////////////////////////
+
+// Size of the text in the status labels
+#define kStatusLabelSize 12.f
 
 // x-offset of the child-views of the background when status bar is in small mode
 #define kSmallXOffset					50
@@ -67,7 +94,11 @@
 #define kHistoryTableRowHeight 25
 
 // default frame of detail view when it is hidden
-#define kDefaultDetailViewFrame CGRectMake(kStatusBarHeight,  - kHistoryTableRowHeight * 6 - kStatusBarHeight, 280, kHistoryTableRowHeight * 6 + kStatusBarHeight)
+#define kDefaultDetailViewFrame CGRectMake(kStatusBarHeight, - kHistoryTableRowHeight * 6 - kStatusBarHeight, 280, \
+										   kHistoryTableRowHeight * 6 + kStatusBarHeight)
+
+
+
 
 //===========================================================
 #pragma mark -
@@ -235,7 +266,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 // updates the current status bar background image for the given size and style
 - (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style;
 // updates the text-colors of the labels for the given style
-- (void)setLabelUIForStatusBarStyle:(UIStatusBarStyle)style;
+- (void)setColorSchemeForStatusBarStyle:(UIStatusBarStyle)style;
 // tries to retrieve the current visible view controller of the app and returns it, used for rotation
 - (UIViewController *)currentVisibleViewController;
 
@@ -563,7 +594,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	UIStatusBarStyle statusBarStyle = [UIApplication sharedApplication].statusBarStyle;
 	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:statusBarStyle];
 	// update label-UI depending on status bar style
-	[self setLabelUIForStatusBarStyle:statusBarStyle];
+	[self setColorSchemeForStatusBarStyle:statusBarStyle];
 
 	// if status bar is currently hidden, show it
 	if (self.reallyHidden) {
@@ -760,10 +791,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID] autorelease];
 
 		cell.textLabel.font = [UIFont boldSystemFontOfSize:10];
-		cell.textLabel.textColor = kStatusBarStyleBlackTextColor;
+		cell.textLabel.textColor = kLightThemeTextColor;
 
 		cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
-		cell.detailTextLabel.textColor = kStatusBarStyleBlackTextColor;
+		cell.detailTextLabel.textColor = kLightThemeTextColor;
 	}
 
 	// step 3: set up cell value
@@ -864,19 +895,21 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 }
 
-- (void)setLabelUIForStatusBarStyle:(UIStatusBarStyle)style {
+- (void)setColorSchemeForStatusBarStyle:(UIStatusBarStyle)style {
 	// gray status bar?
 	// on iPad the Default Status Bar Style is black too
 	if (style == UIStatusBarStyleDefault && !IsIPad) {
-		self.statusLabel1.textColor = kStatusBarStyleDefaultTextColor;
-		self.statusLabel2.textColor = kStatusBarStyleDefaultTextColor;
-		self.finishedLabel.textColor = kStatusBarStyleDefaultTextColor;
-		self.activityIndicator.activityIndicatorViewStyle = kStatusBarStyleDefaultActivityIndicatorViewStyle;
+		self.statusLabel1.textColor = kDarkThemeTextColor;
+		self.statusLabel2.textColor = kDarkThemeTextColor;
+		self.finishedLabel.textColor = kDarkThemeTextColor;
+		self.activityIndicator.activityIndicatorViewStyle = kDarkThemeActivityIndicatorViewStyle;
+		self.detailView.backgroundColor = kDarkThemeDetailViewBackgroundColor;
 	} else {
-		self.statusLabel1.textColor = kStatusBarStyleBlackTextColor;
-		self.statusLabel2.textColor = kStatusBarStyleBlackTextColor;
-		self.finishedLabel.textColor = kStatusBarStyleBlackTextColor;
-		self.activityIndicator.activityIndicatorViewStyle = kStatusBarStyleBlackActivityIndicatorViewStyle;
+		self.statusLabel1.textColor = kLightThemeTextColor;
+		self.statusLabel2.textColor = kLightThemeTextColor;
+		self.finishedLabel.textColor = kLightThemeTextColor;
+		self.activityIndicator.activityIndicatorViewStyle = kLightThemeActivityIndicatorViewStyle;
+		self.detailView.backgroundColor = kLightThemeDetailViewBackgroundColor;
 	}
 }
 
