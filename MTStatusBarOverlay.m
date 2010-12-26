@@ -240,6 +240,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 // set hidden-state using alpha-value instead of hidden-property
 - (void)setHidden:(BOOL)hidden useAlpha:(BOOL)animated;
 
+- (void)clearHistory;
+
 @end
 
 
@@ -288,13 +290,19 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// Default Animation-Mode
 		animation_ = MTStatusBarOverlayAnimationNone;
 
-
-
 		// the detail view that is shown when the user touches the status bar in animation mode "FallDown"
 		detailView_ = [[UIControl alloc] initWithFrame:kDefaultDetailViewFrame];
 		detailView_.backgroundColor = [UIColor blackColor];
 		//detailView_.alpha = 0.8;
 		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+
+		// add rounded corners to detail-view
+		CALayer *l = [detailView_ layer];
+		l.masksToBounds = YES;
+		l.cornerRadius = 10.0;
+		l.borderWidth = 1.0;
+		l.borderColor = [[UIColor darkGrayColor] CGColor];
+
 
 		// Message History
 		messageHistory_ = [[NSMutableArray alloc] init];
@@ -315,15 +323,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		}
 
 		[detailView_ addSubview:historyTableView_];
-
-		// add rounded corners to detail-view
-		CALayer *l = [detailView_ layer];
-		l.masksToBounds = YES;
-		l.cornerRadius = 10.0;
-		l.borderWidth = 1.0;
-		l.borderColor = [[UIColor darkGrayColor] CGColor];
-
 		[self addSubview:detailView_];
+
 
         // Create view that stores all the content
         backgroundView_ = [[UIControl alloc] initWithFrame:self.frame];
@@ -455,6 +456,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)setMessage:(NSString *)message animated:(BOOL)animated {
+	NSString *oldMessage = nil;
+
 	// don't show if status bar is hidden
 	if ([UIApplication sharedApplication].statusBarHidden) {
 		return;
@@ -464,7 +467,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 	// cancel previous hide- and clear requests
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
-	[NSObject cancelPreviousPerformRequestsWithTarget:self.messageHistory selector:@selector(removeAllObjects) object:nil];
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(clearHistory) object:nil];
 
 	self.finishedLabel.hidden = YES;
 	self.activityIndicator.hidden = NO;
@@ -478,6 +481,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	if (animated) {
 		// set text of currently not visible label to new text
 		if (self.hiddenStatusLabel == self.statusLabel1) {
+			oldMessage = self.statusLabel2.text;
 			self.statusLabel1.text = message;
 
 			// position under visible status label
@@ -486,6 +490,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 												 self.statusLabel1.frame.size.width,
 												 self.statusLabel1.frame.size.height);
 		} else {
+			oldMessage = self.statusLabel1.text;
 			self.statusLabel2.text = message;
 
 			// position under visible status label
@@ -523,15 +528,19 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// w/o animation
 	else {
 		if (self.hiddenStatusLabel == self.statusLabel1) {
+			oldMessage = self.statusLabel2.text;
 			self.statusLabel2.text = message;
 		} else {
+			oldMessage = self.statusLabel1.text;
 			self.statusLabel1.text = message;
 		}
 	}
 
-	// add message to history
-	[self.messageHistory addObject:message];
-	[self.historyTableView reloadData];
+	// add old message to history
+	if (oldMessage != nil && ![oldMessage isEqualToString:@""]) {
+		[self.messageHistory addObject:oldMessage];
+		[self.historyTableView reloadData];
+	}
 }
 
 - (void)showWithMessage:(NSString *)message {
@@ -549,19 +558,25 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:statusBarStyle];
 	// update label-UI depending on status bar style
 	[self setLabelUIForStatusBarStyle:statusBarStyle];
+
 	// if status bar is currently hidden, show it
 	if (self.reallyHidden) {
+		NSString *oldMessage = nil;
+
 		// set text of visible status label
 		if (self.statusLabel2 == self.hiddenStatusLabel) {
+			oldMessage = self.statusLabel2.text;
 			self.statusLabel1.text = message;
 		} else {
+			oldMessage = self.statusLabel1.text;
 			self.statusLabel2.text = message;
 		}
 
-
-		// add message to history
-		[self.messageHistory addObject:message];
-		[self.historyTableView reloadData];
+		// add old message to history
+		if (oldMessage != nil && ![oldMessage isEqualToString:@""]) {
+			[self.messageHistory addObject:oldMessage];
+			[self.historyTableView reloadData];
+		}
 
 		[self show];
 	}
@@ -632,7 +647,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// hide after duration
 	[self performSelector:@selector(hide) withObject:nil afterDelay:duration];
 	// clear history after duration
-	[self.messageHistory performSelector:@selector(removeAllObjects) withObject:nil afterDelay:duration];
+	[self performSelector:@selector(clearHistory) withObject:nil afterDelay:duration];
 }
 
 
@@ -648,7 +663,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 	[self performSelector:@selector(hide) withObject:nil afterDelay:duration];
 	// clear history after duration
-	[self.messageHistory performSelector:@selector(removeAllObjects) withObject:nil afterDelay:duration];
+	[self performSelector:@selector(clearHistory) withObject:nil afterDelay:duration];
 }
 
 //===========================================================
@@ -885,6 +900,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		NSLog(@"MTStatusBarOverlay: Could not find a root view controller, will not rotate!");
 		return nil;
 	}
+}
+
+- (void)clearHistory {
+	[self.messageHistory removeAllObjects];
+	[self.historyTableView reloadData];
 }
 
 //===========================================================
