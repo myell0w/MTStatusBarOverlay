@@ -5,6 +5,10 @@ UIStatusBarStyleDefault (left: full size, right: shrinked)
 
 ![Default style](https://img.skitch.com/20101223-r1ddre3u4sjmn4htkqw3bhp84j.jpg "Default style")
 
+New Features!
+-----------------
+* 26.12.2010: Automatic history-tracking for free!
+
 Description
 -----------------
 
@@ -12,7 +16,7 @@ This class provides a custom iOS status bar overlay window known from Apps like 
 It currently supports touch-handling, queuing of messages as well as three different animation modes:
  
 * MTStatusBarOverlayAnimationShrink: When the user touches the overlay the overlay shrinks and only covers the battery-icon on the right side
-* MTStatusBarOverlayAnimationFallDown: When the user touches the overlay a detail view falls down where additional information can be displayed
+* MTStatusBarOverlayAnimationFallDown: When the user touches the overlay a detail view falls down where additional information can be displayed. You can get a history of all your displayed messages for free by enabling historyTracking!
 * MTStatusBarOverlayAnimationNone: Nothing happens, when the user touches the overlay
 
 MTStatusBarOverlay currently supports two different status bar styles, which also can be changed in your app (MTStatusBarOverlay will adopt the style and will be updated the next time you show it):
@@ -26,7 +30,8 @@ Usage
 You can use the custom status bar like this:
 
      MTStatusBarOverlay overlay = [MTStatusBarOverlay sharedInstance];   
-	 overlay.animation = MTStatusBarOverlayAnimationShrink;
+	 overlay.animation = MTStatusBarOverlayAnimationFallDown;  // MTStatusBarOverlayAnimationShrink
+	 overlay.historyEnabled = YES;  	// enable automatic history-tracking and show in detail-view
      [overlay showWithMessage:@"Following @myell0w on Twitter..."]; 
  	 // ...
      [overlay showWithMessage:@"Following myell0w on Github..."];  
@@ -39,7 +44,6 @@ Known Limitations
 ----------------------- 
 
 * Device-Rotation currently only works on iPhone, not iPad
-* MTStatusBarOverlayAnimationFallDown is only basically implemented yet
 * When using UIStatusBarStyleBlackTranslutient the overlay is black opaque
 
 
