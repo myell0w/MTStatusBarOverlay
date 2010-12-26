@@ -55,17 +55,19 @@
 // animation duration of animation mode fallDown
 #define kAnimationDurationFallDown				0.4
 
-// value that is added to [UIApplication sharedApplication].statusBarOrientationAnimationDuration to
-// make delay appearance of StatusBarOverlay after rotation
-#define kStatusBarOrientationAppearTimeDelta	0.2
+// duration of appearance of StatusBarOverlay after rotation
+#define kStatusBarOrientationAppearDuration	 [UIApplication sharedApplication].statusBarOrientationAnimationDuration + 0.2
 
 // x-offset of the child-views of the background when status bar is in small mode
 #define kSmallXOffset					50
 // default-width of the small-mode
 #define kWidthSmall						80
 
+// History
+#define kHistoryTableRowHeight 25
+
 // default frame of detail view when it is hidden
-#define kDefaultDetailViewFrame CGRectMake(20, -150, 280, 150)
+#define kDefaultDetailViewFrame CGRectMake(kStatusBarHeight,  - kHistoryTableRowHeight * 6 - kStatusBarHeight, 280, kHistoryTableRowHeight * 6 + kStatusBarHeight)
 
 //===========================================================
 #pragma mark -
@@ -296,14 +298,14 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// the detail view that is shown when the user touches the status bar in animation mode "FallDown"
 		detailView_ = [[UIControl alloc] initWithFrame:kDefaultDetailViewFrame];
 		detailView_.backgroundColor = [UIColor blackColor];
-		//detailView_.alpha = 0.8;
+		detailView_.alpha = 0.9;
 		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 
 		// add rounded corners to detail-view
 		CALayer *l = [detailView_ layer];
 		l.masksToBounds = YES;
 		l.cornerRadius = 10.0;
-		l.borderWidth = 1.0;
+		l.borderWidth = 2.5;
 		l.borderColor = [[UIColor darkGrayColor] CGColor];
 
 
@@ -317,15 +319,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 																		  kDefaultDetailViewFrame.size.height - kStatusBarHeight)];
 		historyTableView_.dataSource = self;
 		historyTableView_.delegate = nil;
-		historyTableView_.rowHeight = 20;
+		historyTableView_.rowHeight = kHistoryTableRowHeight;
 		// make table view-background transparent
 		historyTableView_.backgroundColor = [UIColor clearColor];
 		historyTableView_.opaque = NO;
+		historyTableView_.separatorColor = [UIColor darkGrayColor];
 		historyTableView_.hidden = !historyEnabled_;
-		// background-view is only supported >= 3.2
-		if ([historyTableView_ respondsToSelector:@selector(setBackgroundView:)]) {
-			[historyTableView_ setBackgroundView:nil];
-		}
+		historyTableView_.backgroundView = nil;
 
 		[detailView_ addSubview:historyTableView_];
 		[self addSubview:detailView_];
@@ -719,7 +719,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	// make visible after given time
-	[UIView animateWithDuration:[UIApplication sharedApplication].statusBarOrientationAnimationDuration+kStatusBarOrientationAppearTimeDelta
+	[UIView animateWithDuration:kStatusBarOrientationAppearDuration
 					 animations:^{
 		[self setHidden:NO useAlpha:YES];
 	}];
@@ -760,10 +760,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID] autorelease];
 
 		cell.textLabel.font = [UIFont boldSystemFontOfSize:10];
-		cell.textLabel.textColor = [UIColor whiteColor];
+		cell.textLabel.textColor = kStatusBarStyleBlackTextColor;
 
 		cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
-		cell.detailTextLabel.textColor = [UIColor whiteColor];
+		cell.detailTextLabel.textColor = kStatusBarStyleBlackTextColor;
 	}
 
 	// step 3: set up cell value
