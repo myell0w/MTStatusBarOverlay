@@ -457,6 +457,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		[self setHidden:YES useAlpha:YES];
 	} completion:^(BOOL finished) {
 		self.hideInProgress = NO;
+
+		// hide detailView
+		self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
+										   self.detailView.frame.size.width, self.detailView.frame.size.height);
 	}];
 }
 
