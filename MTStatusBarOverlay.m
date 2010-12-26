@@ -32,17 +32,21 @@
 ///////////////////////////////////////////////////////
 
 #define kLightThemeTextColor						[UIColor blackColor]
-#define kLightThemeActivityIndicatorViewStyle	UIActivityIndicatorViewStyleGray
+#define kLightThemeActivityIndicatorViewStyle		UIActivityIndicatorViewStyleGray
 #define kLightThemeDetailViewBackgroundColor		[UIColor blackColor]
+#define kLightThemeDetailViewBorderColor			[UIColor darkGrayColor]
+#define kLightThemeHistoryTextColor					[UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0]
 
 
 ///////////////////////////////////////////////////////
 // Dark Theme (for UIStatusBarStyleBlackOpaque)
 ///////////////////////////////////////////////////////
 
-#define kDarkThemeTextColor					[UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0]
-#define kDarkThemeActivityIndicatorViewStyle	UIActivityIndicatorViewStyleWhite
-#define kDarkThemeDetailViewBackgroundColor	[UIColor darkGrayColor]
+#define kDarkThemeTextColor							[UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0]
+#define kDarkThemeActivityIndicatorViewStyle		UIActivityIndicatorViewStyleWhite
+#define kDarkThemeDetailViewBackgroundColor			[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1.0]
+#define kDarkThemeDetailViewBorderColor				[UIColor whiteColor]
+#define kDarkThemeHistoryTextColor					[UIColor whiteColor]
 
 
 ///////////////////////////////////////////////////////
@@ -62,7 +66,7 @@
 #define kAnimationDurationFallDown				0.4
 
 // duration of appearance of StatusBarOverlay after rotation
-#define kStatusBarOrientationAppearDuration	 [UIApplication sharedApplication].statusBarOrientationAnimationDuration + 0.2
+#define kRotationAppearDuration					[UIApplication sharedApplication].statusBarOrientationAnimationDuration + 0.2
 
 
 ///////////////////////////////////////////////////////
@@ -340,28 +344,23 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 
 		// add rounded corners to detail-view
-		CALayer *l = [detailView_ layer];
-		l.masksToBounds = YES;
-		l.cornerRadius = 10.0;
-		l.borderWidth = 2.5;
-		l.borderColor = [[UIColor darkGrayColor] CGColor];
-
+		detailView_.layer.masksToBounds = YES;
+		detailView_.layer.cornerRadius = 10.0;
+		detailView_.layer.borderWidth = 2.5;
 
 		// Message History
 		historyEnabled_ = NO;
 		messageHistory_ = [[NSMutableArray alloc] init];
 
-		historyTableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0,
-																		  kStatusBarHeight,
-																		  kDefaultDetailViewFrame.size.width,
-																		  kDefaultDetailViewFrame.size.height - kStatusBarHeight)];
+		historyTableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0, kStatusBarHeight,
+																		  kDefaultDetailViewFrame.size.width, kDefaultDetailViewFrame.size.height - kStatusBarHeight)];
 		historyTableView_.dataSource = self;
 		historyTableView_.delegate = nil;
 		historyTableView_.rowHeight = kHistoryTableRowHeight;
+		historyTableView_.separatorStyle = UITableViewCellSeparatorStyleNone;
 		// make table view-background transparent
 		historyTableView_.backgroundColor = [UIColor clearColor];
 		historyTableView_.opaque = NO;
-		historyTableView_.separatorColor = [UIColor darkGrayColor];
 		historyTableView_.hidden = !historyEnabled_;
 		historyTableView_.backgroundView = nil;
 
@@ -757,7 +756,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	// make visible after given time
-	[UIView animateWithDuration:kStatusBarOrientationAppearDuration
+	[UIView animateWithDuration:kRotationAppearDuration
 					 animations:^{
 		[self setHidden:NO useAlpha:YES];
 	}];
@@ -798,10 +797,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID] autorelease];
 
 		cell.textLabel.font = [UIFont boldSystemFontOfSize:10];
-		cell.textLabel.textColor = [UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault ? kDarkThemeTextColor : kLightThemeTextColor;
+		cell.textLabel.textColor = [UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault ? kLightThemeHistoryTextColor : kDarkThemeHistoryTextColor;
 
 		cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
-		cell.detailTextLabel.textColor = [UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault ? kDarkThemeTextColor : kLightThemeTextColor;
+		cell.detailTextLabel.textColor = [UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault ? kLightThemeHistoryTextColor : kDarkThemeHistoryTextColor;
 	}
 
 	// step 3: set up cell value
@@ -911,12 +910,16 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		self.finishedLabel.textColor = kLightThemeTextColor;
 		self.activityIndicator.activityIndicatorViewStyle = kLightThemeActivityIndicatorViewStyle;
 		self.detailView.backgroundColor = kLightThemeDetailViewBackgroundColor;
+		self.detailView.layer.borderColor = [kLightThemeDetailViewBorderColor CGColor];
+		self.historyTableView.separatorColor = kLightThemeDetailViewBorderColor;
 	} else {
 		self.statusLabel1.textColor = kDarkThemeTextColor;
 		self.statusLabel2.textColor = kDarkThemeTextColor;
 		self.finishedLabel.textColor = kDarkThemeTextColor;
 		self.activityIndicator.activityIndicatorViewStyle = kDarkThemeActivityIndicatorViewStyle;
 		self.detailView.backgroundColor = kDarkThemeDetailViewBackgroundColor;
+		self.detailView.layer.borderColor = [kDarkThemeDetailViewBorderColor CGColor];
+		self.historyTableView.separatorColor = kDarkThemeDetailViewBorderColor;
 	}
 }
 
