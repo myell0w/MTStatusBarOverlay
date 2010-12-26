@@ -33,7 +33,10 @@ typedef enum MTStatusBarOverlayAnimation {
 
 
 // This class provides an overlay over the iOS Status Bar that can display information
-// and perform an animation when you touch it
+// and perform an animation when you touch it:
+// it can either shrink and only overlap the battery-icon (like in Reeder) or it can display
+// a detail-view that shows additional information. You can show a history of all the previous
+// messages for free by setting historyEnabled to YES
 @interface MTStatusBarOverlay : UIWindow <UITableViewDataSource> {
 	// holds all subviews, is touchable to change size of Status Bar
 	UIControl *backgroundView_;
