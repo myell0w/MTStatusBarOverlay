@@ -505,8 +505,12 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		return;
 	}
 
-	// don't show if currently a animation is ongoing (TODO: queue such a message)
+	// if currently an animation is ongoing
 	if (self.newMessageAnimationInProgress) {
+		// add currently animated message to history
+		[self addMessageToHistory:self.hiddenStatusLabel.text];
+		// and show new message
+		self.hiddenStatusLabel.text = message;
 		return;
 	}
 
@@ -583,8 +587,12 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		return;
 	}
 
-	// don't show if currently a animation is ongoing (TODO: queue such a message)
+	// if currently an animation is ongoing
 	if (self.newMessageAnimationInProgress) {
+		// add currently animated message to history
+		[self addMessageToHistory:self.hiddenStatusLabel.text];
+		// and show new message
+		self.hiddenStatusLabel.text = message;
 		return;
 	}
 
