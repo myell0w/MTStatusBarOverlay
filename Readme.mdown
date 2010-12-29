@@ -45,7 +45,8 @@ Known Limitations
 
 * Device-Rotation currently only works on iPhone, not iPad
 * When using UIStatusBarStyleBlackTranslutient the overlay is black opaque
-* user interaction in detail view is not possible yet
+* User interaction in detail view is not possible yet
+* When showWithMessage is called during an animation of a message is currently ongoing the new message isn't animated afterwards, instead it immediately replaces the currently animated message and moves it to history
 
 
 More Screenshots
