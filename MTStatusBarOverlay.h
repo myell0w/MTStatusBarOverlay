@@ -66,6 +66,9 @@ typedef enum MTStatusBarOverlayAnimation {
 	// is set when finishWithMessage is called and the statusBar is set to be hidden
 	// after a specified amount of time
 	BOOL hideInProgress_;
+	// flag that indicates whether currently an animation is going on, where a new
+	// message is set (both labels are currently moved up)
+	BOOL newMessageAnimationInProgress_;
 
 	// Queue stuff
 	NSMutableArray *queuedMessages_;
@@ -114,8 +117,6 @@ typedef enum MTStatusBarOverlayAnimation {
 // for customizing appearance, automatically disabled userInteractionEnabled on view
 - (void)addSubviewToBackgroundView:(UIView *)view;
 
-// shows the status bar overlay
-- (void)show;
 // hides the status bar overlay
 - (void)hide;
 // convenience-method, set Message and show

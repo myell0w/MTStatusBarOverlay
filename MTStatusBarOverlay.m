@@ -260,9 +260,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (nonatomic, retain) UILabel *statusLabel1;
 @property (nonatomic, retain) UILabel *statusLabel2;
 @property (nonatomic, assign) UILabel *hiddenStatusLabel;
+@property (nonatomic, readonly) UILabel *visibleStatusLabel;
 @property (nonatomic, assign) CGRect oldBackgroundViewFrame;
 // overwrite property for read-write-access
 @property (assign, getter=isHideInProgress) BOOL hideInProgress;
+@property (assign, getter=isNewMessageAnimationInProgress) BOOL newMessageAnimationInProgress;
 // read out hidden-state using alpha-value and hidden-property
 @property (nonatomic, readonly, getter=isReallyHidden) BOOL reallyHidden;
 @property (nonatomic, retain) NSMutableArray *queuedMessages;
@@ -312,6 +314,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize oldBackgroundViewFrame = oldBackgroundViewFrame_;
 @synthesize animation = animation_;
 @synthesize hideInProgress = hideInProgress_;
+@synthesize newMessageAnimationInProgress = newMessageAnimationInProgress_;
 @synthesize queuedMessages = queuedMessages_;
 @synthesize queueTimer = queueTimer_;
 @synthesize historyEnabled = historyEnabled_;
@@ -334,8 +337,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// Default Small size: just show Activity Indicator
 		smallFrame_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 
-		// Default Animation-Mode
+		// Animation Settings
 		animation_ = MTStatusBarOverlayAnimationNone;
+		newMessageAnimationInProgress_ = NO;
 
 		// the detail view that is shown when the user touches the status bar in animation mode "FallDown"
 		detailView_ = [[UIControl alloc] initWithFrame:kDefaultDetailViewFrame];
@@ -470,31 +474,19 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self.backgroundView addSubview:view];
 }
 
-- (void)show {
-	// don't show if status bar is hidden
-	if ([UIApplication sharedApplication].statusBarHidden) {
-		return;
-	}
-
-	// start activity indicator
-	[self.activityIndicator startAnimating];
-	// show status bar overlay with animation
-	[UIView animateWithDuration:kAppearAnimationDuration animations:^{
-		[self setHidden:NO useAlpha:YES];
-	}];
-}
-
 - (void)hide {
 	[self.activityIndicator stopAnimating];
 	self.statusLabel1.text = @"";
 	self.statusLabel2.text = @"";
 
+	self.hideInProgress = NO;
+	// cancel previous hide- and clear requests
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
+
 	// hide status bar overlay with animation
 	[UIView animateWithDuration:kAppearAnimationDuration animations:^{
 		[self setHidden:YES useAlpha:YES];
 	} completion:^(BOOL finished) {
-		self.hideInProgress = NO;
-
 		// hide detailView
 		self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
 										   self.detailView.frame.size.width, self.detailView.frame.size.height);
@@ -504,49 +496,47 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)setMessage:(NSString *)message animated:(BOOL)animated {
 	NSString *oldMessage = nil;
 
-	// don't show if status bar is hidden
-	if ([UIApplication sharedApplication].statusBarHidden) {
+	// don't show if status bar or status bar overlay is hidden
+	// don't show when message is empty
+	// don't duplicate animation if already displaying with text
+	if ([UIApplication sharedApplication].statusBarHidden || self.reallyHidden
+		|| message == nil
+		|| (!self.reallyHidden && [self.visibleStatusLabel.text isEqualToString:message])) {
 		return;
 	}
 
-	self.hideInProgress = NO;
+	// don't show if currently a animation is ongoing (TODO: queue such a message)
+	if (self.newMessageAnimationInProgress) {
+		return;
+	}
+
+	// Kill any queued messages
+	[self.queueTimer invalidate];
 
 	// cancel previous hide- and clear requests
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(clearHistory) object:nil];
 
+	self.hideInProgress = NO;
 	self.finishedLabel.hidden = YES;
 	self.activityIndicator.hidden = NO;
 
-	// status bar not visible in the moment, just show it
-	if (self.reallyHidden) {
-		[self showWithMessage:message];
-		return;
-	}
-
 	if (animated) {
+		// save currently visible message for later
+		oldMessage = self.visibleStatusLabel.text;
 		// set text of currently not visible label to new text
-		if (self.hiddenStatusLabel == self.statusLabel1) {
-			oldMessage = self.statusLabel2.text;
-			self.statusLabel1.text = message;
+		self.hiddenStatusLabel.text = message;
 
-			// position under visible status label
-			self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x,
-												 self.frame.size.height,
-												 self.statusLabel1.frame.size.width,
-												 self.statusLabel1.frame.size.height);
-		} else {
-			oldMessage = self.statusLabel1.text;
-			self.statusLabel2.text = message;
+		// position hidden status label under visible status label
+		self.hiddenStatusLabel.frame = CGRectMake(self.hiddenStatusLabel.frame.origin.x,
+												  self.frame.size.height,
+												  self.hiddenStatusLabel.frame.size.width,
+												  self.hiddenStatusLabel.frame.size.height);
 
-			// position under visible status label
-			self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x,
-												 self.frame.size.height,
-												 self.statusLabel2.frame.size.width,
-												 self.statusLabel2.frame.size.height);
-		}
 
-		// animate not visible label into user view
+		// set flag for new message animation
+		self.newMessageAnimationInProgress = YES;
+		// animate hidden label into user view and visible status label out of view
 		[UIView animateWithDuration:kNextStatusAnimationDuration
 							  delay:0
 							options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionAllowUserInteraction
@@ -568,18 +558,15 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 							 } else {
 								 self.hiddenStatusLabel = self.statusLabel1;
 							 }
+
+							 self.newMessageAnimationInProgress = NO;
 						 }];
 	}
 
-	// w/o animation
+	// w/o animation just save old text and set new one
 	else {
-		if (self.hiddenStatusLabel == self.statusLabel1) {
-			oldMessage = self.statusLabel2.text;
-			self.statusLabel2.text = message;
-		} else {
-			oldMessage = self.statusLabel1.text;
-			self.statusLabel1.text = message;
-		}
+		oldMessage = self.visibleStatusLabel.text;
+		self.visibleStatusLabel.text = message;
 	}
 
 	// add old message to history
@@ -587,14 +574,19 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)showWithMessage:(NSString *)message {
+	// don't show when message is empty
 	// don't duplicate animation if already displaying with text
-	if (message == nil || (!self.reallyHidden && [self.statusLabel1.text isEqualToString:message])) {
+	// don't show if status bar is hidden
+	if (message == nil
+		|| (!self.reallyHidden && [self.visibleStatusLabel.text isEqualToString:message])
+		|| [UIApplication sharedApplication].statusBarHidden) {
 		return;
 	}
 
-	self.finishedLabel.hidden = YES;
-	// Kill any queued messages
-	[self.queueTimer invalidate];
+	// don't show if currently a animation is ongoing (TODO: queue such a message)
+	if (self.newMessageAnimationInProgress) {
+		return;
+	}
 
 	// update status bar background
 	UIStatusBarStyle statusBarStyle = [UIApplication sharedApplication].statusBarStyle;
@@ -606,18 +598,27 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	if (self.reallyHidden) {
 		NSString *oldMessage = nil;
 
-		// set text of visible status label
-		if (self.statusLabel2 == self.hiddenStatusLabel) {
-			oldMessage = self.statusLabel2.text;
-			self.statusLabel1.text = message;
-		} else {
-			oldMessage = self.statusLabel1.text;
-			self.statusLabel2.text = message;
-		}
+		// Kill any queued messages
+		[self.queueTimer invalidate];
 
+		// save text of hidden status label for history
+		oldMessage = self.hiddenStatusLabel.text;
+		// set text of visible status label
+		self.visibleStatusLabel.text = message;
+
+		self.finishedLabel.hidden = YES;
+		self.activityIndicator.hidden = NO;
+		self.hideInProgress = NO;
+
+		// start activity indicator
+		[self.activityIndicator startAnimating];
 		// add old message to history
 		[self addMessageToHistory:oldMessage];
-		[self show];
+
+		// show status bar overlay with animation
+		[UIView animateWithDuration:kAppearAnimationDuration animations:^{
+			[self setHidden:NO useAlpha:YES];
+		}];
 	}
 
 	// already visible, animate to new text
@@ -774,6 +775,14 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (BOOL)isDetailViewVisible {
 	return self.detailView.hidden == NO && self.detailView.alpha > 0.0 &&
 		   self.detailView.frame.origin.y + self.detailView.frame.size.height >= kStatusBarHeight;
+}
+
+- (UILabel *)visibleStatusLabel {
+	if (self.hiddenStatusLabel == self.statusLabel1) {
+		return self.statusLabel2;
+	}
+
+	return self.statusLabel1;
 }
 
 //===========================================================
