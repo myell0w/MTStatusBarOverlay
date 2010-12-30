@@ -606,7 +606,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 			// position hidden status label under visible status label
 			self.hiddenStatusLabel.frame = CGRectMake(self.hiddenStatusLabel.frame.origin.x,
-													  self.frame.size.height,
+													  kStatusBarHeight,
 													  self.hiddenStatusLabel.frame.size.width,
 													  self.hiddenStatusLabel.frame.size.height);
 
@@ -618,11 +618,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 							 animations:^{
 								 // move both status labels up
 								 self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x,
-																	  self.statusLabel1.frame.origin.y - self.frame.size.height,
+																	  self.statusLabel1.frame.origin.y - kStatusBarHeight,
 																	  self.statusLabel1.frame.size.width,
 																	  self.statusLabel1.frame.size.height);
 								 self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x,
-																	  self.statusLabel2.frame.origin.y - self.frame.size.height,
+																	  self.statusLabel2.frame.origin.y - kStatusBarHeight,
 																	  self.statusLabel2.frame.size.width,
 																	  self.statusLabel2.frame.size.height);
 							 }
