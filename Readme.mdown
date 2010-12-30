@@ -35,11 +35,10 @@ You can use the custom status bar like this:
 	 overlay.historyEnabled = YES;  	// enable automatic history-tracking and show in detail-view
      [overlay postMessage:@"Following @myell0w on Twitter..."]; 
  	 // ...
-     [overlay postMessage:@"Following myell0w on Github..."];  
+     [overlay postMessage:@"Following myell0w on Github..." animated:NO];  
    	 // ...
      [overlay postMessage:@"Following was a good idea!" duration:2.0];
 
-if you call showWithMessage when the custom status bar is already visible, the new text is set animated. 
 
 Known Limitations
 ----------------------- 
