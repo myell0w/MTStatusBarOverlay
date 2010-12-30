@@ -53,6 +53,9 @@
 // Animations
 ///////////////////////////////////////////////////////
 
+// minimum time that a message is shown, when messages are queued
+#define kMinimumMessageVisibleTime				0.5
+
 // duration of the animation to show next status message in seconds
 #define kNextStatusAnimationDuration			0.8
 
@@ -576,7 +579,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			// remove the message from the queue
 			[self.queuedMessages removeLastObject];
 			// show the next message
-			[self showNextMessage];
+			[self performSelector:@selector(showNextMessage) withObject:nil afterDelay:kMinimumMessageVisibleTime];
 		}];
 	}
 
@@ -622,7 +625,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 								 // remove the message from the queue
 								 [self.queuedMessages removeLastObject];
 								 // show the next message
-								 [self showNextMessage];
+								 [self performSelector:@selector(showNextMessage) withObject:nil afterDelay:kMinimumMessageVisibleTime];
 							 }];
 		}
 
@@ -636,7 +639,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			// remove the message from the queue
 			[self.queuedMessages removeLastObject];
 			// show next message
-			[self showNextMessage];
+			[self performSelector:@selector(showNextMessage) withObject:nil afterDelay:kMinimumMessageVisibleTime];
 		}
 	}
 }
