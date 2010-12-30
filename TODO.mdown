@@ -7,4 +7,4 @@ TODO
 * implement more animation-modes
 * overthink concept for iPad, not really needed to overlay whole status bar
 * polish history
-* re-work concept: introduce message-queue for every message (not separate queueing-model), if showWithMessage is called very fast in a row animate all messages and show them for a short period of time
+* Delegate-Methods

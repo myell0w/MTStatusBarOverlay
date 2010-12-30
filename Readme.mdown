@@ -7,6 +7,7 @@ UIStatusBarStyleDefault (left: full size, right: shrinked)
 
 New Features!
 -----------------
+* 30.12.2010: No message gets lost - every message is queued!
 * 26.12.2010: Automatic history-tracking for free!
 
 Description
@@ -32,11 +33,11 @@ You can use the custom status bar like this:
      MTStatusBarOverlay overlay = [MTStatusBarOverlay sharedInstance];   
 	 overlay.animation = MTStatusBarOverlayAnimationFallDown;  // MTStatusBarOverlayAnimationShrink
 	 overlay.historyEnabled = YES;  	// enable automatic history-tracking and show in detail-view
-     [overlay showWithMessage:@"Following @myell0w on Twitter..."]; 
+     [overlay postMessage:@"Following @myell0w on Twitter..."]; 
  	 // ...
-     [overlay showWithMessage:@"Following myell0w on Github..."];  
+     [overlay postMessage:@"Following myell0w on Github..."];  
    	 // ...
-     [overlay finishWithMessage:@"Following was a good idea!" duration:2.0];
+     [overlay postMessage:@"Following was a good idea!" duration:2.0];
 
 if you call showWithMessage when the custom status bar is already visible, the new text is set animated. 
 
@@ -46,7 +47,6 @@ Known Limitations
 * Device-Rotation currently only works on iPhone, not iPad
 * When using UIStatusBarStyleBlackTranslutient the overlay is black opaque
 * User interaction in detail view is not possible yet
-* When showWithMessage is called during an animation of a message is currently ongoing the new message isn't animated afterwards, instead it immediately replaces the currently animated message and moves it to history
 
 
 More Screenshots
