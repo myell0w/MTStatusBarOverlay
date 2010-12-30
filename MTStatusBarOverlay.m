@@ -440,14 +440,14 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		statusLabel2_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[self addSubviewToBackgroundView:statusLabel2_];
 
-		// the hidden status label at the beggining
+		// the hidden status label at the beginning
 		hiddenStatusLabel_ = statusLabel2_;
 
 		queuedMessages_ = [[NSMutableArray alloc] init];
 
         [self addSubview:backgroundView_];
 
-
+		// listen for orientation notifications
 		[[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(didRotate:)
@@ -529,6 +529,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 	[self.queuedMessages insertObject:messageDictionaryRepresentation atIndex:0];
 
+	// if the overlay is currently not active, begin with showing of messages
 	if (!self.active) {
 		[self showNextMessage];
 	}
@@ -551,8 +552,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	NSTimeInterval duration = (NSTimeInterval)[[nextMessageDictionary valueForKey:kDurationKey] doubleValue];
 	BOOL animated = [[nextMessageDictionary valueForKey:kAnimatedKey] boolValue];
 
-	NSString *oldMessage = nil;
-
 	// cancel previous hide- and clear requests
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(clearHistory) object:nil];
@@ -565,13 +564,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 	// if status bar is currently hidden, show it
 	if (self.reallyHidden) {
-		// save text of hidden status label for history
-		oldMessage = self.hiddenStatusLabel.text;
 		// set text of visible status label
 		self.visibleStatusLabel.text = message;
-
 		// add old message to history
-		[self addMessageToHistory:oldMessage];
+		[self addMessageToHistory:self.hiddenStatusLabel.text];
 
 		// show status bar overlay with animation
 		[UIView animateWithDuration:kAppearAnimationDuration animations:^{
@@ -579,6 +575,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		} completion:^(BOOL finished) {
 			// remove the message from the queue
 			[self.queuedMessages removeLastObject];
+			// show the next message
 			[self showNextMessage];
 		}];
 	}
@@ -586,11 +583,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// status bar is currently visible
 	else {
 		if (animated) {
-			// save currently visible message for later
-			oldMessage = self.visibleStatusLabel.text;
-
 			// add old message to history
-			[self addMessageToHistory:oldMessage];
+			[self addMessageToHistory:self.visibleStatusLabel.text];
 
 			// set text of currently not visible label to new text
 			self.hiddenStatusLabel.text = message;
@@ -627,20 +621,21 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 								 // remove the message from the queue
 								 [self.queuedMessages removeLastObject];
+								 // show the next message
 								 [self showNextMessage];
 							 }];
 		}
 
 		// w/o animation just save old text and set new one
 		else {
-			oldMessage = self.visibleStatusLabel.text;
-			self.visibleStatusLabel.text = message;
-
 			// add old message to history
-			[self addMessageToHistory:oldMessage];
+			[self addMessageToHistory:self.visibleStatusLabel.text];
+			// set new text
+			self.visibleStatusLabel.text = message;
 
 			// remove the message from the queue
 			[self.queuedMessages removeLastObject];
+			// show next message
 			[self showNextMessage];
 		}
 	}
@@ -676,6 +671,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
 	// current visible view controller
 	UIViewController *visibleViewController = [self currentVisibleViewController];
+	// is the statusBar visible before rotation?
+	BOOL visibleBefore = !self.reallyHidden;
 
 	// check if we should rotate
 	if (visibleViewController == nil ||
@@ -685,7 +682,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	// hide and then unhide after rotation
-	[self setHidden:YES useAlpha:YES];
+	if (visibleBefore) {
+		[self setHidden:YES useAlpha:YES];
+	}
 
 	// store a flag, if the StatusBar is currently shrinked
 	BOOL shrinkedBeforeTransformation = self.shrinked;
@@ -719,7 +718,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// make visible after given time
 	[UIView animateWithDuration:kRotationAppearDuration
 					 animations:^{
-						 [self setHidden:NO useAlpha:YES];
+						 if (visibleBefore) {
+							[self setHidden:NO useAlpha:YES];
+						 }
 					 }];
 }
 
