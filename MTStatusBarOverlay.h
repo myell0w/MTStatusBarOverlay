@@ -66,13 +66,11 @@ typedef enum MTStatusBarOverlayAnimation {
 	// is set when finishWithMessage is called and the statusBar is set to be hidden
 	// after a specified amount of time
 	BOOL hideInProgress_;
-	// flag that indicates whether currently an animation is going on, where a new
-	// message is set (both labels are currently moved up)
-	BOOL newMessageAnimationInProgress_;
+	// flag that indicates whether currently a message is in the queue
+	BOOL active_;
 
 	// Queue stuff
 	NSMutableArray *queuedMessages_;
-	NSTimer *queueTimer_;
 
 	// Message history (is reset when finish is called)
 	BOOL historyEnabled_;
@@ -84,17 +82,20 @@ typedef enum MTStatusBarOverlayAnimation {
 #pragma mark -
 #pragma mark Properties
 //===========================================================
+// the view that holds all the components of the overlay (except for the detailView)
 @property (nonatomic, retain) UIControl *backgroundView;
+// the detailView is shown when animation is set to "FallDown"
 @property (nonatomic, retain) UIControl *detailView;
+// the frame of the status bar when animation is set to "Shrink" and it is shrinked
 @property (nonatomic, assign) CGRect smallFrame;
+// the current active animation
 @property (nonatomic, assign) MTStatusBarOverlayAnimation animation;
+// the label that holds the finished-indicator (either a checkmark, or a error-sign per default)
 @property (nonatomic, retain) UILabel *finishedLabel;
 // detect if status bar is currently shrinked
 @property (nonatomic, readonly, getter=isShrinked) BOOL shrinked;
 // detect if detailView is currently shown
 @property (nonatomic, readonly, getter=isDetailViewVisible) BOOL detailViewVisible;
-// shows if finishWithMessage was currently called
-@property (readonly, getter=isHideInProgress) BOOL hideInProgress;
 // all messages that were displayed since the last finish-call
 @property (nonatomic, retain, readonly) NSMutableArray *messageHistory;
 // enable/disable history-tracking of messages
@@ -106,7 +107,7 @@ typedef enum MTStatusBarOverlayAnimation {
 #pragma mark Class Methods
 //===========================================================
 
-// Singleton
+// Singleton Instance
 + (MTStatusBarOverlay *)sharedInstance;
 
 //===========================================================
@@ -117,18 +118,19 @@ typedef enum MTStatusBarOverlayAnimation {
 // for customizing appearance, automatically disabled userInteractionEnabled on view
 - (void)addSubviewToBackgroundView:(UIView *)view;
 
+// shows an activity indicator and the given message
+- (void)postMessage:(NSString *)message;
+- (void)postMessage:(NSString *)message animated:(BOOL)animated;
+
+// shows a checkmark instead of the activity indicator and hides the status bar after the specified duration
+- (void)postFinishMessage:(NSString *)message duration:(NSTimeInterval)duration;
+- (void)postFinishMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated;
+
+// shows a error-sign instead of the activity indicator and hides the status bar after the specified duration
+- (void)postErrorMessage:(NSString *)message duration:(NSTimeInterval)duration;
+- (void)postErrorMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated;
+
 // hides the status bar overlay
 - (void)hide;
-// convenience-method, set Message and show
-- (void)showWithMessage:(NSString *)message;
-// shows a checkmark instead of the activity indicator and hides the status bar after the specified duration
-- (void)finishWithMessage:(NSString *)message duration:(NSTimeInterval)duration;
-// shows a error-sign instead of the activity indicator and hides the status bar after the specified duration
-- (void)finishWithErrorMessage:(NSString *)message duration:(NSTimeInterval)duration;
-// enables you to change the display Message on the status bar animated or w/o animation
-- (void)setMessage:(NSString *)message animated:(BOOL)animated;
-// shows the message for a specified interval before displaying the next queued item, or hiding the overlay if none are left
-- (void)queueMessage:(NSString *)message forInterval:(NSTimeInterval)interval animated:(BOOL)animated;
-- (void)queueFinalMessage:(NSString *)message forInterval:(NSTimeInterval)interval animated:(BOOL)animated;
 
 @end
