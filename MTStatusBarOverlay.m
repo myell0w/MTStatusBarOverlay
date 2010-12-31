@@ -501,6 +501,14 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self postMessage:message type:MTMessageTypeActivity duration:0 animated:animated];
 }
 
+- (void)postImmediateMessage:(NSString *)message animated:(BOOL)animated {
+	@synchronized(self.queuedMessages) {
+		[self.queuedMessages removeAllObjects];
+	}
+
+	[self postMessage:message animated:animated];
+}
+
 - (void)postFinishMessage:(NSString *)message duration:(NSTimeInterval)duration {
 	[self postFinishMessage:message duration:duration animated:YES];
 }
@@ -509,12 +517,28 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self postMessage:message type:MTMessageTypeFinished duration:duration animated:animated];
 }
 
+- (void)postImmediateFinishMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
+	@synchronized(self.queuedMessages) {
+		[self.queuedMessages removeAllObjects];
+	}
+
+	[self postFinishMessage:message duration:duration animated:animated];
+}
+
 - (void)postErrorMessage:(NSString *)message duration:(NSTimeInterval)duration {
 	[self postErrorMessage:message duration:duration animated:YES];
 }
 
 - (void)postErrorMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
 	[self postMessage:message type:MTMessageTypeError duration:duration animated:animated];
+}
+
+- (void)postImmediateErrorMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
+	@synchronized(self.queuedMessages) {
+		[self.queuedMessages removeAllObjects];
+	}
+
+	[self postErrorMessage:message duration:duration animated:animated];
 }
 
 - (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated {
@@ -533,7 +557,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 													 [NSNumber numberWithDouble:duration], kDurationKey,
 													 [NSNumber numberWithBool:animated],  kAnimatedKey, nil];
 
-	[self.queuedMessages insertObject:messageDictionaryRepresentation atIndex:0];
+	@synchronized (self.queuedMessages) {
+		[self.queuedMessages insertObject:messageDictionaryRepresentation atIndex:0];
+	}
 
 	// if the overlay is currently not active, begin with showing of messages
 	if (!self.active) {
@@ -543,16 +569,24 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (void)showNextMessage {
 	// if there is no next message to show overlay is not active anymore
-	if([self.queuedMessages count] < 1) {
-		self.active = NO;
-		return;
+	@synchronized(self.queuedMessages) {
+		if([self.queuedMessages count] < 1) {
+			self.active = NO;
+			return;
+		}
 	}
 
 	// there is a next message, overlay is active
 	self.active = YES;
 
+
+	NSDictionary *nextMessageDictionary = nil;
+
 	// read out next message
-	NSDictionary *nextMessageDictionary = [self.queuedMessages lastObject];
+	@synchronized(self.queuedMessages) {
+		nextMessageDictionary = [self.queuedMessages lastObject];
+	}
+
 	NSString *message = [nextMessageDictionary valueForKey:kMessageKey];
 	MTMessageType messageType = (MTMessageType)[[nextMessageDictionary valueForKey:kMessageTypeKey] intValue];
 	NSTimeInterval duration = (NSTimeInterval)[[nextMessageDictionary valueForKey:kDurationKey] doubleValue];
@@ -580,7 +614,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			[self setHidden:NO useAlpha:YES];
 		} completion:^(BOOL finished) {
 			// remove the message from the queue
-			[self.queuedMessages removeLastObject];
+			@synchronized(self.queuedMessages) {
+				[self.queuedMessages removeLastObject];
+			}
+
 			// show the next message
 			[self performSelector:@selector(showNextMessage) withObject:nil afterDelay:kMinimumMessageVisibleTime];
 		}];
@@ -626,7 +663,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 								 }
 
 								 // remove the message from the queue
-								 [self.queuedMessages removeLastObject];
+								 @synchronized(self.queuedMessages) {
+									 [self.queuedMessages removeLastObject];
+								 }
 								 // show the next message
 								 [self performSelector:@selector(showNextMessage) withObject:nil afterDelay:kMinimumMessageVisibleTime];
 							 }];
@@ -640,7 +679,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			self.visibleStatusLabel.text = message;
 
 			// remove the message from the queue
-			[self.queuedMessages removeLastObject];
+			@synchronized(self.queuedMessages) {
+				[self.queuedMessages removeLastObject];
+			}
 			// show next message
 			[self performSelector:@selector(showNextMessage) withObject:nil afterDelay:kMinimumMessageVisibleTime];
 		}
