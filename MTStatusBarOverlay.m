@@ -610,7 +610,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		[self addMessageToHistory:self.hiddenStatusLabel.text];
 
 		// show status bar overlay with animation
-		[UIView animateWithDuration:kAppearAnimationDuration animations:^{
+		[UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration animations:^{
 			[self setHidden:NO useAlpha:YES];
 		} completion:^(BOOL finished) {
 			// remove the message from the queue
@@ -698,7 +698,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
 
 	// hide status bar overlay with animation
-	[UIView animateWithDuration:kAppearAnimationDuration animations:^{
+	[UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration animations:^{
 		[self setHidden:YES useAlpha:YES];
 	} completion:^(BOOL finished) {
 		// hide detailView
