@@ -22,6 +22,35 @@
 #import "MTStatusBarOverlay.h"
 #import <QuartzCore/QuartzCore.h>
 
+
+//===========================================================
+#pragma mark -
+#pragma mark Defines
+//===========================================================
+
+// macro for checking if we are on the iPad
+#define IsIPad UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
+// the height of the status bar
+#define kStatusBarHeight 20
+// width of the screen in portrait-orientation
+#define kScreenWidth [UIScreen mainScreen].bounds.size.width
+// height of the screen in portrait-orientation
+#define kScreenHeight [UIScreen mainScreen].bounds.size.height
+
+#define kMessageKey			@"kMessageKey"
+#define kMessageTypeKey		@"kMessageTypeKey"
+#define kDurationKey		@"kDurationKey"
+#define kAnimatedKey		@"kAnimatedKey"
+
+// indicates the type of a message
+typedef enum MTMessageType {
+	MTMessageTypeActivity = 1,		// shows actvity indicator
+	MTMessageTypeFinished,			// shows checkmark
+	MTMessageTypeError				// shows error-mark
+} MTMessageType;
+
+
+
 //===========================================================
 #pragma mark -
 #pragma mark Customize Section
@@ -68,8 +97,8 @@
 // animation duration of animation mode fallDown
 #define kAnimationDurationFallDown				0.4
 
-// duration of appearance of StatusBarOverlay after rotation
-#define kRotationAppearDuration					[UIApplication sharedApplication].statusBarOrientationAnimationDuration + 0.2
+// delay after that the status bar gets visible again after rotation
+#define kRotationAppearDelay					[UIApplication sharedApplication].statusBarOrientationAnimationDuration
 
 
 ///////////////////////////////////////////////////////
@@ -93,8 +122,8 @@
 #define kDetailViewAlpha	   0.9
 
 // default frame of detail view when it is hidden
-#define kDefaultDetailViewFrame CGRectMake(kStatusBarHeight, - kHistoryTableRowHeight * 6 - kStatusBarHeight, 280, \
-kHistoryTableRowHeight * 6 + kStatusBarHeight)
+#define kDefaultDetailViewFrame (IsIPad ? CGRectMake(184, -kHistoryTableRowHeight*6 - kStatusBarHeight, 400, kHistoryTableRowHeight*6 + kStatusBarHeight) : \
+										  CGRectMake(20, -kHistoryTableRowHeight*6 - kStatusBarHeight, 280, kHistoryTableRowHeight*6 + kStatusBarHeight))
 
 
 
@@ -111,34 +140,6 @@ kHistoryTableRowHeight * 6 + kStatusBarHeight)
 #define kWidthSmall						80
 
 
-
-
-
-//===========================================================
-#pragma mark -
-#pragma mark Defines
-//===========================================================
-
-// macro for checking if we are on the iPad
-#define IsIPad UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
-// the height of the status bar
-#define kStatusBarHeight 20
-// width of the screen in portrait-orientation
-#define kScreenWidth [UIScreen mainScreen].bounds.size.width
-// height of the screen in portrait-orientation
-#define kScreenHeight [UIScreen mainScreen].bounds.size.height
-
-#define kMessageKey			@"kMessageKey"
-#define kMessageTypeKey		@"kMessageTypeKey"
-#define kDurationKey		@"kDurationKey"
-#define kAnimatedKey		@"kAnimatedKey"
-
-// indicates the type of a message
-typedef enum MTMessageType {
-	MTMessageTypeActivity = 1,		// shows actvity indicator
-	MTMessageTypeFinished,			// shows checkmark
-	MTMessageTypeError				// shows error-mark
-} MTMessageType;
 
 
 
@@ -304,6 +305,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (UIViewController *)currentVisibleViewController;
 // set hidden-state using alpha-value instead of hidden-property
 - (void)setHidden:(BOOL)hidden useAlpha:(BOOL)animated;
+// used for performSelector:withObject:
+- (void)setHiddenUsingAlpha:(BOOL)hidden;
 // History-tracking
 - (void)addMessageToHistory:(NSString *)message;
 - (void)clearHistory;
@@ -687,6 +690,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// hide and then unhide after rotation
 	if (visibleBefore) {
 		[self setHidden:YES useAlpha:YES];
+
+		self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
+										   self.detailView.frame.size.width, self.detailView.frame.size.height);
 	}
 
 	// store a flag, if the StatusBar is currently shrinked
@@ -719,12 +725,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	// make visible after given time
-	[UIView animateWithDuration:kRotationAppearDuration
-					 animations:^{
-						 if (visibleBefore) {
-							[self setHidden:NO useAlpha:YES];
-						 }
-					 }];
+	 if (visibleBefore) {
+		 [self performSelector:@selector(setHiddenUsingAlpha:) withObject:[NSNumber numberWithBool:NO] afterDelay:kRotationAppearDelay];
+	 }
 }
 
 //===========================================================
@@ -1006,6 +1009,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 #pragma mark -
 #pragma mark Custom Hide-Methods using alpha instead of hidden-property (for animation)
 //===========================================================
+
+// used for performSelector:withObject
+- (void)setHiddenUsingAlpha:(BOOL)hidden {
+	[self setHidden:hidden useAlpha:YES];
+}
 
 - (void)setHidden:(BOOL)hidden useAlpha:(BOOL)useAlpha {
 	if (useAlpha) {
