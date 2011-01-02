@@ -1,11 +1,9 @@
 TODO
 =================
 
-* getting rotation on iPad to work
 * listen for Notification UIApplicationWillChangeStatusBarFrameNotification
 * listen for Notification when status bar-Visibility changes (is there any)?
 * implement more animation-modes
 * overthink concept for iPad, not really needed to overlay whole status bar
 * polish history
-* Delegate-Methods
 * When in history-mode define max-height for detailview and let detailview resize itself up until max-height (or better: max row-count)
