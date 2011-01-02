@@ -123,7 +123,7 @@ typedef enum MTMessageType {
 
 // default frame of detail view when it is hidden
 #define kDefaultDetailViewFrame (IsIPad ? CGRectMake(184, -kHistoryTableRowHeight*6 - kStatusBarHeight, 400, kHistoryTableRowHeight*6 + kStatusBarHeight) : \
-										  CGRectMake(20, -kHistoryTableRowHeight*6 - kStatusBarHeight, 280, kHistoryTableRowHeight*6 + kStatusBarHeight))
+CGRectMake(20, -kHistoryTableRowHeight*6 - kStatusBarHeight, 280, kHistoryTableRowHeight*6 + kStatusBarHeight))
 
 
 
@@ -764,15 +764,52 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	// make visible after given time
-	 if (visibleBefore) {
-		 [self performSelector:@selector(setHiddenUsingAlpha:) withObject:[NSNumber numberWithBool:NO] afterDelay:kRotationAppearDelay];
-	 }
+	if (visibleBefore) {
+		[self performSelector:@selector(setHiddenUsingAlpha:) withObject:[NSNumber numberWithBool:NO] afterDelay:kRotationAppearDelay];
+	}
 }
 
 //===========================================================
 #pragma mark -
-#pragma mark Getter
+#pragma mark Setter/Getter
 //===========================================================
+
+- (void)setAnimation:(MTStatusBarOverlayAnimation)animation {
+	animation_ = animation;
+
+	// update appearance according to new animation-mode
+
+	// if new animation mode is shrink or none, the detailView mustn't be visible
+	if (animation == MTStatusBarOverlayAnimationShrink || animation == MTStatusBarOverlayAnimationNone) {
+		// detailView currently visible -> hide it
+		if (self.detailViewVisible) {
+			[UIView animateWithDuration:kAnimationDurationFallDown
+								  delay:0
+								options:UIViewAnimationOptionCurveEaseOut
+							 animations: ^{
+								 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
+																	self.detailView.frame.size.width, self.detailView.frame.size.height);
+							 }
+							 completion:NULL];
+		}
+	}
+
+	// if new animation mode is fallDown, the overlay must be extended
+	if (animation == MTStatusBarOverlayAnimationFallDown) {
+		if (self.shrinked) {
+			[UIView animateWithDuration:kAnimationDurationShrink animations:^{
+				// update status bar background
+				[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+
+				// make it bigger
+				self.backgroundView.frame = self.oldBackgroundViewFrame;
+
+				self.statusLabel1.hidden = NO;
+				self.statusLabel2.hidden = NO;
+			}];
+		}
+	}
+}
 
 - (BOOL)isShrinked {
 	return CGRectEqualToRect(self.backgroundView.frame, self.smallFrame);
@@ -857,6 +894,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			break;
 
 		case MTStatusBarOverlayAnimationFallDown:
+			// detailView currently visible -> hide it
 			if (self.detailViewVisible) {
 				[UIView animateWithDuration:kAnimationDurationFallDown
 									  delay:0
