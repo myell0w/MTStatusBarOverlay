@@ -331,6 +331,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize messageHistory = messageHistory_;
 @synthesize historyTableView = historyTableView_;
 @synthesize delegate = delegate_;
+@synthesize interfaceOrientations = interfaceOrientations_;
 
 //===========================================================
 #pragma mark -
@@ -470,6 +471,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[messageQueue_ release], messageQueue_ = nil;
 	[messageHistory_ release], messageHistory_ = nil;
 	delegate_ = nil;
+	[interfaceOrientations_ release], interfaceOrientations_ = nil;
 
 	[super dealloc];
 }
@@ -737,9 +739,15 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	BOOL visibleBefore = !self.reallyHidden;
 
 	// check if we should rotate
-	if (visibleViewController == nil ||
-		![visibleViewController respondsToSelector:@selector(shouldAutorotateToInterfaceOrientation:)] ||
-		![visibleViewController shouldAutorotateToInterfaceOrientation:orientation]) {
+	if (visibleViewController == nil) {
+		NSNumber *orientationWrapper = [NSNumber numberWithInt:orientation];
+
+		// check if this interface orientation was set manually, if not don't rotate
+		if (![self.interfaceOrientations containsObject:orientationWrapper]) {
+			return;
+		}
+	} else if(![visibleViewController respondsToSelector:@selector(shouldAutorotateToInterfaceOrientation:)] ||
+			  ![visibleViewController shouldAutorotateToInterfaceOrientation:orientation]) {
 		return;
 	}
 

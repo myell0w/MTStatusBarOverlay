@@ -104,7 +104,14 @@ typedef enum MTMessageType {
 	NSMutableArray *messageHistory_;
 	UITableView *historyTableView_;
 
+	// the delegate
 	id<MTStatusBarOverlayDelegate> delegate_;
+
+	// interface orientations to rotate to:
+	// they are only taken into consideration when automatic detection of current visible
+	// view controller fails (currentVisibleViewController) so that the user can control
+	// rotation on his own
+	NSArray *interfaceOrientations_;
 }
 
 //===========================================================
@@ -131,6 +138,8 @@ typedef enum MTMessageType {
 @property (nonatomic, assign, getter=isHistoryEnabled) BOOL historyEnabled;
 // the delegate of the overlay
 @property (nonatomic, assign) id<MTStatusBarOverlayDelegate> delegate;
+// the orientations to rotate to (only if currentVisibleViewController returns nil)
+@property (nonatomic, copy) NSArray *interfaceOrientations;
 
 
 //===========================================================
