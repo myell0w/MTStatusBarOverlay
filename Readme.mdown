@@ -9,7 +9,7 @@ New Features!
 -----------------
 * 02.01.2011: Delegate-protocol for informing about important events!
 * 30.12.2010: Every message gets queued and is shown for a minimum amount of time!
-* 26.12.2010: Automatic history-tracking for free!
+* 26.12.2010: Automatic history-tracking for free (update 02.01.2001: DetailView now grows with number of messages in history)!
 
 Description
 -----------------
