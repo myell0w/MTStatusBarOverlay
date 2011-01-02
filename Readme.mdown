@@ -7,7 +7,8 @@ UIStatusBarStyleDefault (left: full size, right: shrinked)
 
 New Features!
 -----------------
-* 30.12.2010: No message gets lost - every message is queued!
+* 02.01.2011: Delegate-protocol for informing about important events!
+* 30.12.2010: Every message gets queued and is shown for a minimum amount of time!
 * 26.12.2010: Automatic history-tracking for free!
 
 Description

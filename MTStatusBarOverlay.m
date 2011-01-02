@@ -37,18 +37,6 @@
 // height of the screen in portrait-orientation
 #define kScreenHeight [UIScreen mainScreen].bounds.size.height
 
-#define kMessageKey			@"kMessageKey"
-#define kMessageTypeKey		@"kMessageTypeKey"
-#define kDurationKey		@"kDurationKey"
-#define kAnimatedKey		@"kAnimatedKey"
-
-// indicates the type of a message
-typedef enum MTMessageType {
-	MTMessageTypeActivity = 1,		// shows actvity indicator
-	MTMessageTypeFinished,			// shows checkmark
-	MTMessageTypeError				// shows error-mark
-} MTMessageType;
-
 
 
 //===========================================================
@@ -281,13 +269,15 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (assign, getter=isActive) BOOL active;
 // read out hidden-state using alpha-value and hidden-property
 @property (nonatomic, readonly, getter=isReallyHidden) BOOL reallyHidden;
-@property (nonatomic, retain) NSMutableArray *queuedMessages;
+@property (nonatomic, retain) NSMutableArray *messageQueue;
 // overwrite property for read-write-access
 @property (nonatomic, retain) NSMutableArray *messageHistory;
 @property (nonatomic, retain) UITableView *historyTableView;
 
 // intern method that posts a new entry to the message-queue
 - (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated;
+// intern method that clears the messageQueue and then posts a new entry to it
+- (void)postImmediateMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated;
 // intern method that does all the work of showing the next message in the queue
 - (void)showNextMessage;
 
@@ -308,6 +298,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 // History-tracking
 - (void)addMessageToHistory:(NSString *)message;
 - (void)clearHistory;
+// calls the delegate when a switch from one message to another one occured
+- (void)callDelegateWithNewMessage:(NSString *)newMessage;
 
 @end
 
@@ -334,10 +326,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize animation = animation_;
 @synthesize hideInProgress = hideInProgress_;
 @synthesize active = active_;
-@synthesize queuedMessages = queuedMessages_;
+@synthesize messageQueue = messageQueue_;
 @synthesize historyEnabled = historyEnabled_;
 @synthesize messageHistory = messageHistory_;
 @synthesize historyTableView = historyTableView_;
+@synthesize delegate = delegate_;
 
 //===========================================================
 #pragma mark -
@@ -355,7 +348,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// Default Small size: just show Activity Indicator
 		smallFrame_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 
-		// Animation Settings
+		// Default-values
 		animation_ = MTStatusBarOverlayAnimationNone;
 		active_ = NO;
 
@@ -447,7 +440,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// the hidden status label at the beginning
 		hiddenStatusLabel_ = statusLabel2_;
 
-		queuedMessages_ = [[NSMutableArray alloc] init];
+		messageQueue_ = [[NSMutableArray alloc] init];
 
         [self addSubview:backgroundView_];
 
@@ -474,8 +467,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[finishedLabel_ release], finishedLabel_ = nil;
 	[grayStatusBarImage_ release], grayStatusBarImage_ = nil;
 	[grayStatusBarImageSmall_ release], grayStatusBarImageSmall_ = nil;
-	[queuedMessages_ release], queuedMessages_ = nil;
+	[messageQueue_ release], messageQueue_ = nil;
 	[messageHistory_ release], messageHistory_ = nil;
+	delegate_ = nil;
 
 	[super dealloc];
 }
@@ -500,11 +494,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)postImmediateMessage:(NSString *)message animated:(BOOL)animated {
-	@synchronized(self.queuedMessages) {
-		[self.queuedMessages removeAllObjects];
-	}
-
-	[self postMessage:message animated:animated];
+	[self postImmediateMessage:message type:MTMessageTypeActivity duration:0 animated:animated];
 }
 
 - (void)postFinishMessage:(NSString *)message duration:(NSTimeInterval)duration {
@@ -512,15 +502,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)postFinishMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
-	[self postMessage:message type:MTMessageTypeFinished duration:duration animated:animated];
+	[self postMessage:message type:MTMessageTypeFinish duration:duration animated:animated];
 }
 
 - (void)postImmediateFinishMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
-	@synchronized(self.queuedMessages) {
-		[self.queuedMessages removeAllObjects];
-	}
-
-	[self postFinishMessage:message duration:duration animated:animated];
+	[self postImmediateMessage:message type:MTMessageTypeFinish duration:duration animated:animated];
 }
 
 - (void)postErrorMessage:(NSString *)message duration:(NSTimeInterval)duration {
@@ -532,11 +518,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)postImmediateErrorMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
-	@synchronized(self.queuedMessages) {
-		[self.queuedMessages removeAllObjects];
-	}
-
-	[self postErrorMessage:message duration:duration animated:animated];
+	[self postImmediateMessage:message type:MTMessageTypeError duration:duration animated:animated];
 }
 
 - (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated {
@@ -550,13 +532,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 
-	NSDictionary *messageDictionaryRepresentation = [NSDictionary dictionaryWithObjectsAndKeys:message, kMessageKey,
-													 [NSNumber numberWithInt:messageType], kMessageTypeKey,
-													 [NSNumber numberWithDouble:duration], kDurationKey,
-													 [NSNumber numberWithBool:animated],  kAnimatedKey, nil];
+	NSDictionary *messageDictionaryRepresentation = [NSDictionary dictionaryWithObjectsAndKeys:message, kMTStatusBarOverlayMessageKey,
+													 [NSNumber numberWithInt:messageType], kMTStatusBarOverlayMessageTypeKey,
+													 [NSNumber numberWithDouble:duration], kMTStatusBarOverlayDurationKey,
+													 [NSNumber numberWithBool:animated],  kMTStatusBarOverlayAnimationKey, nil];
 
-	@synchronized (self.queuedMessages) {
-		[self.queuedMessages insertObject:messageDictionaryRepresentation atIndex:0];
+	@synchronized (self.messageQueue) {
+		[self.messageQueue insertObject:messageDictionaryRepresentation atIndex:0];
 	}
 
 	// if the overlay is currently not active, begin with showing of messages
@@ -565,10 +547,27 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 }
 
+- (void)postImmediateMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated {
+	@synchronized(self.messageQueue) {
+		NSArray *messageQueue = [[self.messageQueue copy] autorelease];
+
+		// clear queue so that new message gets posted immediately
+		[self.messageQueue removeAllObjects];
+
+		// call delegate
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
+			[self.delegate statusBarOverlayDidClearMessageQueue:messageQueue];
+		}
+	}
+
+	[self postMessage:message type:messageType duration:duration animated:animated];
+}
+
+
 - (void)showNextMessage {
 	// if there is no next message to show overlay is not active anymore
-	@synchronized(self.queuedMessages) {
-		if([self.queuedMessages count] < 1) {
+	@synchronized(self.messageQueue) {
+		if([self.messageQueue count] < 1) {
 			self.active = NO;
 			return;
 		}
@@ -581,14 +580,14 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	NSDictionary *nextMessageDictionary = nil;
 
 	// read out next message
-	@synchronized(self.queuedMessages) {
-		nextMessageDictionary = [self.queuedMessages lastObject];
+	@synchronized(self.messageQueue) {
+		nextMessageDictionary = [self.messageQueue lastObject];
 	}
 
-	NSString *message = [nextMessageDictionary valueForKey:kMessageKey];
-	MTMessageType messageType = (MTMessageType)[[nextMessageDictionary valueForKey:kMessageTypeKey] intValue];
-	NSTimeInterval duration = (NSTimeInterval)[[nextMessageDictionary valueForKey:kDurationKey] doubleValue];
-	BOOL animated = [[nextMessageDictionary valueForKey:kAnimatedKey] boolValue];
+	NSString *message = [nextMessageDictionary valueForKey:kMTStatusBarOverlayMessageKey];
+	MTMessageType messageType = (MTMessageType)[[nextMessageDictionary valueForKey:kMTStatusBarOverlayMessageTypeKey] intValue];
+	NSTimeInterval duration = (NSTimeInterval)[[nextMessageDictionary valueForKey:kMTStatusBarOverlayDurationKey] doubleValue];
+	BOOL animated = [[nextMessageDictionary valueForKey:kMTStatusBarOverlayAnimationKey] boolValue];
 
 	// cancel previous hide- and clear requests
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
@@ -608,27 +607,32 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		[self addMessageToHistory:self.hiddenStatusLabel.text];
 
 		// show status bar overlay with animation
-		[UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration animations:^{
-			[self setHidden:NO useAlpha:YES];
-		} completion:^(BOOL finished) {
-			// remove the message from the queue
-			@synchronized(self.queuedMessages) {
-				[self.queuedMessages removeLastObject];
-			}
+		[UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration
+						 animations:^{
+							 [self setHidden:NO useAlpha:YES];
+						 }
+						 completion:^(BOOL finished) {
+							 // remove the message from the queue
+							 @synchronized(self.messageQueue) {
+								 [self.messageQueue removeLastObject];
+							 }
 
-			// show the next message
-			[self performSelector:@selector(showNextMessage) withObject:nil afterDelay:kMinimumMessageVisibleTime];
-		}];
+							 // inform delegate about message-switch
+							 [self callDelegateWithNewMessage:message];
+
+							 // show the next message
+							 [self performSelector:@selector(showNextMessage) withObject:nil afterDelay:kMinimumMessageVisibleTime];
+						 }];
 	}
 
 	// status bar is currently visible
 	else {
 		if (animated) {
-			// add old message to history
-			[self addMessageToHistory:self.visibleStatusLabel.text];
-
 			// set text of currently not visible label to new text
 			self.hiddenStatusLabel.text = message;
+
+			// add old message to history
+			[self addMessageToHistory:self.visibleStatusLabel.text];
 
 			// position hidden status label under visible status label
 			self.hiddenStatusLabel.frame = CGRectMake(self.hiddenStatusLabel.frame.origin.x,
@@ -661,9 +665,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 								 }
 
 								 // remove the message from the queue
-								 @synchronized(self.queuedMessages) {
-									 [self.queuedMessages removeLastObject];
+								 @synchronized(self.messageQueue) {
+									 [self.messageQueue removeLastObject];
 								 }
+
+								 // inform delegate about message-switch
+								 [self callDelegateWithNewMessage:message];
+
 								 // show the next message
 								 [self performSelector:@selector(showNextMessage) withObject:nil afterDelay:kMinimumMessageVisibleTime];
 							 }];
@@ -677,9 +685,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			self.visibleStatusLabel.text = message;
 
 			// remove the message from the queue
-			@synchronized(self.queuedMessages) {
-				[self.queuedMessages removeLastObject];
+			@synchronized(self.messageQueue) {
+				[self.messageQueue removeLastObject];
 			}
+
+			// inform delegate about message-switch
+			[self callDelegateWithNewMessage:message];
+
 			// show next message
 			[self performSelector:@selector(showNextMessage) withObject:nil afterDelay:kMinimumMessageVisibleTime];
 		}
@@ -702,6 +714,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// hide detailView
 		self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
 										   self.detailView.frame.size.width, self.detailView.frame.size.height);
+
+		// call delegate
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
+			[self.delegate statusBarOverlayDidHide];
+		}
 	}];
 }
 
@@ -975,7 +992,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			// start activity indicator
 			[self.activityIndicator startAnimating];
 			break;
-		case MTMessageTypeFinished:
+		case MTMessageTypeFinish:
 			// will call hide after delay
 			self.hideInProgress = YES;
 			// show finished-label, hide acitvity indicator
@@ -1040,6 +1057,20 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	} else {
 		NSLog(@"Warning MTStatusBarOverlay: Could not find a root view controller - will not rotate!");
 		return nil;
+	}
+}
+
+- (void)callDelegateWithNewMessage:(NSString *)newMessage {
+	if (self.historyEnabled &&
+		self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
+		NSString *oldMessage = nil;
+
+		if (self.messageHistory.count > 0) {
+			oldMessage = [self.messageHistory lastObject];
+		}
+
+		[self.delegate statusBarOverlayDidSwitchFromOldMessage:oldMessage
+												  toNewMessage:newMessage];
 	}
 }
 
