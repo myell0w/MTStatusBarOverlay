@@ -107,7 +107,7 @@
 ///////////////////////////////////////////////////////
 
 #define kHistoryTableRowHeight		25
-#define kMaxHistoryTableRowCount	6
+#define kMaxHistoryTableRowCount	5
 
 #define kDetailViewAlpha			0.9
 #define kDetailViewWidth			(IsIPad ? 400 : 280)
@@ -617,8 +617,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	if (self.reallyHidden) {
 		// set text of visible status label
 		self.visibleStatusLabel.text = message;
-		// add old message to history
-		[self addMessageToHistory:self.hiddenStatusLabel.text];
 
 		// show status bar overlay with animation
 		[UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration
@@ -626,6 +624,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 							 [self setHidden:NO useAlpha:YES];
 						 }
 						 completion:^(BOOL finished) {
+							 // add old message to history
+							 [self addMessageToHistory:self.hiddenStatusLabel.text];
+
 							 // remove the message from the queue
 							 @synchronized(self.messageQueue) {
 								 [self.messageQueue removeLastObject];
@@ -644,9 +645,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		if (animated) {
 			// set text of currently not visible label to new text
 			self.hiddenStatusLabel.text = message;
-
-			// add old message to history
-			[self addMessageToHistory:self.visibleStatusLabel.text];
 
 			// position hidden status label under visible status label
 			self.hiddenStatusLabel.frame = CGRectMake(self.hiddenStatusLabel.frame.origin.x,
@@ -671,6 +669,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 																	  self.statusLabel2.frame.size.height);
 							 }
 							 completion:^(BOOL finished) {
+								 // add old message to history
+								 [self addMessageToHistory:self.visibleStatusLabel.text];
+
 								 // after animation, set new hidden status label indicator
 								 if (self.hiddenStatusLabel == self.statusLabel1) {
 									 self.hiddenStatusLabel = self.statusLabel2;
@@ -747,7 +748,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// current visible view controller
 	UIViewController *visibleViewController = [self currentVisibleViewController];
 	// is the statusBar visible before rotation?
-	BOOL visibleBefore = !self.reallyHidden;
+	BOOL visibleBeforeTransformation = !self.reallyHidden;
+	// store a flag, if the StatusBar is currently shrinked
+	BOOL shrinkedBeforeTransformation = self.shrinked;
 
 	// check if we should rotate
 	if (visibleViewController == nil) {
@@ -763,13 +766,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	// hide and then unhide after rotation
-	if (visibleBefore) {
+	if (visibleBeforeTransformation) {
 		[self setHidden:YES useAlpha:YES];
 		[self setDetailViewHidden:YES animated:NO];
 	}
-
-	// store a flag, if the StatusBar is currently shrinked
-	BOOL shrinkedBeforeTransformation = self.shrinked;
 
 	if (orientation == UIDeviceOrientationPortrait) {
 		self.transform = CGAffineTransformIdentity;
@@ -798,7 +798,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 
 	// make visible after given time
-	if (visibleBefore) {
+	if (visibleBeforeTransformation) {
 		[self performSelector:@selector(setHiddenUsingAlpha:) withObject:[NSNumber numberWithBool:NO] afterDelay:kRotationAppearDelay];
 	}
 }
@@ -835,7 +835,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (BOOL)isDetailViewHidden {
 	return self.detailView.hidden == YES || self.detailView.alpha == 0.0 ||
-	self.detailView.frame.origin.y + self.detailView.frame.size.height < kStatusBarHeight;
+		   self.detailView.frame.origin.y + self.detailView.frame.size.height < kStatusBarHeight;
 }
 
 - (void)setDetailViewHidden:(BOOL)hidden animated:(BOOL)animated {
@@ -856,7 +856,18 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 							  delay:0
 							options:UIViewAnimationOptionCurveEaseIn
 						 animations: ^{
-							 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, 0,
+							 int y = 0;
+
+							 // if history is enabled let the detailView "grow" with
+							 // the number of messages in the history up until the set maximum
+							 if (self.historyEnabled) {
+								 y = -(kMaxHistoryTableRowCount - MIN(self.messageHistory.count, kMaxHistoryTableRowCount)) * kHistoryTableRowHeight;
+
+								 self.historyTableView.frame = CGRectMake(self.historyTableView.frame.origin.x, kStatusBarHeight - y,
+																		  self.historyTableView.frame.size.width, self.historyTableView.frame.size.height);
+							 }
+
+							 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, y,
 																self.detailView.frame.size.width, self.detailView.frame.size.height);
 						 }
 						 completion:NULL];
@@ -1104,6 +1115,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 		// add message to history-array
 		[self.messageHistory addObject:message];
+
+		[self setDetailViewHidden:self.detailViewHidden animated:YES];
 
 		// update history table-view
 		[self.historyTableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newHistoryMessageIndexPath]
