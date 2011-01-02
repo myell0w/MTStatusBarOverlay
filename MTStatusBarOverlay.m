@@ -1087,9 +1087,15 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)addMessageToHistory:(NSString *)message {
 	if (self.historyEnabled	&& message != nil
 		&& [message stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0) {
+		NSIndexPath *newHistoryMessageIndexPath = [NSIndexPath indexPathForRow:self.messageHistory.count inSection:0];
+
+		// add message to history-array
 		[self.messageHistory addObject:message];
-		[self.historyTableView reloadData];
-		[self.historyTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:self.messageHistory.count-1 inSection:0]
+
+		// update history table-view
+		[self.historyTableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newHistoryMessageIndexPath]
+									 withRowAnimation:UITableViewRowAnimationFade];
+		[self.historyTableView scrollToRowAtIndexPath:newHistoryMessageIndexPath
 									 atScrollPosition:UITableViewScrollPositionTop animated:YES];
 	}
 }
