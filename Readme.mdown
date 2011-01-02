@@ -14,14 +14,14 @@ New Features!
 Description
 -----------------
 
-This class provides a custom iOS status bar overlay window known from Apps like Reeder.
-It currently supports touch-handling, queuing of messages as well as three different animation modes:
+This class provides a custom iOS (iPhone + iPad) status bar overlay window known from Apps like Reeder.
+It currently supports touch-handling, queuing of messages, delegation as well as three different animation modes:
  
 * MTStatusBarOverlayAnimationShrink: When the user touches the overlay the overlay shrinks and only covers the battery-icon on the right side
 * MTStatusBarOverlayAnimationFallDown: When the user touches the overlay a detail view falls down where additional information can be displayed. You can get a history of all your displayed messages for free by enabling historyTracking!
 * MTStatusBarOverlayAnimationNone: Nothing happens, when the user touches the overlay
 
-MTStatusBarOverlay currently supports two different status bar styles, which also can be changed in your app (MTStatusBarOverlay will adopt the style and will be updated the next time you show it):
+MTStatusBarOverlay currently fully supports two different status bar styles, which also can be changed in your app (MTStatusBarOverlay will adopt the style and will be updated the next time you show it):
 
 * UIStatusBarStyleDefault
 * UIStatusBarStyleBlackOpaque
@@ -34,17 +34,16 @@ You can use the custom status bar like this:
      MTStatusBarOverlay overlay = [MTStatusBarOverlay sharedInstance];   
 	 overlay.animation = MTStatusBarOverlayAnimationFallDown;  // MTStatusBarOverlayAnimationShrink
 	 overlay.historyEnabled = YES;  	// enable automatic history-tracking and show in detail-view
+	 overlay.delegate = self;
      [overlay postMessage:@"Following @myell0w on Twitter..."]; 
  	 // ...
      [overlay postMessage:@"Following myell0w on Github..." animated:NO];  
    	 // ...
-     [overlay postMessage:@"Following was a good idea!" duration:2.0];
+     [overlay postImmediateFinishMessage:@"Following was a good idea!" duration:2.0 animated:YES];
 
 
 Known Limitations
 ----------------------- 
-
-* Device-Rotation currently only works on iPhone, not iPad
 * When using UIStatusBarStyleBlackTranslutient the overlay is black opaque
 * User interaction in detail view is not possible yet
 
