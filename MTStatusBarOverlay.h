@@ -130,8 +130,8 @@ typedef enum MTMessageType {
 @property (nonatomic, retain) UILabel *finishedLabel;
 // detect if status bar is currently shrinked
 @property (nonatomic, readonly, getter=isShrinked) BOOL shrinked;
-// detect if detailView is currently shown
-@property (nonatomic, readonly, getter=isDetailViewVisible) BOOL detailViewVisible;
+// detect if detailView is currently hidden
+@property (nonatomic, readonly, getter=isDetailViewHidden) BOOL detailViewHidden;
 // all messages that were displayed since the last finish-call
 @property (nonatomic, retain, readonly) NSMutableArray *messageHistory;
 // enable/disable history-tracking of messages

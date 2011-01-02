@@ -106,13 +106,14 @@
 // Detail View
 ///////////////////////////////////////////////////////
 
-#define kHistoryTableRowHeight 25
-#define kDetailViewAlpha	   0.9
+#define kHistoryTableRowHeight		25
+#define kMaxHistoryTableRowCount	6
 
+#define kDetailViewAlpha			0.9
+#define kDetailViewWidth			(IsIPad ? 400 : 280)
 // default frame of detail view when it is hidden
-#define kDefaultDetailViewFrame (IsIPad ? CGRectMake(184, -kHistoryTableRowHeight*6 - kStatusBarHeight, 400, kHistoryTableRowHeight*6 + kStatusBarHeight) : \
-CGRectMake(20, -kHistoryTableRowHeight*6 - kStatusBarHeight, 280, kHistoryTableRowHeight*6 + kStatusBarHeight))
-
+#define kDefaultDetailViewFrame CGRectMake((kScreenWidth - kDetailViewWidth)/2, -(kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHeight),\
+										    kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHeight)
 
 
 ///////////////////////////////////////////////////////
@@ -291,15 +292,21 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)updateUIForMessageType:(MTMessageType)messageType duration:(NSTimeInterval)duration;
 // tries to retrieve the current visible view controller of the app and returns it, used for rotation
 - (UIViewController *)currentVisibleViewController;
+// calls the delegate when a switch from one message to another one occured
+- (void)callDelegateWithNewMessage:(NSString *)newMessage;
+// shrink/expand the overlay
+- (void)setShrinked:(BOOL)shrinked animated:(BOOL)animated;
+
 // set hidden-state using alpha-value instead of hidden-property
-- (void)setHidden:(BOOL)hidden useAlpha:(BOOL)animated;
+- (void)setHidden:(BOOL)hidden useAlpha:(BOOL)useAlpha;
 // used for performSelector:withObject:
 - (void)setHiddenUsingAlpha:(BOOL)hidden;
+// set hidden-state of detailView
+- (void)setDetailViewHidden:(BOOL)hidden animated:(BOOL)animated;
+
 // History-tracking
 - (void)addMessageToHistory:(NSString *)message;
 - (void)clearHistory;
-// calls the delegate when a switch from one message to another one occured
-- (void)callDelegateWithNewMessage:(NSString *)newMessage;
 
 @end
 
@@ -360,13 +367,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 
 		// add rounded corners to detail-view
-		detailView_.layer.masksToBounds = NO;
+		detailView_.layer.masksToBounds = YES;
 		detailView_.layer.cornerRadius = 10.0;
 		detailView_.layer.borderWidth = 2.5;
-		detailView_.layer.shadowColor = [UIColor blackColor].CGColor;
+		/*detailView_.layer.shadowColor = [UIColor blackColor].CGColor;
 		detailView_.layer.shadowOpacity = 1.0f;
 		detailView_.layer.shadowRadius = 6.0f;
-		detailView_.layer.shadowOffset = CGSizeMake(0, 3);
+		detailView_.layer.shadowOffset = CGSizeMake(0, 3);*/
 
 		// Message History
 		historyEnabled_ = NO;
@@ -719,8 +726,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		[self setHidden:YES useAlpha:YES];
 	} completion:^(BOOL finished) {
 		// hide detailView
-		self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
-										   self.detailView.frame.size.width, self.detailView.frame.size.height);
+		[self setDetailViewHidden:YES animated:NO];
 
 		// call delegate
 		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
@@ -759,9 +765,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// hide and then unhide after rotation
 	if (visibleBefore) {
 		[self setHidden:YES useAlpha:YES];
-
-		self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
-										   self.detailView.frame.size.width, self.detailView.frame.size.height);
+		[self setDetailViewHidden:YES animated:NO];
 	}
 
 	// store a flag, if the StatusBar is currently shrinked
@@ -812,31 +816,15 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	// if new animation mode is shrink or none, the detailView mustn't be visible
 	if (animation == MTStatusBarOverlayAnimationShrink || animation == MTStatusBarOverlayAnimationNone) {
 		// detailView currently visible -> hide it
-		if (self.detailViewVisible) {
-			[UIView animateWithDuration:kAnimationDurationFallDown
-								  delay:0
-								options:UIViewAnimationOptionCurveEaseOut
-							 animations: ^{
-								 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
-																	self.detailView.frame.size.width, self.detailView.frame.size.height);
-							 }
-							 completion:NULL];
+		if (!self.detailViewHidden) {
+			[self setDetailViewHidden:YES animated:YES];
 		}
 	}
 
 	// if new animation mode is fallDown, the overlay must be extended
 	if (animation == MTStatusBarOverlayAnimationFallDown) {
 		if (self.shrinked) {
-			[UIView animateWithDuration:kAnimationDurationShrink animations:^{
-				// update status bar background
-				[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
-
-				// make it bigger
-				self.backgroundView.frame = self.oldBackgroundViewFrame;
-
-				self.statusLabel1.hidden = NO;
-				self.statusLabel2.hidden = NO;
-			}];
+			[self setShrinked:NO animated:YES];
 		}
 	}
 }
@@ -845,9 +833,35 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	return CGRectEqualToRect(self.backgroundView.frame, self.smallFrame);
 }
 
-- (BOOL)isDetailViewVisible {
-	return self.detailView.hidden == NO && self.detailView.alpha > 0.0 &&
-	self.detailView.frame.origin.y + self.detailView.frame.size.height >= kStatusBarHeight;
+- (BOOL)isDetailViewHidden {
+	return self.detailView.hidden == YES || self.detailView.alpha == 0.0 ||
+	self.detailView.frame.origin.y + self.detailView.frame.size.height < kStatusBarHeight;
+}
+
+- (void)setDetailViewHidden:(BOOL)hidden animated:(BOOL)animated {
+	// hide detail view
+	if (hidden) {
+		[UIView animateWithDuration:animated ? kAnimationDurationFallDown : 0
+							  delay:0
+							options:UIViewAnimationOptionCurveEaseOut
+						 animations: ^{
+							 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
+																self.detailView.frame.size.width, self.detailView.frame.size.height);
+						 }
+						 completion:NULL];
+	}
+	// show detail view
+	else {
+		[UIView animateWithDuration:animated ? kAnimationDurationFallDown : 0
+							  delay:0
+							options:UIViewAnimationOptionCurveEaseIn
+						 animations: ^{
+							 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, 0,
+																self.detailView.frame.size.width, self.detailView.frame.size.height);
+						 }
+						 completion:NULL];
+	}
+
 }
 
 - (UILabel *)visibleStatusLabel {
@@ -901,50 +915,12 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (IBAction)contentViewClicked:(id)sender {
 	switch (self.animation) {
 		case MTStatusBarOverlayAnimationShrink:
-			[UIView animateWithDuration:kAnimationDurationShrink animations:^{
-				// update status bar background
-				[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
-
-				// if size is small size, make it bigger
-				if (self.shrinked) {
-					self.backgroundView.frame = self.oldBackgroundViewFrame;
-
-					self.statusLabel1.hidden = NO;
-					self.statusLabel2.hidden = NO;
-				}
-				// else make it smaller
-				else {
-					self.oldBackgroundViewFrame = self.backgroundView.frame;
-					self.backgroundView.frame = self.smallFrame;
-
-					self.statusLabel1.hidden = YES;
-					self.statusLabel2.hidden = YES;
-				}
-			}];
+			[self setShrinked:!self.shrinked animated:YES];
 			break;
 
 		case MTStatusBarOverlayAnimationFallDown:
 			// detailView currently visible -> hide it
-			if (self.detailViewVisible) {
-				[UIView animateWithDuration:kAnimationDurationFallDown
-									  delay:0
-									options:UIViewAnimationOptionCurveEaseOut
-								 animations: ^{
-									 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
-																		self.detailView.frame.size.width, self.detailView.frame.size.height);
-								 }
-								 completion:NULL];
-			} else {
-				[UIView animateWithDuration:kAnimationDurationFallDown
-									  delay:0
-									options:UIViewAnimationOptionCurveEaseIn
-								 animations: ^{
-									 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, 0,
-																		self.detailView.frame.size.width, self.detailView.frame.size.height);
-								 }
-								 completion:NULL];
-			}
-
+			[self setDetailViewHidden:!self.detailViewHidden animated:YES];
 			break;
 		case MTStatusBarOverlayAnimationNone:
 			// ignore
@@ -1085,6 +1061,30 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		[self.delegate statusBarOverlayDidSwitchFromOldMessage:oldMessage
 												  toNewMessage:newMessage];
 	}
+}
+
+- (void)setShrinked:(BOOL)shrinked animated:(BOOL)animated {
+	[UIView animateWithDuration:animated ? kAnimationDurationShrink : 0
+					 animations:^{
+						 // update status bar background
+						 [self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+
+						 // shrink the overlay
+						 if (shrinked) {
+							 self.oldBackgroundViewFrame = self.backgroundView.frame;
+							 self.backgroundView.frame = self.smallFrame;
+
+							 self.statusLabel1.hidden = YES;
+							 self.statusLabel2.hidden = YES;
+						 }
+						 // expand the overlay
+						 else {
+							 self.backgroundView.frame = self.oldBackgroundViewFrame;
+
+							 self.statusLabel1.hidden = NO;
+							 self.statusLabel2.hidden = NO;
+						 }
+					 }];
 }
 
 //===========================================================
