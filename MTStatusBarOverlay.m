@@ -132,12 +132,10 @@ typedef enum MTMessageType {
 ///////////////////////////////////////////////////////
 
 // Size of the text in the status labels
-#define kStatusLabelSize 12.f
+#define kStatusLabelSize				12.f
 
-// x-offset of the child-views of the background when status bar is in small mode
-#define kSmallXOffset					50
 // default-width of the small-mode
-#define kWidthSmall						80
+#define kWidthSmall						28
 
 
 
@@ -844,30 +842,16 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 				if (self.shrinked) {
 					self.backgroundView.frame = self.oldBackgroundViewFrame;
 
-					// move activity indicator and statusLabel to the left
-					self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x - kSmallXOffset, self.activityIndicator.frame.origin.y,
-															  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
-					self.finishedLabel.frame = CGRectMake(self.finishedLabel.frame.origin.x - kSmallXOffset, self.finishedLabel.frame.origin.y,
-														  self.finishedLabel.frame.size.width, self.finishedLabel.frame.size.height);
-					self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x - kSmallXOffset, self.statusLabel1.frame.origin.y,
-														 self.statusLabel1.frame.size.width, self.statusLabel1.frame.size.height);
-					self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x - kSmallXOffset, self.statusLabel2.frame.origin.y,
-														 self.statusLabel2.frame.size.width, self.statusLabel2.frame.size.height);
+					self.statusLabel1.hidden = NO;
+					self.statusLabel2.hidden = NO;
 				}
 				// else make it smaller
 				else {
 					self.oldBackgroundViewFrame = self.backgroundView.frame;
 					self.backgroundView.frame = self.smallFrame;
 
-					// move activity indicator and statusLabel to the right
-					self.activityIndicator.frame = CGRectMake(self.activityIndicator.frame.origin.x + kSmallXOffset, self.activityIndicator.frame.origin.y,
-															  self.activityIndicator.frame.size.width, self.activityIndicator.frame.size.height);
-					self.finishedLabel.frame = CGRectMake(self.finishedLabel.frame.origin.x + kSmallXOffset, self.finishedLabel.frame.origin.y,
-														  self.finishedLabel.frame.size.width, self.finishedLabel.frame.size.height);
-					self.statusLabel1.frame = CGRectMake(self.statusLabel1.frame.origin.x + kSmallXOffset, self.statusLabel1.frame.origin.y,
-														 self.statusLabel1.frame.size.width, self.statusLabel1.frame.size.height);
-					self.statusLabel2.frame = CGRectMake(self.statusLabel2.frame.origin.x + kSmallXOffset, self.statusLabel2.frame.origin.y,
-														 self.statusLabel2.frame.size.width, self.statusLabel2.frame.size.height);
+					self.statusLabel1.hidden = YES;
+					self.statusLabel2.hidden = YES;
 				}
 			}];
 			break;
