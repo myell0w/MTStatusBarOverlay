@@ -1,7 +1,7 @@
 TODO
 =================
 
-* listen for Notification UIApplicationWillChangeStatusBarFrameNotification
+* listen for Notification UIApplicationWillChangeStatusBarFrameNotification (done, but things done in the method are animated - WHY?)
 * listen for Notification when status bar-Visibility changes (is there any)?
 * implement more animation-modes
 * overthink concept for iPad, not really needed to overlay whole status bar

@@ -360,9 +360,13 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 
 		// add rounded corners to detail-view
-		detailView_.layer.masksToBounds = YES;
+		detailView_.layer.masksToBounds = NO;
 		detailView_.layer.cornerRadius = 10.0;
 		detailView_.layer.borderWidth = 2.5;
+		detailView_.layer.shadowColor = [UIColor blackColor].CGColor;
+		detailView_.layer.shadowOpacity = 1.0f;
+		detailView_.layer.shadowRadius = 6.0f;
+		detailView_.layer.shadowOffset = CGSizeMake(0, 3);
 
 		// Message History
 		historyEnabled_ = NO;
@@ -449,7 +453,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		[[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(didRotate:)
-													 name:UIDeviceOrientationDidChangeNotification object:nil];
+													 name:UIDeviceOrientationDidChangeNotification
+												   object:nil];
     }
 
 	return self;
