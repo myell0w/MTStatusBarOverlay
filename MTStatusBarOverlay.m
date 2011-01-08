@@ -102,6 +102,7 @@
 #define kErrorFontSize		19.f
 
 
+
 ///////////////////////////////////////////////////////
 // Detail View
 ///////////////////////////////////////////////////////
@@ -124,7 +125,7 @@
 #define kStatusLabelSize				12.f
 
 // default-width of the small-mode
-#define kWidthSmall						28
+#define kWidthSmall						26
 
 
 
@@ -416,12 +417,12 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 		// Activity Indicator
 		activityIndicator_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-		activityIndicator_.frame = CGRectMake(8.0f, 3.0f, self.frame.size.height - 6, self.frame.size.height - 6);
+		activityIndicator_.frame = CGRectMake(6.0f, 3.0f, self.frame.size.height - 6, self.frame.size.height - 6);
 		activityIndicator_.hidesWhenStopped = YES;
 		[self addSubviewToBackgroundView:activityIndicator_];
 
 		// Finished-Label
-		finishedLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(8,1,self.frame.size.height, self.frame.size.height-1)];
+		finishedLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(4,1,self.frame.size.height, self.frame.size.height-1)];
 		finishedLabel_.backgroundColor = [UIColor clearColor];
 		finishedLabel_.hidden = YES;
 		finishedLabel_.text = kFinishedText;
