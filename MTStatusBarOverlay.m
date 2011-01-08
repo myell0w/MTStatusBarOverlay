@@ -831,7 +831,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (BOOL)isShrinked {
-	return CGRectEqualToRect(self.backgroundView.frame, self.smallFrame);
+	return self.backgroundView.frame.size.width == self.smallFrame.size.width;
 }
 
 - (void)setShrinked:(BOOL)shrinked animated:(BOOL)animated {
