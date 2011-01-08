@@ -285,8 +285,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 // is called when the user touches the statusbar
 - (IBAction)contentViewClicked:(id)sender;
-// updates the current status bar background image for the given size and style
-- (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style;
+// updates the current status bar background image for the given style and current size
+- (void)setStatusBarBackgroundForStyle:(UIStatusBarStyle)style;
 // updates the text-colors of the labels for the given style
 - (void)setColorSchemeForStatusBarStyle:(UIStatusBarStyle)style;
 // updates the visiblity of the activity indicator and finished-label depending on the type
@@ -610,7 +610,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 	// update UI depending on current status bar style
 	UIStatusBarStyle statusBarStyle = [UIApplication sharedApplication].statusBarStyle;
-	[self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:statusBarStyle];
+	[self setStatusBarBackgroundForStyle:statusBarStyle];
 	[self setColorSchemeForStatusBarStyle:statusBarStyle];
 	[self updateUIForMessageType:messageType duration:duration];
 
@@ -834,6 +834,31 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	return CGRectEqualToRect(self.backgroundView.frame, self.smallFrame);
 }
 
+- (void)setShrinked:(BOOL)shrinked animated:(BOOL)animated {
+	[UIView animateWithDuration:animated ? kAnimationDurationShrink : 0
+					 animations:^{
+						 // shrink the overlay
+						 if (shrinked) {
+							 self.oldBackgroundViewFrame = self.backgroundView.frame;
+							 self.backgroundView.frame = self.smallFrame;
+
+							 self.statusLabel1.hidden = YES;
+							 self.statusLabel2.hidden = YES;
+						 }
+						 // expand the overlay
+						 else {
+							 self.backgroundView.frame = self.oldBackgroundViewFrame;
+
+							 self.statusLabel1.hidden = NO;
+							 self.statusLabel2.hidden = NO;
+						 }
+
+						 // update status bar background
+						 [self setStatusBarBackgroundForStyle:[UIApplication sharedApplication].statusBarStyle];
+					 }];
+}
+
+
 - (BOOL)isDetailViewHidden {
 	return self.detailView.hidden == YES || self.detailView.alpha == 0.0 ||
 		   self.detailView.frame.origin.y + self.detailView.frame.size.height < kStatusBarHeight;
@@ -940,15 +965,15 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 }
 
-- (void)setStatusBarBackgroundForSize:(CGRect)size statusBarStyle:(UIStatusBarStyle)style {
+- (void)setStatusBarBackgroundForStyle:(UIStatusBarStyle)style {
 	// gray status bar?
 	// on iPad the Default Status Bar Style is black too
 	if (style == UIStatusBarStyleDefault && !IsIPad) {
 		// choose image depending on size
 		if (self.shrinked) {
-			self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
-		} else {
 			self.statusBarBackgroundImageView.image = [self.grayStatusBarImageSmall stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
+		} else {
+			self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
 		}
 	}
 
@@ -1073,30 +1098,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		[self.delegate statusBarOverlayDidSwitchFromOldMessage:oldMessage
 												  toNewMessage:newMessage];
 	}
-}
-
-- (void)setShrinked:(BOOL)shrinked animated:(BOOL)animated {
-	[UIView animateWithDuration:animated ? kAnimationDurationShrink : 0
-					 animations:^{
-						 // update status bar background
-						 [self setStatusBarBackgroundForSize:self.backgroundView.frame statusBarStyle:[UIApplication sharedApplication].statusBarStyle];
-
-						 // shrink the overlay
-						 if (shrinked) {
-							 self.oldBackgroundViewFrame = self.backgroundView.frame;
-							 self.backgroundView.frame = self.smallFrame;
-
-							 self.statusLabel1.hidden = YES;
-							 self.statusLabel2.hidden = YES;
-						 }
-						 // expand the overlay
-						 else {
-							 self.backgroundView.frame = self.oldBackgroundViewFrame;
-
-							 self.statusLabel1.hidden = NO;
-							 self.statusLabel2.hidden = NO;
-						 }
-					 }];
 }
 
 //===========================================================
