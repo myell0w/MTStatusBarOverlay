@@ -1099,7 +1099,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	if ([nextResponder isKindOfClass:[UIViewController class]]) {
 		return nextResponder;
 	} else {
-		NSLog(@"Warning MTStatusBarOverlay: Could not find a root view controller - will not rotate!");
+		NSLog(@"Warning MTStatusBarOverlay: Could not find a root view controller - will not rotate! You can manually specify interface orientations to rotate to by setting property 'interfaceOrientations'.");
 		return nil;
 	}
 }
