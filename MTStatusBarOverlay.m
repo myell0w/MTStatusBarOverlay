@@ -537,15 +537,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated {
-	// don't show when message is empty
-	// don't duplicate animation if already displaying with text
-	// don't show if status bar is hidden
-	if (message == nil
-		|| (!self.reallyHidden && [self.visibleStatusLabel.text isEqualToString:message])
-		|| [UIApplication sharedApplication].statusBarHidden) {
+	// don't add to queue when message is empty
+	if (message == nil) {
 		return;
 	}
-
 
 	NSDictionary *messageDictionaryRepresentation = [NSDictionary dictionaryWithObjectsAndKeys:message, kMTStatusBarOverlayMessageKey,
 													 [NSNumber numberWithInt:messageType], kMTStatusBarOverlayMessageTypeKey,
@@ -587,10 +582,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			return;
 		}
 	}
-
+	
 	// there is a next message, overlay is active
 	self.active = YES;
-
 
 	NSDictionary *nextMessageDictionary = nil;
 
@@ -603,7 +597,31 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	MTMessageType messageType = (MTMessageType)[[nextMessageDictionary valueForKey:kMTStatusBarOverlayMessageTypeKey] intValue];
 	NSTimeInterval duration = (NSTimeInterval)[[nextMessageDictionary valueForKey:kMTStatusBarOverlayDurationKey] doubleValue];
 	BOOL animated = [[nextMessageDictionary valueForKey:kMTStatusBarOverlayAnimationKey] boolValue];
-
+	
+	// don't show anything if status bar is hidden (queue gets cleared)
+	if([UIApplication sharedApplication].statusBarHidden) {
+		@synchronized(self.messageQueue) {
+			[self.messageQueue removeAllObjects];
+		}
+		
+		self.active = NO;
+		
+		return;
+	}
+	
+	// don't duplicate animation if already displaying with text
+	if (!self.reallyHidden && [self.visibleStatusLabel.text isEqualToString:message]) {
+		// remove unneccesary message
+		@synchronized(self.messageQueue) {
+			[self.messageQueue removeLastObject];
+		}
+		
+		// show the next message w/o delay
+		[self showNextMessage];
+		
+		return;
+	}
+	
 	// cancel previous hide- and clear requests
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(clearHistory) object:nil];
