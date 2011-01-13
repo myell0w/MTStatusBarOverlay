@@ -291,8 +291,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)setColorSchemeForStatusBarStyle:(UIStatusBarStyle)style;
 // updates the visiblity of the activity indicator and finished-label depending on the type
 - (void)updateUIForMessageType:(MTMessageType)messageType duration:(NSTimeInterval)duration;
-// tries to retrieve the current visible view controller of the app and returns it, used for rotation
-- (UIViewController *)currentVisibleViewController;
 // calls the delegate when a switch from one message to another one occured
 - (void)callDelegateWithNewMessage:(NSString *)newMessage;
 // shrink/expand the overlay
@@ -339,7 +337,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize messageHistory = messageHistory_;
 @synthesize historyTableView = historyTableView_;
 @synthesize delegate = delegate_;
-@synthesize interfaceOrientations = interfaceOrientations_;
 
 //===========================================================
 #pragma mark -
@@ -457,12 +454,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
         [self addSubview:backgroundView_];
 
-		// listen for orientation notifications
-		[[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+		// listen for changes of status bar frame
 		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(didRotate:)
-													 name:UIDeviceOrientationDidChangeNotification
-												   object:nil];
+												 selector:@selector(didChangeStatusBarFrame:)
+													 name:UIApplicationWillChangeStatusBarFrameNotification object:nil];
     }
 
 	return self;
@@ -484,7 +479,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[messageQueue_ release], messageQueue_ = nil;
 	[messageHistory_ release], messageHistory_ = nil;
 	delegate_ = nil;
-	[interfaceOrientations_ release], interfaceOrientations_ = nil;
 
 	[super dealloc];
 }
@@ -758,31 +752,27 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 //===========================================================
 #pragma mark -
-#pragma mark Rotation Notification
+#pragma mark Rotation Stuff
 //===========================================================
 
-- (void)didRotate:(NSNotification *)notification {
+- (void)didChangeStatusBarFrame:(NSNotification *)notification {
+	NSValue * statusBarFrameValue = [notification.userInfo valueForKey:UIApplicationStatusBarFrameUserInfoKey];
+	
+	// TODO: react on changes of status bar height (e.g. incoming call, tethering, ...)
+	// NSLog(@"Status bar frame changed: %@", NSStringFromCGRect([statusBarFrameValue CGRectValue]));
+	
+	// have to use performSelector to prohibit animation of rotation
+	[self performSelector:@selector(rotateToStatusBarFrame:) withObject:statusBarFrameValue afterDelay:0];
+}
+
+- (void)rotateToStatusBarFrame:(NSValue *)statusBarFrameValue {
 	// current device orientation
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-	// current visible view controller
-	UIViewController *visibleViewController = [self currentVisibleViewController];
 	// is the statusBar visible before rotation?
 	BOOL visibleBeforeTransformation = !self.reallyHidden;
 	// store a flag, if the StatusBar is currently shrinked
 	BOOL shrinkedBeforeTransformation = self.shrinked;
 
-	// check if we should rotate
-	if (visibleViewController == nil) {
-		NSNumber *orientationWrapper = [NSNumber numberWithInt:orientation];
-
-		// check if this interface orientation was set manually, if not don't rotate
-		if (![self.interfaceOrientations containsObject:orientationWrapper]) {
-			return;
-		}
-	} else if(![visibleViewController respondsToSelector:@selector(shouldAutorotateToInterfaceOrientation:)] ||
-			  ![visibleViewController shouldAutorotateToInterfaceOrientation:orientation]) {
-		return;
-	}
 
 	// hide and then unhide after rotation
 	if (visibleBeforeTransformation) {
@@ -1074,33 +1064,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			// clear history after duration
 			[self performSelector:@selector(clearHistory) withObject:nil afterDelay:duration];
 			break;
-	}
-}
-
-- (UIViewController *)currentVisibleViewController {
-	// Credits go to ShareKit: https://github.com/ideashower/ShareKit
-
-	// Try to find the root view controller programmically
-	// Find the top window (that is not an alert view or other window)
-	UIWindow *topWindow = [[UIApplication sharedApplication] keyWindow];
-
-	if (topWindow.windowLevel != UIWindowLevelNormal) {
-		NSArray *windows = [[UIApplication sharedApplication] windows];
-
-		for(topWindow in windows) {
-			if (topWindow.windowLevel == UIWindowLevelNormal)
-				break;
-		}
-	}
-
-	UIView *rootView = [[topWindow subviews] objectAtIndex:0];
-	id nextResponder = [rootView nextResponder];
-
-	if ([nextResponder isKindOfClass:[UIViewController class]]) {
-		return nextResponder;
-	} else {
-		NSLog(@"Warning MTStatusBarOverlay: Could not find a root view controller - will not rotate! You can manually specify interface orientations to rotate to by setting property 'interfaceOrientations'.");
-		return nil;
 	}
 }
 
