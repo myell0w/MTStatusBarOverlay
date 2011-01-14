@@ -345,9 +345,16 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
-        // Place the window on the correct level and position
+        CGRect statusBarFrame = [UIApplication sharedApplication].statusBarFrame;
+
+		// only use height of 20px even is status bar is doubled
+		statusBarFrame.size.height = statusBarFrame.size.height == 2*kStatusBarHeight ? kStatusBarHeight : statusBarFrame.size.height;
+		// must be done with width and height because of a possible rotation
+		// statusBarFrame.size.width = statusBarFrame.size.width == 2*kStatusBarHeight ? kStatusBarHeight : statusBarFrame.size.width;
+
+		// Place the window on the correct level and position
         self.windowLevel = UIWindowLevelStatusBar+1.0f;
-        self.frame = [UIApplication sharedApplication].statusBarFrame;
+        self.frame = statusBarFrame;
 		self.alpha = 0.0f;
 		self.hidden = NO;
 
@@ -576,7 +583,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			return;
 		}
 	}
-	
+
 	// there is a next message, overlay is active
 	self.active = YES;
 
@@ -591,31 +598,31 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	MTMessageType messageType = (MTMessageType)[[nextMessageDictionary valueForKey:kMTStatusBarOverlayMessageTypeKey] intValue];
 	NSTimeInterval duration = (NSTimeInterval)[[nextMessageDictionary valueForKey:kMTStatusBarOverlayDurationKey] doubleValue];
 	BOOL animated = [[nextMessageDictionary valueForKey:kMTStatusBarOverlayAnimationKey] boolValue];
-	
+
 	// don't show anything if status bar is hidden (queue gets cleared)
 	if([UIApplication sharedApplication].statusBarHidden) {
 		@synchronized(self.messageQueue) {
 			[self.messageQueue removeAllObjects];
 		}
-		
+
 		self.active = NO;
-		
+
 		return;
 	}
-	
+
 	// don't duplicate animation if already displaying with text
 	if (!self.reallyHidden && [self.visibleStatusLabel.text isEqualToString:message]) {
 		// remove unneccesary message
 		@synchronized(self.messageQueue) {
 			[self.messageQueue removeLastObject];
 		}
-		
+
 		// show the next message w/o delay
 		[self showNextMessage];
-		
+
 		return;
 	}
-	
+
 	// cancel previous hide- and clear requests
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(clearHistory) object:nil];
@@ -757,10 +764,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (void)didChangeStatusBarFrame:(NSNotification *)notification {
 	NSValue * statusBarFrameValue = [notification.userInfo valueForKey:UIApplicationStatusBarFrameUserInfoKey];
-	
+
 	// TODO: react on changes of status bar height (e.g. incoming call, tethering, ...)
 	// NSLog(@"Status bar frame changed: %@", NSStringFromCGRect([statusBarFrameValue CGRectValue]));
-	
+
 	// have to use performSelector to prohibit animation of rotation
 	[self performSelector:@selector(rotateToStatusBarFrame:) withObject:statusBarFrameValue afterDelay:0];
 }
@@ -808,7 +815,19 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 	// make visible after given time
 	if (visibleBeforeTransformation) {
-		[self performSelector:@selector(setHiddenUsingAlpha:) withObject:[NSNumber numberWithBool:NO] afterDelay:kRotationAppearDelay];
+		// TODO:
+		// somehow this doesn't work anymore since rotation-method was changed from
+		// DeviceDidRotate-Notification to StatusBarFrameChanged-Notification
+		// therefore iplemented it with a UIView-Animation instead
+		//[self performSelector:@selector(setHiddenUsingAlpha:) withObject:[NSNumber numberWithBool:NO] afterDelay:kRotationAppearDelay];
+
+		[UIView animateWithDuration:kAppearAnimationDuration
+							  delay:kRotationAppearDelay
+							options:UIViewAnimationOptionCurveEaseInOut
+						 animations:^{
+							 [self setHiddenUsingAlpha:NO];
+							}
+						 completion:NULL];
 	}
 }
 
