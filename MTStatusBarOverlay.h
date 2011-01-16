@@ -35,6 +35,13 @@ typedef enum MTStatusBarOverlayAnimation {
 } MTStatusBarOverlayAnimation;
 
 
+// Mode of the detail view
+typedef enum MTDetailViewMode {
+	MTDetailViewModeHistory,			// History of messages is recorded and displayed in detailView
+	MTDetailViewModeDetailText,			// a text can be displayed easily
+	MTDetailViewModeCustom				// the detailView can be customized in the way the developer wants
+} MTDetailViewMode;
+
 // indicates the type of a message
 typedef enum MTMessageType {
 	MTMessageTypeActivity,				// shows actvity indicator
@@ -99,8 +106,12 @@ typedef enum MTMessageType {
 	// Queue stuff
 	NSMutableArray *messageQueue_;
 
+	// Detail View
+	MTDetailViewMode detailViewMode_;
+	NSString *detailText_;
+	UITextView *detailTextView_;
+
 	// Message history (is reset when finish is called)
-	BOOL historyEnabled_;
 	NSMutableArray *messageHistory_;
 	UITableView *historyTableView_;
 
@@ -128,8 +139,12 @@ typedef enum MTMessageType {
 @property (nonatomic, readonly, getter=isDetailViewHidden) BOOL detailViewHidden;
 // all messages that were displayed since the last finish-call
 @property (nonatomic, retain, readonly) NSMutableArray *messageHistory;
-// enable/disable history-tracking of messages
+// DEPRECATED: enable/disable history-tracking of messages
 @property (nonatomic, assign, getter=isHistoryEnabled) BOOL historyEnabled;
+// the mode of the detailView
+@property (nonatomic, assign) MTDetailViewMode detailViewMode;
+// the text displayed in the detailView (alternative to history)
+@property (nonatomic, copy) NSString *detailText;
 // the delegate of the overlay
 @property (nonatomic, assign) id<MTStatusBarOverlayDelegate> delegate;
 

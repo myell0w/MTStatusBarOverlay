@@ -271,6 +271,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (assign, getter=isActive) BOOL active;
 // read out hidden-state using alpha-value and hidden-property
 @property (nonatomic, readonly, getter=isReallyHidden) BOOL reallyHidden;
+@property (nonatomic, retain) UITextView *detailTextView;
 @property (nonatomic, retain) NSMutableArray *messageQueue;
 // overwrite property for read-write-access
 @property (nonatomic, retain) NSMutableArray *messageHistory;
@@ -293,6 +294,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)updateUIForMessageType:(MTMessageType)messageType duration:(NSTimeInterval)duration;
 // calls the delegate when a switch from one message to another one occured
 - (void)callDelegateWithNewMessage:(NSString *)newMessage;
+// update the height of the detail text view according to new text
+- (void)updateDetailTextViewHeight;
 // shrink/expand the overlay
 - (void)setShrinked:(BOOL)shrinked animated:(BOOL)animated;
 
@@ -333,7 +336,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize hideInProgress = hideInProgress_;
 @synthesize active = active_;
 @synthesize messageQueue = messageQueue_;
-@synthesize historyEnabled = historyEnabled_;
+@synthesize detailViewMode = detailViewMode_;
+@synthesize detailText = detailText_;
+@synthesize detailTextView = detailTextView_;
 @synthesize messageHistory = messageHistory_;
 @synthesize historyTableView = historyTableView_;
 @synthesize delegate = delegate_;
@@ -370,6 +375,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		detailView_.backgroundColor = [UIColor blackColor];
 		detailView_.alpha = kDetailViewAlpha;
 		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+		detailViewMode_ = MTDetailViewModeCustom;
 
 		// add rounded corners to detail-view
 		detailView_.layer.masksToBounds = YES;
@@ -380,8 +386,14 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		detailView_.layer.shadowRadius = 6.0f;
 		detailView_.layer.shadowOffset = CGSizeMake(0, 3);*/
 
+		// Detail Text label
+		detailTextView_ = [[UITextView alloc] initWithFrame:CGRectMake(0, kStatusBarHeight,
+																	 kDefaultDetailViewFrame.size.width, kDefaultDetailViewFrame.size.height - kStatusBarHeight)];
+		detailTextView_.backgroundColor = [UIColor clearColor];
+		detailTextView_.hidden = detailViewMode_ != MTDetailViewModeDetailText;
+		[detailView_ addSubview:detailTextView_];
+
 		// Message History
-		historyEnabled_ = NO;
 		messageHistory_ = [[NSMutableArray alloc] init];
 
 		historyTableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0, kStatusBarHeight,
@@ -393,7 +405,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// make table view-background transparent
 		historyTableView_.backgroundColor = [UIColor clearColor];
 		historyTableView_.opaque = NO;
-		historyTableView_.hidden = !historyEnabled_;
+		historyTableView_.hidden = detailViewMode_ != MTDetailViewModeHistory;
 		historyTableView_.backgroundView = nil;
 
 		[detailView_ addSubview:historyTableView_];
@@ -483,6 +495,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[finishedLabel_ release], finishedLabel_ = nil;
 	[grayStatusBarImage_ release], grayStatusBarImage_ = nil;
 	[grayStatusBarImageSmall_ release], grayStatusBarImageSmall_ = nil;
+	[detailText_ release], detailText_ = nil;
+	[detailTextView_ release], detailTextView_ = nil;
 	[messageQueue_ release], messageQueue_ = nil;
 	[messageHistory_ release], messageHistory_ = nil;
 	delegate_ = nil;
@@ -836,6 +850,30 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 #pragma mark Setter/Getter
 //===========================================================
 
+- (void)setDetailText:(NSString *)detailText {
+	// custom setter Memory Mgmt
+	if (detailText_ != detailText) {
+        [detailText_ release];
+        detailText_ = [detailText copy];
+    }
+
+	// update text in label
+	self.detailTextView.text = detailText;
+
+	// update height of detailText-View
+	[self updateDetailTextViewHeight];
+	// update height of detailView
+	[self setDetailViewHidden:self.detailViewHidden animated:YES];
+}
+
+- (void)setDetailViewMode:(MTDetailViewMode)detailViewMode {
+	detailViewMode_ = detailViewMode;
+
+	// update UI
+	self.historyTableView.hidden = detailViewMode != MTDetailViewModeHistory;
+	self.detailTextView.hidden = detailViewMode != MTDetailViewModeDetailText;
+}
+
 - (void)setAnimation:(MTStatusBarOverlayAnimation)animation {
 	animation_ = animation;
 
@@ -913,15 +951,20 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 							 // if history is enabled let the detailView "grow" with
 							 // the number of messages in the history up until the set maximum
-							 if (self.historyEnabled) {
+							 if (self.detailViewMode == MTDetailViewModeHistory) {
 								 y = -(kMaxHistoryTableRowCount - MIN(self.messageHistory.count, kMaxHistoryTableRowCount)) * kHistoryTableRowHeight;
 
 								 self.historyTableView.frame = CGRectMake(self.historyTableView.frame.origin.x, kStatusBarHeight - y,
 																		  self.historyTableView.frame.size.width, self.historyTableView.frame.size.height);
 							 }
 
-							 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, y,
-																self.detailView.frame.size.width, self.detailView.frame.size.height);
+							 if (self.detailViewMode == MTDetailViewModeDetailText) {
+								 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, y,
+																	self.detailView.frame.size.width, self.detailTextView.frame.size.height + kStatusBarHeight);
+							 } else {
+								 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, y,
+																	self.detailView.frame.size.width, self.detailView.frame.size.height);
+							 }
 						 }
 						 completion:NULL];
 	}
@@ -1021,6 +1064,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		self.detailView.backgroundColor = kLightThemeDetailViewBackgroundColor;
 		self.detailView.layer.borderColor = [kLightThemeDetailViewBorderColor CGColor];
 		self.historyTableView.separatorColor = kLightThemeDetailViewBorderColor;
+		self.detailTextView.textColor = kLightThemeHistoryTextColor;
 	} else {
 		self.statusLabel1.textColor = kDarkThemeTextColor;
 		self.statusLabel2.textColor = kDarkThemeTextColor;
@@ -1029,6 +1073,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		self.detailView.backgroundColor = kDarkThemeDetailViewBackgroundColor;
 		self.detailView.layer.borderColor = [kDarkThemeDetailViewBorderColor CGColor];
 		self.historyTableView.separatorColor = kDarkThemeDetailViewBorderColor;
+		self.detailTextView.textColor = kDarkThemeHistoryTextColor;
 	}
 }
 
@@ -1100,13 +1145,28 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	}
 }
 
+- (void)updateDetailTextViewHeight {
+	CGRect f = self.detailTextView.frame;
+	f.size.height = self.detailTextView.contentSize.height;
+	self.detailTextView.frame = f;
+}
+
 //===========================================================
 #pragma mark -
 #pragma mark History Tracking
 //===========================================================
 
+- (BOOL)isHistoryEnabled {
+	return self.detailViewMode == MTDetailViewModeHistory;
+}
+
 - (void)setHistoryEnabled:(BOOL)historyEnabled {
-	historyEnabled_ = historyEnabled;
+	if (historyEnabled) {
+		self.detailViewMode = MTDetailViewModeHistory;
+	} else {
+		self.detailViewMode = MTDetailViewModeCustom;
+	}
+
 	self.historyTableView.hidden = !historyEnabled;
 }
 
