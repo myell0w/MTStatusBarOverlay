@@ -7,9 +7,9 @@ UIStatusBarStyleDefault (left: full size, right: shrinked)
 
 New Features!
 -----------------
+* 16.01.2011: 3 detailViewModes: History, DetailText, Custom!
 * 02.01.2011: Delegate-protocol for informing about important events!
 * 30.12.2010: Every message gets queued and is shown for a minimum amount of time!
-* 26.12.2010: Automatic history-tracking for free (update 02.01.2001: DetailView now grows with number of messages in history)!
 
 Description
 -----------------
@@ -33,7 +33,7 @@ You can use the custom status bar like this:
 
      MTStatusBarOverlay overlay = [MTStatusBarOverlay sharedInstance];   
 	 overlay.animation = MTStatusBarOverlayAnimationFallDown;  // MTStatusBarOverlayAnimationShrink
-	 overlay.historyEnabled = YES;  	// enable automatic history-tracking and show in detail-view
+	 overlay.detailViewMode = MTDetailViewModeHistory;  	// enable automatic history-tracking and show in detail-view
 	 overlay.delegate = self;
      [overlay postMessage:@"Following @myell0w on Twitter..."]; 
  	 // ...
