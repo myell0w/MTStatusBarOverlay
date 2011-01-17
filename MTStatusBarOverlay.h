@@ -58,6 +58,7 @@ typedef enum MTMessageType {
 #define kMTStatusBarOverlayMessageTypeKey		@"MessageType"
 #define kMTStatusBarOverlayDurationKey			@"MessageDuration"
 #define kMTStatusBarOverlayAnimationKey			@"MessageAnimation"
+#define kMTStatusBarOverlayImmediateKey			@"MessageImmediate"
 
 
 //===========================================================

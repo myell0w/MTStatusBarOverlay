@@ -278,7 +278,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @property (nonatomic, retain) UITableView *historyTableView;
 
 // intern method that posts a new entry to the message-queue
-- (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated;
+- (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated immediate:(BOOL)immediate;
 // intern method that clears the messageQueue and then posts a new entry to it
 - (void)postImmediateMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated;
 // intern method that does all the work of showing the next message in the queue
@@ -520,7 +520,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)postMessage:(NSString *)message animated:(BOOL)animated {
-	[self postMessage:message type:MTMessageTypeActivity duration:0 animated:animated];
+	[self postMessage:message type:MTMessageTypeActivity duration:0 animated:animated immediate:NO];
 }
 
 - (void)postImmediateMessage:(NSString *)message animated:(BOOL)animated {
@@ -532,7 +532,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)postFinishMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
-	[self postMessage:message type:MTMessageTypeFinish duration:duration animated:animated];
+	[self postMessage:message type:MTMessageTypeFinish duration:duration animated:animated immediate:NO];
 }
 
 - (void)postImmediateFinishMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
@@ -544,14 +544,14 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 }
 
 - (void)postErrorMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
-	[self postMessage:message type:MTMessageTypeError duration:duration animated:animated];
+	[self postMessage:message type:MTMessageTypeError duration:duration animated:animated immediate:NO];
 }
 
 - (void)postImmediateErrorMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
 	[self postImmediateMessage:message type:MTMessageTypeError duration:duration animated:animated];
 }
 
-- (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated {
+- (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated immediate:(BOOL)immediate {
 	// don't add to queue when message is empty
 	if (message == nil) {
 		return;
@@ -560,7 +560,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	NSDictionary *messageDictionaryRepresentation = [NSDictionary dictionaryWithObjectsAndKeys:message, kMTStatusBarOverlayMessageKey,
 													 [NSNumber numberWithInt:messageType], kMTStatusBarOverlayMessageTypeKey,
 													 [NSNumber numberWithDouble:duration], kMTStatusBarOverlayDurationKey,
-													 [NSNumber numberWithBool:animated],  kMTStatusBarOverlayAnimationKey, nil];
+													 [NSNumber numberWithBool:animated],  kMTStatusBarOverlayAnimationKey,
+													 [NSNumber numberWithBool:immediate], kMTStatusBarOverlayImmediateKey, nil];
 
 	@synchronized (self.messageQueue) {
 		[self.messageQueue insertObject:messageDictionaryRepresentation atIndex:0];
@@ -574,18 +575,23 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 - (void)postImmediateMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated {
 	@synchronized(self.messageQueue) {
-		NSArray *messageQueue = [[self.messageQueue copy] autorelease];
+		NSMutableArray *clearedMessages = [NSMutableArray array];
 
-		// clear queue so that new message gets posted immediately
-		[self.messageQueue removeAllObjects];
-
+		for (id messageDictionary in self.messageQueue) {
+			if ([[messageDictionary valueForKey:kMTStatusBarOverlayImmediateKey] boolValue] == NO) {
+				[clearedMessages addObject:messageDictionary];
+			}
+		}
+		
+		[self.messageQueue removeObjectsInArray:clearedMessages];
+		
 		// call delegate
-		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
-			[self.delegate statusBarOverlayDidClearMessageQueue:messageQueue];
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)] && clearedMessages.count > 0) {
+			[self.delegate statusBarOverlayDidClearMessageQueue:clearedMessages];
 		}
 	}
 
-	[self postMessage:message type:messageType duration:duration animated:animated];
+	[self postMessage:message type:messageType duration:duration animated:animated immediate:YES];
 }
 
 
