@@ -337,6 +337,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize hideInProgress = hideInProgress_;
 @synthesize active = active_;
 @synthesize messageQueue = messageQueue_;
+@synthesize canRemoveImmediateMessagesFromQueue = canRemoveImmediateMessagesFromQueue_;
 @synthesize detailViewMode = detailViewMode_;
 @synthesize detailText = detailText_;
 @synthesize detailTextView = detailTextView_;
@@ -472,6 +473,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		hiddenStatusLabel_ = statusLabel2_;
 
 		messageQueue_ = [[NSMutableArray alloc] init];
+		canRemoveImmediateMessagesFromQueue_ = YES;
 
         [self addSubview:backgroundView_];
 
@@ -580,7 +582,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		NSMutableArray *clearedMessages = [NSMutableArray array];
 
 		for (id messageDictionary in self.messageQueue) {
-			if ([[messageDictionary valueForKey:kMTStatusBarOverlayImmediateKey] boolValue] == NO) {
+			if (messageDictionary != [self.messageQueue lastObject] &&
+				(self.canRemoveImmediateMessagesFromQueue || [[messageDictionary valueForKey:kMTStatusBarOverlayImmediateKey] boolValue] == NO)) {
 				[clearedMessages addObject:messageDictionary];
 			}
 		}
@@ -654,7 +657,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self setStatusBarBackgroundForStyle:statusBarStyle];
 	[self setColorSchemeForStatusBarStyle:statusBarStyle];
 	[self updateUIForMessageType:messageType duration:duration];
-
+	
 	// if status bar is currently hidden, show it
 	if (self.reallyHidden) {
 		// set text of visible status label

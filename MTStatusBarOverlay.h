@@ -87,7 +87,7 @@ typedef enum MTMessageType {
 	// for displaying activity indication
 	UIActivityIndicatorView *activityIndicator_;
 	UILabel *finishedLabel_;
-	
+	// if set to YES, neither activityIndicator nor finishedLabel are shown
 	BOOL hidesActivity_;
 
 	// Image of gray Status Bar
@@ -108,6 +108,8 @@ typedef enum MTMessageType {
 
 	// Queue stuff
 	NSMutableArray *messageQueue_;
+	// if YES older immediate messages in the queue get removed, when a new one gets posted
+	BOOL canRemoveImmediateMessagesFromQueue_;
 
 	// Detail View
 	MTDetailViewMode detailViewMode_;
@@ -146,6 +148,8 @@ typedef enum MTMessageType {
 @property (nonatomic, retain, readonly) NSMutableArray *messageHistory;
 // DEPRECATED: enable/disable history-tracking of messages
 @property (nonatomic, assign, getter=isHistoryEnabled) BOOL historyEnabled;
+// determines if immediate messages in the queue get removed or stay in the queue, when a new immediate message gets posted
+@property (nonatomic, assign) BOOL canRemoveImmediateMessagesFromQueue;
 // the mode of the detailView
 @property (nonatomic, assign) MTDetailViewMode detailViewMode;
 // the text displayed in the detailView (alternative to history)
