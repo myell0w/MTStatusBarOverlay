@@ -87,6 +87,8 @@ typedef enum MTMessageType {
 	// for displaying activity indication
 	UIActivityIndicatorView *activityIndicator_;
 	UILabel *finishedLabel_;
+	
+	BOOL hidesActivity_;
 
 	// Image of gray Status Bar
 	UIImage *grayStatusBarImage_;
@@ -134,6 +136,8 @@ typedef enum MTMessageType {
 @property (nonatomic, assign) MTStatusBarOverlayAnimation animation;
 // the label that holds the finished-indicator (either a checkmark, or a error-sign per default)
 @property (nonatomic, retain) UILabel *finishedLabel;
+// if this flag is set to YES, neither activityIndicator nor finishedLabel are shown
+@property (nonatomic, assign) BOOL hidesActivity;
 // detect if status bar is currently shrinked
 @property (nonatomic, readonly, getter=isShrinked) BOOL shrinked;
 // detect if detailView is currently hidden

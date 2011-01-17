@@ -328,6 +328,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize hiddenStatusLabel = hiddenStatusLabel_;
 @synthesize activityIndicator = activityIndicator_;
 @synthesize finishedLabel = finishedLabel_;
+@synthesize hidesActivity = hidesActivity_;
 @synthesize grayStatusBarImage = grayStatusBarImage_;
 @synthesize grayStatusBarImageSmall = grayStatusBarImageSmall_;
 @synthesize smallFrame = smallFrame_;
@@ -369,6 +370,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// Default-values
 		animation_ = MTStatusBarOverlayAnimationNone;
 		active_ = NO;
+		hidesActivity_ = NO;
 
 		// the detail view that is shown when the user touches the status bar in animation mode "FallDown"
 		detailView_ = [[UIControl alloc] initWithFrame:kDefaultDetailViewFrame];
@@ -1091,16 +1093,18 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			self.hideInProgress = NO;
 			// show activity indicator, hide finished-label
 			self.finishedLabel.hidden = YES;
-			self.activityIndicator.hidden = NO;
+			self.activityIndicator.hidden = self.hidesActivity;
 
 			// start activity indicator
-			[self.activityIndicator startAnimating];
+			if (!self.hidesActivity) {
+				[self.activityIndicator startAnimating];
+			}
 			break;
 		case MTMessageTypeFinish:
 			// will call hide after delay
 			self.hideInProgress = YES;
 			// show finished-label, hide acitvity indicator
-			self.finishedLabel.hidden = NO;
+			self.finishedLabel.hidden = self.hidesActivity;
 			self.activityIndicator.hidden = YES;
 
 			// stop activity indicator
@@ -1119,7 +1123,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 			// will call hide after delay
 			self.hideInProgress = YES;
 			// show finished-label, hide activity indicator
-			self.finishedLabel.hidden = NO;
+			self.finishedLabel.hidden = self.hidesActivity;
 			self.activityIndicator.hidden = YES;
 
 			// stop activity indicator
