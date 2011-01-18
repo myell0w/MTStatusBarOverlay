@@ -310,6 +310,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)addMessageToHistory:(NSString *)message;
 - (void)clearHistory;
 
+// selectors
+- (void)rotateToStatusBarFrame:(NSValue *)statusBarFrameValue;
+- (void)didChangeStatusBarFrame:(NSNotification *)notification;
+
 @end
 
 
