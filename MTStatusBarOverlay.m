@@ -52,16 +52,16 @@
 #define kLightThemeActivityIndicatorViewStyle		UIActivityIndicatorViewStyleGray
 #define kLightThemeDetailViewBackgroundColor		[UIColor blackColor]
 #define kLightThemeDetailViewBorderColor			[UIColor darkGrayColor]
-#define kLightThemeHistoryTextColor					[UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0]
+#define kLightThemeHistoryTextColor					[UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f]
 
 
 ///////////////////////////////////////////////////////
 // Dark Theme (for UIStatusBarStyleBlackOpaque)
 ///////////////////////////////////////////////////////
 
-#define kDarkThemeTextColor							[UIColor colorWithRed:0.749 green:0.749 blue:0.749 alpha:1.0]
+#define kDarkThemeTextColor							[UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f]
 #define kDarkThemeActivityIndicatorViewStyle		UIActivityIndicatorViewStyleWhite
-#define kDarkThemeDetailViewBackgroundColor			[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1.0]
+#define kDarkThemeDetailViewBackgroundColor			[UIColor colorWithRed:0.3f green:0.3f blue:0.3f alpha:1.0f]
 #define kDarkThemeDetailViewBorderColor				[UIColor whiteColor]
 #define kDarkThemeHistoryTextColor					[UIColor whiteColor]
 
@@ -71,19 +71,19 @@
 ///////////////////////////////////////////////////////
 
 // minimum time that a message is shown, when messages are queued
-#define kMinimumMessageVisibleTime				0.5
+#define kMinimumMessageVisibleTime				0.5f
 
 // duration of the animation to show next status message in seconds
-#define kNextStatusAnimationDuration			0.8
+#define kNextStatusAnimationDuration			0.8f
 
 // duration the statusBarOverlay takes to appear when it was hidden
-#define kAppearAnimationDuration				0.5
+#define kAppearAnimationDuration				0.5f
 
 // animation duration of animation mode shrink
-#define kAnimationDurationShrink				0.3
+#define kAnimationDurationShrink				0.3f
 
 // animation duration of animation mode fallDown
-#define kAnimationDurationFallDown				0.4
+#define kAnimationDurationFallDown				0.4f
 
 // delay after that the status bar gets visible again after rotation
 #define kRotationAppearDelay					[UIApplication sharedApplication].statusBarOrientationAnimationDuration
@@ -110,7 +110,7 @@
 #define kHistoryTableRowHeight		25
 #define kMaxHistoryTableRowCount	5
 
-#define kDetailViewAlpha			0.9
+#define kDetailViewAlpha			0.9f
 #define kDetailViewWidth			(IsIPad ? 400 : 280)
 // default frame of detail view when it is hidden
 #define kDefaultDetailViewFrame CGRectMake((kScreenWidth - kDetailViewWidth)/2, -(kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHeight),\
@@ -382,8 +382,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 		// add rounded corners to detail-view
 		detailView_.layer.masksToBounds = YES;
-		detailView_.layer.cornerRadius = 10.0;
-		detailView_.layer.borderWidth = 2.5;
+		detailView_.layer.cornerRadius = 10.0f;
+		detailView_.layer.borderWidth = 2.5f;
 		/*detailView_.layer.shadowColor = [UIColor blackColor].CGColor;
 		detailView_.layer.shadowOpacity = 1.0f;
 		detailView_.layer.shadowRadius = 6.0f;
@@ -812,20 +812,21 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		[self setDetailViewHidden:YES animated:NO];
 	}
 
+	CGFloat pi = (CGFloat)M_PI;
 	if (orientation == UIDeviceOrientationPortrait) {
 		self.transform = CGAffineTransformIdentity;
 		self.frame = CGRectMake(0,0,kScreenWidth,kStatusBarHeight);
 		self.smallFrame = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 	}else if (orientation == UIDeviceOrientationLandscapeLeft) {
-		self.transform = CGAffineTransformMakeRotation(M_PI * (90) / 180.0);
+		self.transform = CGAffineTransformMakeRotation(pi * (90) / 180.0f);
 		self.frame = CGRectMake(kScreenWidth - kStatusBarHeight,0, kStatusBarHeight, kScreenHeight);
 		self.smallFrame = CGRectMake(kScreenHeight-kWidthSmall,0,kWidthSmall,kStatusBarHeight);
 	} else if (orientation == UIDeviceOrientationLandscapeRight) {
-		self.transform = CGAffineTransformMakeRotation(M_PI * (-90) / 180.0);
+		self.transform = CGAffineTransformMakeRotation(pi * (-90) / 180.0f);
 		self.frame = CGRectMake(0,0, kStatusBarHeight, kScreenHeight);
 		self.smallFrame = CGRectMake(kScreenHeight-kWidthSmall,0, kWidthSmall, kStatusBarHeight);
 	} else if (orientation == UIDeviceOrientationPortraitUpsideDown) {
-		self.transform = CGAffineTransformMakeRotation(M_PI);
+		self.transform = CGAffineTransformMakeRotation(pi);
 		self.frame = CGRectMake(0,kScreenHeight - kStatusBarHeight,kScreenWidth,kStatusBarHeight);
 		self.smallFrame = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 	}
