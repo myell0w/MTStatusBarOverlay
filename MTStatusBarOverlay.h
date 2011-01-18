@@ -195,6 +195,10 @@ typedef enum MTMessageType {
 // hides the status bar overlay
 - (void)hide;
 
+// selectors
+- (void)rotateToStatusBarFrame:(NSValue *)statusBarFrameValue;
+- (void)didChangeStatusBarFrame:(NSNotification *)notification;
+
 @end
 
 
