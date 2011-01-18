@@ -519,6 +519,11 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self.backgroundView addSubview:view];
 }
 
+- (void)addSubviewToBackgroundView:(UIView *)view atIndex:(NSInteger)index {
+	view.userInteractionEnabled = NO;
+	[self.backgroundView insertSubview:view atIndex:index];
+}
+
 - (void)postMessage:(NSString *)message {
 	[self postMessage:message animated:YES];
 }

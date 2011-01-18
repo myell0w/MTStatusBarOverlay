@@ -173,6 +173,7 @@ typedef enum MTMessageType {
 
 // for customizing appearance, automatically disabled userInteractionEnabled on view
 - (void)addSubviewToBackgroundView:(UIView *)view;
+- (void)addSubviewToBackgroundView:(UIView *)view atIndex:(NSInteger)index;
 
 // shows an activity indicator and the given message
 - (void)postMessage:(NSString *)message;
