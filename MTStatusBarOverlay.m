@@ -28,14 +28,14 @@
 #pragma mark Defines
 //===========================================================
 
-// macro for checking if we are on the iPad
-#define IsIPad UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
 // the height of the status bar
 #define kStatusBarHeight 20
 // width of the screen in portrait-orientation
 #define kScreenWidth [UIScreen mainScreen].bounds.size.width
 // height of the screen in portrait-orientation
 #define kScreenHeight [UIScreen mainScreen].bounds.size.height
+// macro for checking if we are on the iPad (but not in the iPhone-mode on an iPad)
+#define IsIPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) && (kScreenWidth > 320)
 
 
 
@@ -356,6 +356,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 		// only use height of 20px even is status bar is doubled
 		statusBarFrame.size.height = statusBarFrame.size.height == 2*kStatusBarHeight ? kStatusBarHeight : statusBarFrame.size.height;
+		// if we are on the iPad but in iPhone-Mode (non-universal-app) correct the width
+		if( statusBarFrame.size.width > kScreenWidth )
+			statusBarFrame.size.width = kScreenWidth;
 		// must be done with width and height because of a possible rotation
 		// statusBarFrame.size.width = statusBarFrame.size.width == 2*kStatusBarHeight ? kStatusBarHeight : statusBarFrame.size.width;
 
@@ -592,9 +595,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 				[clearedMessages addObject:messageDictionary];
 			}
 		}
-		
+
 		[self.messageQueue removeObjectsInArray:clearedMessages];
-		
+
 		// call delegate
 		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)] && clearedMessages.count > 0) {
 			[self.delegate statusBarOverlayDidClearMessageQueue:clearedMessages];
@@ -662,7 +665,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[self setStatusBarBackgroundForStyle:statusBarStyle];
 	[self setColorSchemeForStatusBarStyle:statusBarStyle];
 	[self updateUIForMessageType:messageType duration:duration];
-	
+
 	// if status bar is currently hidden, show it
 	if (self.reallyHidden) {
 		// set text of visible status label
