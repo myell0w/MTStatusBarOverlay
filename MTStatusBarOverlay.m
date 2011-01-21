@@ -2,7 +2,7 @@
 //  MTStatusBarOverlay.m
 //
 //  Created by Matthias Tretter on 27.09.10.
-//  Copyright (c) 2009-2010  Matthias Tretter, @myell0w. All rights reserved.
+//  Copyright (c) 2009-2011  Matthias Tretter, @myell0w. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
 // to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
