@@ -34,8 +34,11 @@
 #define kScreenWidth [UIScreen mainScreen].bounds.size.width
 // height of the screen in portrait-orientation
 #define kScreenHeight [UIScreen mainScreen].bounds.size.height
-// macro for checking if we are on the iPad (but not in the iPhone-mode on an iPad)
-#define IsIPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) && (kScreenWidth > 320)
+// macro for checking if we are on the iPad
+#define IsIPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+// macro for checking if we are on the iPad in iPhone-Emulation mode
+#define IsIPhoneEmulationMode (!IsIPad && \
+			MAX([UIApplication sharedApplication].statusBarFrame.size.width, [UIApplication sharedApplication].statusBarFrame.size.height) > 480)
 
 
 
@@ -361,16 +364,19 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 		// only use height of 20px even is status bar is doubled
 		statusBarFrame.size.height = statusBarFrame.size.height == 2*kStatusBarHeight ? kStatusBarHeight : statusBarFrame.size.height;
 		// if we are on the iPad but in iPhone-Mode (non-universal-app) correct the width
-		if( statusBarFrame.size.width > kScreenWidth )
-			statusBarFrame.size.width = kScreenWidth;
-		// must be done with width and height because of a possible rotation
-		// statusBarFrame.size.width = statusBarFrame.size.width == 2*kStatusBarHeight ? kStatusBarHeight : statusBarFrame.size.width;
+		if(IsIPhoneEmulationMode)
+			statusBarFrame.size.width = 320;
 
 		// Place the window on the correct level and position
         self.windowLevel = UIWindowLevelStatusBar+1.0f;
         self.frame = statusBarFrame;
 		self.alpha = 0.0f;
 		self.hidden = NO;
+
+		NSLog(@"Idiom: %@", UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? @"iPad" : @"iPhone");
+		NSLog(@"Scale: %f", [UIScreen mainScreen].scale);
+		NSLog(@"Frame: %@", NSStringFromCGRect([UIApplication sharedApplication].statusBarFrame));
+		NSLog(@"Is iPad: %d", IsIPad);
 
 		// Default Small size: just show Activity Indicator
 		smallFrame_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
@@ -1062,7 +1068,10 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)setStatusBarBackgroundForStyle:(UIStatusBarStyle)style {
 	// gray status bar?
 	// on iPad the Default Status Bar Style is black too
-	if (style == UIStatusBarStyleDefault && !IsIPad) {
+
+	NSLog(@"iPad: %d, Emulation mode: %d (Width: %f)", IsIPad, IsIPhoneEmulationMode, [UIApplication sharedApplication].statusBarFrame.size.width);
+
+	if (style == UIStatusBarStyleDefault && !IsIPad && !IsIPhoneEmulationMode) {
 		// choose image depending on size
 		if (self.shrinked) {
 			self.statusBarBackgroundImageView.image = [self.grayStatusBarImageSmall stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
@@ -1080,7 +1089,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 - (void)setColorSchemeForStatusBarStyle:(UIStatusBarStyle)style {
 	// gray status bar?
 	// on iPad the Default Status Bar Style is black too
-	if (style == UIStatusBarStyleDefault && !IsIPad) {
+	if (style == UIStatusBarStyleDefault && !IsIPad && !IsIPhoneEmulationMode) {
 		self.statusLabel1.textColor = kLightThemeTextColor;
 		self.statusLabel2.textColor = kLightThemeTextColor;
 		self.finishedLabel.textColor = kLightThemeTextColor;
