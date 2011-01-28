@@ -262,8 +262,6 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 @property (nonatomic, retain) UIActivityIndicatorView *activityIndicator;
 @property (nonatomic, retain) UIImageView *statusBarBackgroundImageView;
-@property (nonatomic, retain) UIImage *grayStatusBarImage;
-@property (nonatomic, retain) UIImage *grayStatusBarImageSmall;
 @property (nonatomic, retain) UILabel *statusLabel1;
 @property (nonatomic, retain) UILabel *statusLabel2;
 @property (nonatomic, assign) UILabel *hiddenStatusLabel;
@@ -336,8 +334,8 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 @synthesize activityIndicator = activityIndicator_;
 @synthesize finishedLabel = finishedLabel_;
 @synthesize hidesActivity = hidesActivity_;
-@synthesize grayStatusBarImage = grayStatusBarImage_;
-@synthesize grayStatusBarImageSmall = grayStatusBarImageSmall_;
+@synthesize defaultStatusBarImage = defaultStatusBarImage_;
+@synthesize defaultStatusBarImageShrinked = grayStatusBarImageSmall_;
 @synthesize smallFrame = smallFrame_;
 @synthesize oldBackgroundViewFrame = oldBackgroundViewFrame_;
 @synthesize animation = animation_;
@@ -436,7 +434,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 
 		// Image of gray status bar
 		NSData *pngData = [NSData dataWithBytesNoCopy:statusBarBackgroundGrey_png length:statusBarBackgroundGrey_png_len freeWhenDone:NO];
-		grayStatusBarImage_ = [[UIImage imageWithData:pngData] retain];
+		defaultStatusBarImage_ = [[UIImage imageWithData:pngData] retain];
 
 		NSData *pngDataSmall = [NSData dataWithBytesNoCopy:statusBarBackgroundGreySmall_png length:statusBarBackgroundGreySmall_png_len freeWhenDone:NO];
 		grayStatusBarImageSmall_ = [[UIImage imageWithData:pngDataSmall] retain];
@@ -510,7 +508,7 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	[statusLabel2_ release], statusLabel2_ = nil;
 	[activityIndicator_ release], activityIndicator_ = nil;
 	[finishedLabel_ release], finishedLabel_ = nil;
-	[grayStatusBarImage_ release], grayStatusBarImage_ = nil;
+	[defaultStatusBarImage_ release], defaultStatusBarImage_ = nil;
 	[grayStatusBarImageSmall_ release], grayStatusBarImageSmall_ = nil;
 	[detailText_ release], detailText_ = nil;
 	[detailTextView_ release], detailTextView_ = nil;
@@ -1074,9 +1072,9 @@ unsigned int statusBarBackgroundGreySmall_png_len = 1015;
 	if (style == UIStatusBarStyleDefault && !IsIPad && !IsIPhoneEmulationMode) {
 		// choose image depending on size
 		if (self.shrinked) {
-			self.statusBarBackgroundImageView.image = [self.grayStatusBarImageSmall stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
+			self.statusBarBackgroundImageView.image = [self.defaultStatusBarImageShrinked stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
 		} else {
-			self.statusBarBackgroundImageView.image = [self.grayStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
+			self.statusBarBackgroundImageView.image = [self.defaultStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
 		}
 	}
 

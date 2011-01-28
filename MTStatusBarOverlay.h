@@ -91,8 +91,8 @@ typedef enum MTMessageType {
 	BOOL hidesActivity_;
 
 	// Image of gray Status Bar
-	UIImage *grayStatusBarImage_;
-	UIImage *grayStatusBarImageSmall_;
+	UIImage *defaultStatusBarImage_;
+	UIImage *defaultStatusBarImageShrinked_;
 
 	// Animation-Type
 	MTStatusBarOverlayAnimation animation_;
@@ -140,6 +140,10 @@ typedef enum MTMessageType {
 @property (nonatomic, retain) UILabel *finishedLabel;
 // if this flag is set to YES, neither activityIndicator nor finishedLabel are shown
 @property (nonatomic, assign) BOOL hidesActivity;
+// the image used when the Status Bar Style is Default
+@property (nonatomic, retain) UIImage *defaultStatusBarImage;
+// the image used when the Status Bar Style is Default and the Overlay is shrinked
+@property (nonatomic, retain) UIImage *defaultStatusBarImageShrinked;
 // detect if status bar is currently shrinked
 @property (nonatomic, readonly, getter=isShrinked) BOOL shrinked;
 // detect if detailView is currently hidden
