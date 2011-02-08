@@ -7,6 +7,7 @@ UIStatusBarStyleDefault (left: full size, right: shrinked)
 
 New Features!
 -----------------
+* 28.01.2011: Finally: Retina-Images for the overlay-background!
 * 16.01.2011: 3 detailViewModes: History, DetailText, Custom!
 * 02.01.2011: Delegate-protocol for informing about important events!
 * 30.12.2010: Every message gets queued and is shown for a minimum amount of time!
@@ -14,7 +15,7 @@ New Features!
 Description
 -----------------
 
-This class provides a custom iOS (iPhone + iPad) status bar overlay window known from Apps like Reeder.
+This class provides a custom iOS (iPhone + iPad) status bar overlay window known from Apps like Reeder, Google Mobile App or Evernote.
 It currently supports touch-handling, queuing of messages, delegation as well as three different animation modes:
  
 * MTStatusBarOverlayAnimationShrink: When the user touches the overlay the overlay shrinks and only covers the battery-icon on the right side
