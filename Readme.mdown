@@ -34,11 +34,11 @@ You can use the custom status bar like this:
 
      MTStatusBarOverlay *overlay = [MTStatusBarOverlay sharedInstance];
 	 overlay.animation = MTStatusBarOverlayAnimationFallDown;  // MTStatusBarOverlayAnimationShrink
-	 overlay.detailViewMode = MTDetailViewModeHistory;  	// enable automatic history-tracking and show in detail-view
+	 overlay.detailViewMode = MTDetailViewModeHistory;         // enable automatic history-tracking and show in detail-view
 	 overlay.delegate = self;
-     [overlay postMessage:@"Following @myell0w on Twitter..."]; 
+     [overlay postMessage:@"Following @myell0w on Twitter…"];
  	 // ...
-     [overlay postMessage:@"Following myell0w on Github..." animated:NO];  
+     [overlay postMessage:@"Following myell0w on Github…" animated:NO];
    	 // ...
      [overlay postImmediateFinishMessage:@"Following was a good idea!" duration:2.0 animated:YES];
 
