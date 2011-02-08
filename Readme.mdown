@@ -32,7 +32,7 @@ Usage
 
 You can use the custom status bar like this:
 
-     MTStatusBarOverlay overlay = [MTStatusBarOverlay sharedInstance];   
+     MTStatusBarOverlay *overlay = [MTStatusBarOverlay sharedInstance];
 	 overlay.animation = MTStatusBarOverlayAnimationFallDown;  // MTStatusBarOverlayAnimationShrink
 	 overlay.detailViewMode = MTDetailViewModeHistory;  	// enable automatic history-tracking and show in detail-view
 	 overlay.delegate = self;
