@@ -456,7 +456,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
 - (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated immediate:(BOOL)immediate {
 	// don't add to queue when message is empty
-	if (message == nil) {
+	if (message.length == 0) {
 		return;
 	}
 
