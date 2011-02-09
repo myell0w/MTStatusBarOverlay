@@ -62,6 +62,8 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 ///////////////////////////////////////////////////////
 
 #define kLightThemeTextColor						[UIColor blackColor]
+#define kLightThemeErrorMessageTextColor            [UIColor blackColor] // [UIColor colorWithRed:0.494898f green:0.330281f blue:0.314146f alpha:1.0f]
+#define kLightThemeFinishedMessageTextColor         [UIColor blackColor] // [UIColor colorWithRed:0.389487f green:0.484694f blue:0.38121f alpha:1.0f]
 #define kLightThemeActivityIndicatorViewStyle		UIActivityIndicatorViewStyleGray
 #define kLightThemeDetailViewBackgroundColor		[UIColor blackColor]
 #define kLightThemeDetailViewBorderColor			[UIColor darkGrayColor]
@@ -73,6 +75,8 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 ///////////////////////////////////////////////////////
 
 #define kDarkThemeTextColor							[UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f]
+#define kDarkThemeErrorMessageTextColor             [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f] // [UIColor colorWithRed:0.918367f green:0.48385f blue:0.423895f alpha:1.0f]
+#define kDarkThemeFinishedMessageTextColor          [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f] // [UIColor colorWithRed:0.681767f green:0.918367f blue:0.726814f alpha:1.0f]
 #define kDarkThemeActivityIndicatorViewStyle		UIActivityIndicatorViewStyleWhite
 #define kDarkThemeDetailViewBackgroundColor			[UIColor colorWithRed:0.3f green:0.3f blue:0.3f alpha:1.0f]
 #define kDarkThemeDetailViewBorderColor				[UIColor whiteColor]
@@ -178,8 +182,8 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 - (IBAction)contentViewClicked:(id)sender;
 // updates the current status bar background image for the given style and current size
 - (void)setStatusBarBackgroundForStyle:(UIStatusBarStyle)style;
-// updates the text-colors of the labels for the given style
-- (void)setColorSchemeForStatusBarStyle:(UIStatusBarStyle)style;
+// updates the text-colors of the labels for the given style and message type
+- (void)setColorSchemeForStatusBarStyle:(UIStatusBarStyle)style messageType:(MTMessageType)messageType;
 // updates the visiblity of the activity indicator and finished-label depending on the type
 - (void)updateUIForMessageType:(MTMessageType)messageType duration:(NSTimeInterval)duration;
 // calls the delegate when a switch from one message to another one occured
@@ -554,7 +558,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 	// update UI depending on current status bar style
 	UIStatusBarStyle statusBarStyle = [UIApplication sharedApplication].statusBarStyle;
 	[self setStatusBarBackgroundForStyle:statusBarStyle];
-	[self setColorSchemeForStatusBarStyle:statusBarStyle];
+	[self setColorSchemeForStatusBarStyle:statusBarStyle messageType:messageType];
 	[self updateUIForMessageType:messageType duration:duration];
 
 	// if status bar is currently hidden, show it
@@ -964,22 +968,54 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 	}
 }
 
-- (void)setColorSchemeForStatusBarStyle:(UIStatusBarStyle)style {
+- (void)setColorSchemeForStatusBarStyle:(UIStatusBarStyle)style messageType:(MTMessageType)messageType {
 	// gray status bar?
 	// on iPad the Default Status Bar Style is black too
 	if (style == UIStatusBarStyleDefault && !IsIPad && !IsIPhoneEmulationMode) {
-		self.statusLabel1.textColor = kLightThemeTextColor;
-		self.statusLabel2.textColor = kLightThemeTextColor;
-		self.finishedLabel.textColor = kLightThemeTextColor;
+		// set color of labels depending on messageType
+        switch(messageType) {
+                case MTMessageTypeFinish:
+                self.statusLabel1.textColor = kLightThemeFinishedMessageTextColor;
+                self.statusLabel2.textColor = kLightThemeFinishedMessageTextColor;
+                self.finishedLabel.textColor = kLightThemeFinishedMessageTextColor;
+                break;
+            case MTMessageTypeError:
+                self.statusLabel1.textColor = kLightThemeErrorMessageTextColor;
+                self.statusLabel2.textColor = kLightThemeErrorMessageTextColor;
+                self.finishedLabel.textColor = kLightThemeErrorMessageTextColor;
+                break;
+            default:
+                self.statusLabel1.textColor = kLightThemeTextColor;
+                self.statusLabel2.textColor = kLightThemeTextColor;
+                self.finishedLabel.textColor = kLightThemeTextColor;
+                break;
+        }
+        
 		self.activityIndicator.activityIndicatorViewStyle = kLightThemeActivityIndicatorViewStyle;
 		self.detailView.backgroundColor = kLightThemeDetailViewBackgroundColor;
 		self.detailView.layer.borderColor = [kLightThemeDetailViewBorderColor CGColor];
 		self.historyTableView.separatorColor = kLightThemeDetailViewBorderColor;
 		self.detailTextView.textColor = kLightThemeHistoryTextColor;
 	} else {
-		self.statusLabel1.textColor = kDarkThemeTextColor;
-		self.statusLabel2.textColor = kDarkThemeTextColor;
-		self.finishedLabel.textColor = kDarkThemeTextColor;
+		// set color of labels depending on messageType
+        switch(messageType) {
+            case MTMessageTypeFinish:
+                self.statusLabel1.textColor = kDarkThemeFinishedMessageTextColor;
+                self.statusLabel2.textColor = kDarkThemeFinishedMessageTextColor;
+                self.finishedLabel.textColor = kDarkThemeFinishedMessageTextColor;
+                break;
+            case MTMessageTypeError:
+                self.statusLabel1.textColor = kDarkThemeErrorMessageTextColor;
+                self.statusLabel2.textColor = kDarkThemeErrorMessageTextColor;
+                self.finishedLabel.textColor = kDarkThemeErrorMessageTextColor;
+                break;
+            default:
+                self.statusLabel1.textColor = kDarkThemeTextColor;
+                self.statusLabel2.textColor = kDarkThemeTextColor;
+                self.finishedLabel.textColor = kDarkThemeTextColor;
+                break;
+        }
+        
 		self.activityIndicator.activityIndicatorViewStyle = kDarkThemeActivityIndicatorViewStyle;
 		self.detailView.backgroundColor = kDarkThemeDetailViewBackgroundColor;
 		self.detailView.layer.borderColor = [kDarkThemeDetailViewBorderColor CGColor];
