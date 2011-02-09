@@ -84,10 +84,10 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 ///////////////////////////////////////////////////////
 
 // minimum time that a message is shown, when messages are queued
-#define kMinimumMessageVisibleTime				0.5f
+#define kMinimumMessageVisibleTime				0.4f
 
 // duration of the animation to show next status message in seconds
-#define kNextStatusAnimationDuration			0.8f
+#define kNextStatusAnimationDuration			0.6f
 
 // duration the statusBarOverlay takes to appear when it was hidden
 #define kAppearAnimationDuration				0.5f
