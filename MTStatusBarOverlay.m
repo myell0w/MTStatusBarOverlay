@@ -701,8 +701,8 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 }
 
 - (void)rotateToStatusBarFrame:(NSValue *)statusBarFrameValue {
-	// current device orientation
-	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+	// current interface orientation
+    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
 	// is the statusBar visible before rotation?
 	BOOL visibleBeforeTransformation = !self.reallyHidden;
 	// store a flag, if the StatusBar is currently shrinked
