@@ -15,8 +15,8 @@
 // Credits go to:
 // -------------------------------
 // http://stackoverflow.com/questions/2833724/adding-view-on-statusbar-in-iphone
-// http://cocoabyss.com/2010/ios-custom-status-bar/
-// @reederapp
+// http://www.cocoabyss.com/uikit/custom-status-bar-ios/
+// @reederapp for inspiration
 // -------------------------------
 
 #import "MTStatusBarOverlay.h"
