@@ -179,7 +179,11 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 - (void)showNextMessage;
 
 // is called when the user touches the statusbar
-- (IBAction)contentViewClicked:(id)sender;
+- (IBAction)contentViewClicked:(UIGestureRecognizer *)gestureRecognizer;
+// is called when the user swipes down the statusbar
+- (IBAction)contentViewSwipedUp:(UIGestureRecognizer *)gestureRecognizer;
+- (IBAction)contentViewSwipedDown:(UIGestureRecognizer *)gestureRecognizer;
+
 // updates the current status bar background image for the given style and current size
 - (void)setStatusBarBackgroundForStyle:(UIStatusBarStyle)style;
 // updates the text-colors of the labels for the given style and message type
@@ -315,14 +319,22 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		[detailView_ addSubview:historyTableView_];
 		[self addSubview:detailView_];
 
-
         // Create view that stores all the content
         backgroundView_ = [[UIView alloc] initWithFrame:self.frame];
 		backgroundView_.clipsToBounds = YES;
 		backgroundView_.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
-		UIGestureRecognizer *gestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewClicked:)] autorelease];
-		[backgroundView_ addGestureRecognizer:gestureRecognizer];
+		// Add gesture recognizers
+		UITapGestureRecognizer *tapGestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewClicked:)] autorelease];
+		//UISwipeGestureRecognizer *upGestureRecognizer = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewSwipedUp:)] autorelease];
+		//UISwipeGestureRecognizer *downGestureRecognizer = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewSwipedDown:)] autorelease];
+
+		//upGestureRecognizer.direction = UISwipeGestureRecognizerDirectionUp;
+		//downGestureRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
+
+		[backgroundView_ addGestureRecognizer:tapGestureRecognizer];
+		//[backgroundView_ addGestureRecognizer:upGestureRecognizer];
+		//[backgroundView_ addGestureRecognizer:downGestureRecognizer];
 
 		// Images used as background when status bar style is Default
 		defaultStatusBarImage_ = [[UIImage imageWithData:MTStatusBarBackgroundImageData(NO)] retain];
@@ -936,19 +948,33 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 #pragma mark Private Methods
 //===========================================================
 
-- (IBAction)contentViewClicked:(id)sender {
-	switch (self.animation) {
-		case MTStatusBarOverlayAnimationShrink:
-			[self setShrinked:!self.shrinked animated:YES];
-			break;
+- (IBAction)contentViewClicked:(UIGestureRecognizer *)gestureRecognizer {
+	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
+		switch (self.animation) {
+			case MTStatusBarOverlayAnimationShrink:
+				[self setShrinked:!self.shrinked animated:YES];
+				break;
 
-		case MTStatusBarOverlayAnimationFallDown:
-			// detailView currently visible -> hide it
-			[self setDetailViewHidden:!self.detailViewHidden animated:YES];
-			break;
-		case MTStatusBarOverlayAnimationNone:
-			// ignore
-			break;
+			case MTStatusBarOverlayAnimationFallDown:
+				// detailView currently visible -> hide it
+				[self setDetailViewHidden:!self.detailViewHidden animated:YES];
+				break;
+			case MTStatusBarOverlayAnimationNone:
+				// ignore
+				break;
+		}
+	}
+}
+
+- (IBAction)contentViewSwipedUp:(UIGestureRecognizer *)gestureRecognizer {
+	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
+		[self setDetailViewHidden:YES animated:YES];
+	}
+}
+
+- (IBAction)contentViewSwipedDown:(UIGestureRecognizer *)gestureRecognizer {
+	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
+		[self setDetailViewHidden:NO animated:YES];
 	}
 }
 
