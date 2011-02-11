@@ -274,7 +274,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		hidesActivity_ = NO;
 
 		// the detail view that is shown when the user touches the status bar in animation mode "FallDown"
-		detailView_ = [[UIControl alloc] initWithFrame:kDefaultDetailViewFrame];
+		detailView_ = [[UIView alloc] initWithFrame:kDefaultDetailViewFrame];
 		detailView_.backgroundColor = [UIColor blackColor];
 		detailView_.alpha = kDetailViewAlpha;
 		detailView_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
@@ -317,10 +317,12 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
 
         // Create view that stores all the content
-        backgroundView_ = [[UIControl alloc] initWithFrame:self.frame];
-		[backgroundView_ addTarget:self action:@selector(contentViewClicked:) forControlEvents:UIControlEventTouchUpInside];
+        backgroundView_ = [[UIView alloc] initWithFrame:self.frame];
 		backgroundView_.clipsToBounds = YES;
 		backgroundView_.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+
+		UIGestureRecognizer *gestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewClicked:)] autorelease];
+		[backgroundView_ addGestureRecognizer:gestureRecognizer];
 
 		// Images used as background when status bar style is Default
 		defaultStatusBarImage_ = [[UIImage imageWithData:MTStatusBarBackgroundImageData(NO)] retain];
@@ -990,7 +992,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
                 self.finishedLabel.textColor = kLightThemeTextColor;
                 break;
         }
-        
+
 		self.activityIndicator.activityIndicatorViewStyle = kLightThemeActivityIndicatorViewStyle;
 		self.detailView.backgroundColor = kLightThemeDetailViewBackgroundColor;
 		self.detailView.layer.borderColor = [kLightThemeDetailViewBorderColor CGColor];
@@ -1015,7 +1017,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
                 self.finishedLabel.textColor = kDarkThemeTextColor;
                 break;
         }
-        
+
 		self.activityIndicator.activityIndicatorViewStyle = kDarkThemeActivityIndicatorViewStyle;
 		self.detailView.backgroundColor = kDarkThemeDetailViewBackgroundColor;
 		self.detailView.layer.borderColor = [kDarkThemeDetailViewBorderColor CGColor];

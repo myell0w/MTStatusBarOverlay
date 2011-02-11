@@ -74,9 +74,9 @@ typedef enum MTMessageType {
 // messages for free by setting historyEnabled to YES
 @interface MTStatusBarOverlay : UIWindow <UITableViewDataSource> {
 	// holds all subviews, is touchable to change size of Status Bar
-	UIControl *backgroundView_;
+	UIView *backgroundView_;
 	// the view that is shown in animation mode "FallDown" when the user touches the status bar
-	UIControl *detailView_;
+	UIView *detailView_;
 
 	// background of Status Bar Black or gray
 	UIImageView *statusBarBackgroundImageView_;
@@ -129,9 +129,9 @@ typedef enum MTMessageType {
 #pragma mark Properties
 //===========================================================
 // the view that holds all the components of the overlay (except for the detailView)
-@property (nonatomic, retain) UIControl *backgroundView;
+@property (nonatomic, retain) UIView *backgroundView;
 // the detailView is shown when animation is set to "FallDown"
-@property (nonatomic, retain) UIControl *detailView;
+@property (nonatomic, retain) UIView *detailView;
 // the frame of the status bar when animation is set to "Shrink" and it is shrinked
 @property (nonatomic, assign) CGRect smallFrame;
 // the current active animation
