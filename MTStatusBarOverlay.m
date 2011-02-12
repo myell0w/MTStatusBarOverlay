@@ -270,7 +270,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		self.hidden = NO;
 
 		// Default Small size: just show Activity Indicator
-		smallFrame_ = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
+		smallFrame_ = CGRectMake(statusBarFrame.size.width - kWidthSmall, 0.0f, kWidthSmall, statusBarFrame.size.height);
 
 		// Default-values
 		animation_ = MTStatusBarOverlayAnimationNone;
@@ -320,9 +320,9 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		[self addSubview:detailView_];
 
         // Create view that stores all the content
-        backgroundView_ = [[UIView alloc] initWithFrame:self.frame];
+        backgroundView_ = [[UIView alloc] initWithFrame:statusBarFrame];
 		backgroundView_.clipsToBounds = YES;
-		backgroundView_.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+		backgroundView_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 
 		// Add gesture recognizers
 		UITapGestureRecognizer *tapGestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewClicked:)] autorelease];
@@ -341,7 +341,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		defaultStatusBarImageShrinked_ = [[UIImage imageWithData:MTStatusBarBackgroundImageData(YES)] retain];
 
 		// Background-Image of the Content View
-		statusBarBackgroundImageView_ = [[UIImageView alloc] initWithFrame:self.frame];
+		statusBarBackgroundImageView_ = [[UIImageView alloc] initWithFrame:backgroundView_.frame];
 		statusBarBackgroundImageView_.backgroundColor = [UIColor blackColor];
 		statusBarBackgroundImageView_.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 		[self addSubviewToBackgroundView:statusBarBackgroundImageView_];
@@ -353,7 +353,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		[self addSubviewToBackgroundView:activityIndicator_];
 
 		// Finished-Label
-		finishedLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(4,1,self.frame.size.height, self.frame.size.height-1)];
+		finishedLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(4,1,backgroundView_.frame.size.height, backgroundView_.frame.size.height-1)];
 		finishedLabel_.backgroundColor = [UIColor clearColor];
 		finishedLabel_.hidden = YES;
 		finishedLabel_.text = kFinishedText;
@@ -362,7 +362,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		[self addSubviewToBackgroundView:finishedLabel_];
 
 		// Status Label 1 is first visible
-		statusLabel1_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, 0.0f, self.frame.size.width - 60.0f, self.frame.size.height-1)];
+		statusLabel1_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, 0.0f, backgroundView_.frame.size.width - 60.0f,backgroundView_.frame.size.height-1)];
 		statusLabel1_.backgroundColor = [UIColor clearColor];
 		statusLabel1_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
 		statusLabel1_.textAlignment = UITextAlignmentCenter;
@@ -372,7 +372,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		[self addSubviewToBackgroundView:statusLabel1_];
 
 		// Status Label 2 is hidden
-		statusLabel2_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, self.frame.size.height,self.frame.size.width - 60.0f , self.frame.size.height-1)];
+		statusLabel2_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, backgroundView_.frame.size.height,backgroundView_.frame.size.width - 60.0f , backgroundView_.frame.size.height-1)];
 		statusLabel2_.backgroundColor = [UIColor clearColor];
 		statusLabel2_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
 		statusLabel2_.textAlignment = UITextAlignmentCenter;
@@ -684,13 +684,13 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 	// cancel previous hide- and clear requests
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hide) object:nil];
 
+	// hide detailView
+	[self setDetailViewHidden:YES animated:YES];
+
 	// hide status bar overlay with animation
 	[UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration animations:^{
 		[self setHidden:YES useAlpha:YES];
 	} completion:^(BOOL finished) {
-		// hide detailView
-		[self setDetailViewHidden:YES animated:NO];
-
 		// call delegate
 		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
 			[self.delegate statusBarOverlayDidHide];
