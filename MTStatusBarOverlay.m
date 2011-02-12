@@ -945,7 +945,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
 //===========================================================
 #pragma mark -
-#pragma mark Private Methods
+#pragma mark UIGestureRecognizer Methods
 //===========================================================
 
 - (IBAction)contentViewClicked:(UIGestureRecognizer *)gestureRecognizer {
@@ -963,20 +963,38 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 				// ignore
 				break;
 		}
+
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidRecognizeGesture:)]) {
+			[self.delegate statusBarOverlayDidRecognizeGesture:gestureRecognizer];
+		}
 	}
 }
 
 - (IBAction)contentViewSwipedUp:(UIGestureRecognizer *)gestureRecognizer {
 	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
 		[self setDetailViewHidden:YES animated:YES];
+
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidRecognizeGesture:)]) {
+			[self.delegate statusBarOverlayDidRecognizeGesture:gestureRecognizer];
+		}
 	}
 }
 
 - (IBAction)contentViewSwipedDown:(UIGestureRecognizer *)gestureRecognizer {
 	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
 		[self setDetailViewHidden:NO animated:YES];
+
+		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidRecognizeGesture:)]) {
+			[self.delegate statusBarOverlayDidRecognizeGesture:gestureRecognizer];
+		}
 	}
 }
+
+
+//===========================================================
+#pragma mark -
+#pragma mark Private Methods
+//===========================================================
 
 - (void)setStatusBarBackgroundForStyle:(UIStatusBarStyle)style {
 	// gray status bar?

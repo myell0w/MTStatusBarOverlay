@@ -212,6 +212,8 @@ typedef enum MTMessageType {
 
 @protocol MTStatusBarOverlayDelegate <NSObject>
 @optional
+// is called, when a gesture on the overlay is recognized
+- (void)statusBarOverlayDidRecognizeGesture:(UIGestureRecognizer *)gestureRecognizer;
 // is called when the status bar overlay gets hidden
 - (void)statusBarOverlayDidHide;
 // is called, when the status bar overlay changed it's displayed message from one message to another
