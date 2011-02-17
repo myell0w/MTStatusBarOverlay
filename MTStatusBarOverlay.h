@@ -181,6 +181,7 @@ typedef enum MTMessageType {
 
 // shows an activity indicator and the given message
 - (void)postMessage:(NSString *)message;
+- (void)postMessage:(NSString *)message duration:(NSTimeInterval)duration;
 - (void)postMessage:(NSString *)message animated:(BOOL)animated;
 // clears the message queue and shows this message instantly
 - (void)postImmediateMessage:(NSString *)message animated:(BOOL)animated;
