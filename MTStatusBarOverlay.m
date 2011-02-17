@@ -445,7 +445,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 }
 
 - (void)postMessage:(NSString *)message duration:(NSTimeInterval)duration {
-  [self postMessage:message type:MTMessageTypeActivity duration:duration animated:YES immediate:NO];
+	[self postMessage:message type:MTMessageTypeActivity duration:duration animated:YES immediate:NO];
 }
 
 - (void)postImmediateMessage:(NSString *)message animated:(BOOL)animated {
