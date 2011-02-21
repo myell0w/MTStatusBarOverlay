@@ -29,9 +29,9 @@
 
 // Animation that happens, when the user touches the status bar overlay
 typedef enum MTStatusBarOverlayAnimation {
-	MTStatusBarOverlayAnimationNone,	// nothing happens
-	MTStatusBarOverlayAnimationShrink,  // the status bar shrinks to the right side and only shows the activity indicator
-	MTStatusBarOverlayAnimationFallDown	// the status bar falls down and displays more information
+	MTStatusBarOverlayAnimationNone,      // nothing happens
+	MTStatusBarOverlayAnimationShrink,    // the status bar shrinks to the right side and only shows the activity indicator
+	MTStatusBarOverlayAnimationFallDown   // the status bar falls down and displays more information
 } MTStatusBarOverlayAnimation;
 
 
@@ -50,15 +50,20 @@ typedef enum MTMessageType {
 } MTMessageType;
 
 
-// forward-declaration of delegate-protocol
-@protocol MTStatusBarOverlayDelegate;
-
-
+// keys used in the dictionary-representation of a status message
 #define kMTStatusBarOverlayMessageKey			@"MessageText"
 #define kMTStatusBarOverlayMessageTypeKey		@"MessageType"
 #define kMTStatusBarOverlayDurationKey			@"MessageDuration"
 #define kMTStatusBarOverlayAnimationKey			@"MessageAnimation"
 #define kMTStatusBarOverlayImmediateKey			@"MessageImmediate"
+
+// keys used for saving state to NSUserDefaults
+#define kMTStatusBarOverlayStateShrinked        @"kMTStatusBarOverlayStateShrinked"
+
+
+// forward-declaration of delegate-protocol
+@protocol MTStatusBarOverlayDelegate;
+
 
 
 //===========================================================
@@ -202,6 +207,12 @@ typedef enum MTMessageType {
 
 // hides the status bar overlay
 - (void)hide;
+
+// saves the state in NSUserDefaults and synchronizes them
+- (void)saveState;
+- (void)saveStateSynchronized:(BOOL)synchronizeAtEnd;
+// restores the state from NSUserDefaults
+- (void)restoreState;
 
 @end
 

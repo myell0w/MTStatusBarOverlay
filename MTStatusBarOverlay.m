@@ -323,6 +323,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
         backgroundView_ = [[UIView alloc] initWithFrame:statusBarFrame];
 		backgroundView_.clipsToBounds = YES;
 		backgroundView_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        oldBackgroundViewFrame_ = backgroundView_.frame;
 
 		// Add gesture recognizers
 		UITapGestureRecognizer *tapGestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewClicked:)] autorelease];
@@ -423,7 +424,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
 //===========================================================
 #pragma mark -
-#pragma mark Change status bar appearance and behavior
+#pragma mark Change status bar appearance
 //===========================================================
 
 - (void)addSubviewToBackgroundView:(UIView *)view {
@@ -435,6 +436,35 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 	view.userInteractionEnabled = NO;
 	[self.backgroundView insertSubview:view atIndex:index];
 }
+
+
+//===========================================================
+#pragma mark -
+#pragma mark Save/Restore current state
+//===========================================================
+
+- (void)saveState {
+    [self saveStateSynchronized:YES];
+}
+
+- (void)saveStateSynchronized:(BOOL)synchronizeAtEnd {
+    // TODO: save more state
+    [[NSUserDefaults standardUserDefaults] setBool:self.shrinked forKey:kMTStatusBarOverlayStateShrinked];
+    
+    if (synchronizeAtEnd) {
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+}
+
+- (void)restoreState {
+    // restore shrinked-state
+    [self setShrinked:[[NSUserDefaults standardUserDefaults] boolForKey:kMTStatusBarOverlayStateShrinked] animated:NO];
+}
+
+//===========================================================
+#pragma mark -
+#pragma mark Post Messages
+//===========================================================
 
 - (void)postMessage:(NSString *)message {
 	[self postMessage:message animated:YES];
@@ -528,6 +558,10 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 	[self postMessage:message type:messageType duration:duration animated:animated immediate:YES];
 }
 
+//===========================================================
+#pragma mark -
+#pragma mark Show/Hide Status Bar
+//===========================================================
 
 - (void)showNextMessage {
 	// if there is no next message to show overlay is not active anymore
@@ -962,19 +996,29 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
 - (IBAction)contentViewClicked:(UIGestureRecognizer *)gestureRecognizer {
 	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
-		switch (self.animation) {
-			case MTStatusBarOverlayAnimationShrink:
-				[self setShrinked:!self.shrinked animated:YES];
-				break;
-
-			case MTStatusBarOverlayAnimationFallDown:
-				// detailView currently visible -> hide it
-				[self setDetailViewHidden:!self.detailViewHidden animated:YES];
-				break;
-			case MTStatusBarOverlayAnimationNone:
-				// ignore
-				break;
-		}
+        
+        // if we are currently in a special state, restore to normal
+        // and ignore current set animation in that case
+        if (self.shrinked) {
+            [self setShrinked:NO animated:YES];
+        } else if (!self.detailViewHidden) {
+            [self setDetailViewHidden:YES animated:NO];
+        } else {
+            // normal case/status, do what's specified in animation-state
+            switch (self.animation) {
+                case MTStatusBarOverlayAnimationShrink:
+                    [self setShrinked:!self.shrinked animated:YES];
+                    break;
+                    
+                case MTStatusBarOverlayAnimationFallDown:
+                    // detailView currently visible -> hide it
+                    [self setDetailViewHidden:!self.detailViewHidden animated:YES];
+                    break;
+                case MTStatusBarOverlayAnimationNone:
+                    // ignore
+                    break;
+            }
+        }
 
 		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidRecognizeGesture:)]) {
 			[self.delegate statusBarOverlayDidRecognizeGesture:gestureRecognizer];
