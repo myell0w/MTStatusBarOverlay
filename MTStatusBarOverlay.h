@@ -182,9 +182,11 @@ typedef enum MTMessageType {
 // shows an activity indicator and the given message
 - (void)postMessage:(NSString *)message;
 - (void)postMessage:(NSString *)message duration:(NSTimeInterval)duration;
+- (void)postMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated;
 - (void)postMessage:(NSString *)message animated:(BOOL)animated;
 // clears the message queue and shows this message instantly
 - (void)postImmediateMessage:(NSString *)message animated:(BOOL)animated;
+- (void)postImmediateMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated;
 
 // shows a checkmark instead of the activity indicator and hides the status bar after the specified duration
 - (void)postFinishMessage:(NSString *)message duration:(NSTimeInterval)duration;
