@@ -1102,11 +1102,6 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 			// update font and text
 			self.finishedLabel.font = [UIFont boldSystemFontOfSize:kFinishedFontSize];
 			self.finishedLabel.text = kFinishedText;
-
-			// hide after duration
-			[self performSelector:@selector(hide) withObject:nil afterDelay:duration];
-			// clear history after duration
-			[self performSelector:@selector(clearHistory) withObject:nil afterDelay:duration];
 			break;
 		case MTMessageTypeError:
 			// will call hide after delay
@@ -1121,13 +1116,16 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 			// update font and text
 			self.finishedLabel.font = [UIFont boldSystemFontOfSize:kErrorFontSize];
 			self.finishedLabel.text = kErrorText;
-
-			// hide after duration
-			[self performSelector:@selector(hide) withObject:nil afterDelay:duration];
-			// clear history after duration
-			[self performSelector:@selector(clearHistory) withObject:nil afterDelay:duration];
 			break;
 	}
+    
+    // if a duration is specified, hide after given duration
+    if (duration > 0) {
+        // hide after duration
+        [self performSelector:@selector(hide) withObject:nil afterDelay:duration];
+        // clear history after duration
+        [self performSelector:@selector(clearHistory) withObject:nil afterDelay:duration];
+    }
 }
 
 - (void)callDelegateWithNewMessage:(NSString *)newMessage {
