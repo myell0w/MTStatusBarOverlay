@@ -298,6 +298,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		detailTextView_ = [[UITextView alloc] initWithFrame:CGRectMake(0, kStatusBarHeight,
 																	 kDefaultDetailViewFrame.size.width, kDefaultDetailViewFrame.size.height - kStatusBarHeight)];
 		detailTextView_.backgroundColor = [UIColor clearColor];
+        detailTextView_.userInteractionEnabled = NO;
 		detailTextView_.hidden = detailViewMode_ != MTDetailViewModeDetailText;
 		[detailView_ addSubview:detailTextView_];
 
