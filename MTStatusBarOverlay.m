@@ -1002,7 +1002,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
         if (self.shrinked) {
             [self setShrinked:NO animated:YES];
         } else if (!self.detailViewHidden) {
-            [self setDetailViewHidden:YES animated:NO];
+            [self setDetailViewHidden:YES animated:YES];
         } else {
             // normal case/status, do what's specified in animation-state
             switch (self.animation) {
