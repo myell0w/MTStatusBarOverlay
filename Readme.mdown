@@ -52,7 +52,7 @@ MTStatusBarOverlay is compiled as a static library. You have two options for int
 
 #### First option: copy files
 1. Just copy over the files MTStatusBarOverlay.h and MTStatusBarOverlay.m to your project.
-2. #import "MTStatusBarOverlay.h" everywhere where you want to use it
+2. import "MTStatusBarOverlay.h" everywhere where you want to use it
 3. There is no step 3 :)
 
 #### Second option: Xcode dependent project
