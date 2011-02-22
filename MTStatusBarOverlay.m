@@ -335,8 +335,8 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		//downGestureRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
 
 		[backgroundView_ addGestureRecognizer:tapGestureRecognizer];
-		//[backgroundView_ addGestureRecognizer:upGestureRecognizer];
-		//[backgroundView_ addGestureRecognizer:downGestureRecognizer];
+		//[detailView_ addGestureRecognizer:upGestureRecognizer];
+		//[self addGestureRecognizer:downGestureRecognizer];
 
 		// Images used as background when status bar style is Default
 		defaultStatusBarImage_ = [[UIImage imageWithData:MTStatusBarBackgroundImageData(NO)] retain];
@@ -350,7 +350,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
 		// Activity Indicator
 		activityIndicator_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-		activityIndicator_.frame = CGRectMake(6.0f, 3.0f, self.frame.size.height - 6, self.frame.size.height - 6);
+		activityIndicator_.frame = CGRectMake(6.0f, 3.0f, backgroundView_.frame.size.height - 6, backgroundView_.frame.size.height - 6);
 		activityIndicator_.hidesWhenStopped = YES;
 		[self addSubviewToBackgroundView:activityIndicator_];
 
