@@ -7,10 +7,8 @@ UIStatusBarStyleDefault (left: full size, right: shrinked)
 
 New Features!
 -----------------
+* 22.02.2011: Methods to save/restore the state of the overlay!
 * 28.01.2011: Finally: Retina-Images for the overlay-background!
-* 16.01.2011: 3 detailViewModes: History, DetailText, Custom!
-* 02.01.2011: Delegate-protocol for informing about important events!
-* 30.12.2010: Every message gets queued and is shown for a minimum amount of time!
 
 Description
 -----------------
@@ -41,6 +39,23 @@ You can use the custom status bar like this:
      [overlay postMessage:@"Following myell0w on Github…" animated:NO];
    	 // ...
      [overlay postImmediateFinishMessage:@"Following was a good idea!" duration:2.0 animated:YES];
+
+
+Adding MTStatusBarOverlay to your project
+------------------
+MTStatusBarOverlay is compiled as a static library. You have two options for integrating it into you own project, after cloning the MTStatusBarOverlay git repository with the terminal-command: `git clone git://github.com/myell0w/MTStatusBarOverlay.git`
+
+#### First option: copy files
+1. Just copy over the files MTStatusBarOverlay.h and MTStatusBarOverlay.m to your project.
+2. #import "MTStatusBarOverlay.h" everywhere where you want to use it
+3. There is no step 3 :)
+
+#### Second option: Xcode dependent project
+1. Locate the "MTStatusBarOverlay.xcodeproj" file and drag itonto the root of your Xcode project's "Groups and Files"  sidebar.  A dialog will appear -- make sure "Copy items" is unchecked and "Reference Type" is "Relative to Project" before clicking "Add".
+2. Add MTStatusBarOverlay as a direct dependency (Xcode 3) or target dependency (Xcode 4) of your target
+3. Drag libMTStatusBarOverlay.a onto the section 'Link Binary with Libraries' of your target
+4. Finally, you need to tell your project where to find the MTStatusBarOverlay-header. Open your "Project Settings" and go to the "Build" tab. Look for "Header Search Paths" and double-click it.  Add the relative path from your project's directory to the MTStatusBarOverlay-directory.
+5. You are good to go, just #import "MTStatusBarOverlay.h" everywhere where you want to use it.
 
 
 Known Limitations
