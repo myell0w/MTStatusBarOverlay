@@ -7,6 +7,7 @@ UIStatusBarStyleDefault (left: full size, right: shrinked)
 
 New Features!
 -----------------
+* 23.02.2011: MTStatusBarOverlay can now show the progress of an activity!
 * 22.02.2011: Methods to save/restore the state of the overlay!
 * 28.01.2011: Finally: Retina-Images for the overlay-background!
 
@@ -34,11 +35,15 @@ You can use the custom status bar like this:
 	 overlay.animation = MTStatusBarOverlayAnimationFallDown;  // MTStatusBarOverlayAnimationShrink
 	 overlay.detailViewMode = MTDetailViewModeHistory;         // enable automatic history-tracking and show in detail-view
 	 overlay.delegate = self;
+	 overlay.progress = 0.0;
      [overlay postMessage:@"Following @myell0w on Twitter…"];
+     overlay.progress = 0.1;
  	 // ...
      [overlay postMessage:@"Following myell0w on Github…" animated:NO];
+     overlay.progress = 0.5;
    	 // ...
      [overlay postImmediateFinishMessage:@"Following was a good idea!" duration:2.0 animated:YES];
+     overlay.progress = 1.0;
 
 
 Adding MTStatusBarOverlay to your project
@@ -78,3 +83,7 @@ UIStatusBarStyleDefault, Landscape
 UIStatusBarStyleDefault, detail view visible
 
 ![History tracking:](https://img.skitch.com/20101226-b1k5hjbmfyepd2mh6nbdbgw6a4.jpg "History tracking")
+
+UIStatusBarStyleBlackOpaque, Progress visible
+
+![History tracking:](https://img.skitch.com/20110223-rm4mjnn7w2yp4qeuactjfiiah5.png "History tracking")

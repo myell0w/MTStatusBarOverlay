@@ -89,6 +89,11 @@ typedef enum MTMessageType {
 	UILabel *statusLabel1_;
 	UILabel *statusLabel2_;
 	UILabel *hiddenStatusLabel_;
+    
+    // used for displaying progress-information
+    UIImageView *progressView_;
+    double progress_;
+    
 	// for displaying activity indication
 	UIActivityIndicatorView *activityIndicator_;
 	UILabel *finishedLabel_;
@@ -137,6 +142,8 @@ typedef enum MTMessageType {
 @property (nonatomic, retain) UIView *backgroundView;
 // the detailView is shown when animation is set to "FallDown"
 @property (nonatomic, retain) UIView *detailView;
+// the current progress
+@property (nonatomic, assign) double progress;
 // the frame of the status bar when animation is set to "Shrink" and it is shrinked
 @property (nonatomic, assign) CGRect smallFrame;
 // the current active animation

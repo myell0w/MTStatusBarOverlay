@@ -82,6 +82,13 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 #define kDarkThemeDetailViewBorderColor				[UIColor whiteColor]
 #define kDarkThemeHistoryTextColor					[UIColor whiteColor]
 
+///////////////////////////////////////////////////////
+// Progress
+///////////////////////////////////////////////////////
+
+#define kProgressViewAlpha                          0.7f
+#define kProgressViewBackgroundColor                [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:1.0f]
+
 
 ///////////////////////////////////////////////////////
 // Animations
@@ -101,6 +108,9 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
 // animation duration of animation mode fallDown
 #define kAnimationDurationFallDown				0.4f
+
+// animation duration of change of progressView-size
+#define kUpdateProgressViewDuration             0.2f
 
 // delay after that the status bar gets visible again after rotation
 #define kRotationAppearDelay					[UIApplication sharedApplication].statusBarOrientationAnimationDuration
@@ -159,6 +169,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 @property (nonatomic, retain) UILabel *statusLabel2;
 @property (nonatomic, assign) UILabel *hiddenStatusLabel;
 @property (nonatomic, readonly) UILabel *visibleStatusLabel;
+@property (nonatomic, retain) UIImageView *progressView;
 @property (nonatomic, assign) CGRect oldBackgroundViewFrame;
 // overwrite property for read-write-access
 @property (assign, getter=isHideInProgress) BOOL hideInProgress;
@@ -190,6 +201,8 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 - (void)setColorSchemeForStatusBarStyle:(UIStatusBarStyle)style messageType:(MTMessageType)messageType;
 // updates the visiblity of the activity indicator and finished-label depending on the type
 - (void)updateUIForMessageType:(MTMessageType)messageType duration:(NSTimeInterval)duration;
+// updates the size of the progressView to always cover only the displayed text-frame
+- (void)updateProgressViewSizeForLabel:(UILabel *)label;
 // calls the delegate when a switch from one message to another one occured
 - (void)callDelegateWithNewMessage:(NSString *)newMessage;
 // update the height of the detail text view according to new text
@@ -228,6 +241,8 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 @synthesize statusLabel1 = statusLabel1_;
 @synthesize statusLabel2 = statusLabel2_;
 @synthesize hiddenStatusLabel = hiddenStatusLabel_;
+@synthesize progress = progress_;
+@synthesize progressView = progressView_;
 @synthesize activityIndicator = activityIndicator_;
 @synthesize finishedLabel = finishedLabel_;
 @synthesize hidesActivity = hidesActivity_;
@@ -385,6 +400,14 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
 		// the hidden status label at the beginning
 		hiddenStatusLabel_ = statusLabel2_;
+        
+        
+        progress_ = 1.0;
+        progressView_ = [[UIImageView alloc] initWithFrame:statusBarBackgroundImageView_.frame];
+        progressView_.opaque = NO;
+        progressView_.hidden = YES;
+        progressView_.alpha = kProgressViewAlpha;
+        [self addSubviewToBackgroundView:progressView_];
 
 		messageQueue_ = [[NSMutableArray alloc] init];
 		canRemoveImmediateMessagesFromQueue_ = YES;
@@ -409,6 +432,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 	[statusBarBackgroundImageView_ release], statusBarBackgroundImageView_ = nil;
 	[statusLabel1_ release], statusLabel1_ = nil;
 	[statusLabel2_ release], statusLabel2_ = nil;
+    [progressView_ release], progressView_ = nil;
 	[activityIndicator_ release], activityIndicator_ = nil;
 	[finishedLabel_ release], finishedLabel_ = nil;
 	[defaultStatusBarImage_ release], defaultStatusBarImage_ = nil;
@@ -626,6 +650,8 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 	if (self.reallyHidden) {
 		// set text of visible status label
 		self.visibleStatusLabel.text = message;
+        // update progressView to only cover displayed text
+        [self updateProgressViewSizeForLabel:self.visibleStatusLabel];
 
 		// show status bar overlay with animation
 		[UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration
@@ -654,6 +680,8 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		if (animated) {
 			// set text of currently not visible label to new text
 			self.hiddenStatusLabel.text = message;
+            // update progressView to only cover displayed text
+            [self updateProgressViewSizeForLabel:self.hiddenStatusLabel];
 
 			// position hidden status label under visible status label
 			self.hiddenStatusLabel.frame = CGRectMake(self.hiddenStatusLabel.frame.origin.x,
@@ -707,6 +735,8 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 			[self addMessageToHistory:self.visibleStatusLabel.text];
 			// set new text
 			self.visibleStatusLabel.text = message;
+            // update progressView to only cover displayed text
+            [self updateProgressViewSizeForLabel:self.visibleStatusLabel];
 
 			// remove the message from the queue
 			@synchronized(self.messageQueue) {
@@ -825,6 +855,14 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 #pragma mark -
 #pragma mark Setter/Getter
 //===========================================================
+
+- (void)setProgress:(double)progress {
+    // bound progress to 0.0 - 1.0
+    progress_ = MAX(0.0, MIN(progress, 1.0));
+    
+    // update UI on main thread
+    [self performSelectorOnMainThread:@selector(updateProgressViewSizeForLabel:) withObject:self.visibleStatusLabel waitUntilDone:NO];
+}
 
 - (void)setDetailText:(NSString *)detailText {
 	// custom setter Memory Mgmt
@@ -1099,6 +1137,9 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		self.detailView.layer.borderColor = [kLightThemeDetailViewBorderColor CGColor];
 		self.historyTableView.separatorColor = kLightThemeDetailViewBorderColor;
 		self.detailTextView.textColor = kLightThemeHistoryTextColor;
+        
+        self.progressView.backgroundColor = [UIColor clearColor];
+        self.progressView.image = [self.defaultStatusBarImageShrinked stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
 	} else {
 		// set color of labels depending on messageType
         switch(messageType) {
@@ -1124,6 +1165,9 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		self.detailView.layer.borderColor = [kDarkThemeDetailViewBorderColor CGColor];
 		self.historyTableView.separatorColor = kDarkThemeDetailViewBorderColor;
 		self.detailTextView.textColor = kDarkThemeHistoryTextColor;
+        
+        self.progressView.backgroundColor = kProgressViewBackgroundColor;
+        self.progressView.image = nil;
 	}
 }
 
@@ -1155,6 +1199,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 			// update font and text
 			self.finishedLabel.font = [UIFont boldSystemFontOfSize:kFinishedFontSize];
 			self.finishedLabel.text = kFinishedText;
+            self.progress = 1.0;
 			break;
 		case MTMessageTypeError:
 			// will call hide after delay
@@ -1169,6 +1214,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 			// update font and text
 			self.finishedLabel.font = [UIFont boldSystemFontOfSize:kErrorFontSize];
 			self.finishedLabel.text = kErrorText;
+            self.progress = 1.0;
 			break;
 	}
     
@@ -1199,6 +1245,25 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 	CGRect f = self.detailTextView.frame;
 	f.size.height = self.detailTextView.contentSize.height;
 	self.detailTextView.frame = f;
+}
+
+- (void)updateProgressViewSizeForLabel:(UILabel *)label {
+    if (self.progress < 1.0) {
+        CGSize size = [label sizeThatFits:label.frame.size];
+        CGFloat width = size.width * (float)(1.0 - self.progress);
+        CGFloat x = self.backgroundView.center.x + size.width/2.f - width;
+        
+        // progressView always covers only the visible portion of the text
+        // it "shrinks" to the right with increased progress to reveal more
+        // text under it
+        self.progressView.hidden = NO;
+        [UIView animateWithDuration:kUpdateProgressViewDuration animations:^{
+            self.progressView.frame = CGRectMake(x, self.progressView.frame.origin.y,
+                                                 self.backgroundView.frame.size.width-x, self.progressView.frame.size.height);
+        }];
+    } else {
+        self.progressView.hidden = YES;
+    }
 }
 
 //===========================================================
