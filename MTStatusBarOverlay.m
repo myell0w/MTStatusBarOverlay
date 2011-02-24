@@ -1257,10 +1257,11 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
         // it "shrinks" to the right with increased progress to reveal more
         // text under it
         self.progressView.hidden = NO;
-        [UIView animateWithDuration:kUpdateProgressViewDuration animations:^{
-            self.progressView.frame = CGRectMake(x, self.progressView.frame.origin.y,
-                                                 self.backgroundView.frame.size.width-x, self.progressView.frame.size.height);
-        }];
+        [UIView animateWithDuration:self.progress > 0.0 ? kUpdateProgressViewDuration : 0.0
+                         animations:^{
+                             self.progressView.frame = CGRectMake(x, self.progressView.frame.origin.y,
+                                                                  self.backgroundView.frame.size.width-x, self.progressView.frame.size.height);
+                         }];
     } else {
         self.progressView.hidden = YES;
     }
