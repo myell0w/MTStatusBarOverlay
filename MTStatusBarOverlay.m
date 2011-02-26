@@ -557,7 +557,9 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
 	// if the overlay is currently not active, begin with showing of messages
 	if (!self.active) {
-		[self showNextMessage];
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [self showNextMessage];
+        }];
 	}
 }
 
@@ -872,12 +874,14 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
     }
 
 	// update text in label
-	self.detailTextView.text = detailText;
-
-	// update height of detailText-View
-	[self updateDetailTextViewHeight];
-	// update height of detailView
-	[self setDetailViewHidden:self.detailViewHidden animated:YES];
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        self.detailTextView.text = detailText;
+        // update height of detailText-View
+        [self updateDetailTextViewHeight];
+    }];
+    
+    // update height of detailView
+    [self setDetailViewHidden:self.detailViewHidden animated:YES];
 }
 
 - (void)setDetailViewMode:(MTDetailViewMode)detailViewMode {
@@ -1164,7 +1168,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 		self.detailView.backgroundColor = kDarkThemeDetailViewBackgroundColor;
 		self.detailView.layer.borderColor = [kDarkThemeDetailViewBorderColor CGColor];
 		self.historyTableView.separatorColor = kDarkThemeDetailViewBorderColor;
-		self.detailTextView.textColor = kDarkThemeHistoryTextColor;
+        self.detailTextView.textColor = kDarkThemeHistoryTextColor;
         
         self.progressView.backgroundColor = kProgressViewBackgroundColor;
         self.progressView.image = nil;
@@ -1244,7 +1248,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 - (void)updateDetailTextViewHeight {
 	CGRect f = self.detailTextView.frame;
 	f.size.height = self.detailTextView.contentSize.height;
-	self.detailTextView.frame = f;
+    self.detailTextView.frame = f;
 }
 
 - (void)updateProgressViewSizeForLabel:(UILabel *)label {
