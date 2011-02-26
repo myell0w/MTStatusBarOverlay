@@ -557,9 +557,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
 	// if the overlay is currently not active, begin with showing of messages
 	if (!self.active) {
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            [self showNextMessage];
-        }];
+        [self performSelectorOnMainThread:@selector(showNextMessage) withObject:nil waitUntilDone:NO];
 	}
 }
 
