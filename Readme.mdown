@@ -1,6 +1,8 @@
 Read Me
 =====================
 
+If you use MTStatusBarOverlay in your app, please drop me a line so that I can add your app here!
+
 UIStatusBarStyleDefault (left: full size, right: shrinked)
 
 ![Default style](https://img.skitch.com/20101223-r1ddre3u4sjmn4htkqw3bhp84j.jpg "Default style")
