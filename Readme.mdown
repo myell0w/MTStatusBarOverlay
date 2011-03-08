@@ -89,3 +89,9 @@ UIStatusBarStyleDefault, detail view visible
 UIStatusBarStyleBlackOpaque, Progress visible
 
 ![History tracking:](https://img.skitch.com/20110223-rm4mjnn7w2yp4qeuactjfiiah5.png "History tracking")
+
+
+Apps using MTStatusBarOverlay
+------------------------
+* [Öffnungszeiten Österreich](http://www.oeffnungszeitenapp.at/ "oeffnungszeitenapp.at")
+* Municipal Denmark
