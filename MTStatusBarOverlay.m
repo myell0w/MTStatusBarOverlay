@@ -627,6 +627,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	if (!self.reallyHidden && [self.visibleStatusLabel.text isEqualToString:message]) {
 		// remove unneccesary message
 		@synchronized(self.messageQueue) {
+          if (self.messageQueue.count)
 			[self.messageQueue removeLastObject];
 		}
         
@@ -700,6 +701,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
                              
                              // remove the message from the queue
                              @synchronized(self.messageQueue) {
+                               if (self.messageQueue.count)
                                  [self.messageQueue removeLastObject];
                              }
                              
@@ -722,6 +724,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
         
         // remove the message from the queue
         @synchronized(self.messageQueue) {
+          if (self.messageQueue.count)
             [self.messageQueue removeLastObject];
         }
         
