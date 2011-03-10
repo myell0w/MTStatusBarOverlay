@@ -95,3 +95,4 @@ Apps using MTStatusBarOverlay
 ------------------------
 * [Öffnungszeiten Österreich](http://www.oeffnungszeitenapp.at/ "oeffnungszeitenapp.at")
 * Municipal Denmark
+* [Anytune](http://bit.ly/anytune-itunes-preview "Anytune")
