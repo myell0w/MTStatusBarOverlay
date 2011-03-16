@@ -89,11 +89,11 @@ typedef enum MTMessageType {
 	UILabel *statusLabel1_;
 	UILabel *statusLabel2_;
 	UILabel *hiddenStatusLabel_;
-    
+
     // used for displaying progress-information
     UIImageView *progressView_;
     double progress_;
-    
+
 	// for displaying activity indication
 	UIActivityIndicatorView *activityIndicator_;
 	UILabel *finishedLabel_;
@@ -181,6 +181,9 @@ typedef enum MTMessageType {
 
 // Singleton Instance
 + (MTStatusBarOverlay *)sharedInstance;
++ (MTStatusBarOverlay *)sharedOverlay;
++ (MTStatusBarOverlay *)threadSafeSharedInstance;
++ (MTStatusBarOverlay *)threadSafeSharedOverlay;
 
 //===========================================================
 #pragma mark -
