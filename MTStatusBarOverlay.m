@@ -64,6 +64,9 @@ MAX([UIApplication sharedApplication].statusBarFrame.size.width, [UIApplication 
 #define kLightThemeTextColor						[UIColor blackColor]
 #define kLightThemeErrorMessageTextColor            [UIColor blackColor] // [UIColor colorWithRed:0.494898f green:0.330281f blue:0.314146f alpha:1.0f]
 #define kLightThemeFinishedMessageTextColor         [UIColor blackColor] // [UIColor colorWithRed:0.389487f green:0.484694f blue:0.38121f alpha:1.0f]
+#define kLightThemeShadowColor                      [UIColor whiteColor]
+#define kLightThemeErrorMessageShadowColor          [UIColor whiteColor]
+#define kLightThemeFinishedMessageShadowColor       [UIColor whiteColor]
 #define kLightThemeActivityIndicatorViewStyle		UIActivityIndicatorViewStyleGray
 #define kLightThemeDetailViewBackgroundColor		[UIColor blackColor]
 #define kLightThemeDetailViewBorderColor			[UIColor darkGrayColor]
@@ -371,6 +374,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 		// Finished-Label
 		finishedLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(4,1,backgroundView_.frame.size.height, backgroundView_.frame.size.height-1)];
+		finishedLabel_.shadowOffset = CGSizeMake(0, 1);
 		finishedLabel_.backgroundColor = [UIColor clearColor];
 		finishedLabel_.hidden = YES;
 		finishedLabel_.text = kFinishedText;
@@ -381,6 +385,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		// Status Label 1 is first visible
 		statusLabel1_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, 0.0f, backgroundView_.frame.size.width - 60.0f,backgroundView_.frame.size.height-1)];
 		statusLabel1_.backgroundColor = [UIColor clearColor];
+		statusLabel1_.shadowOffset = CGSizeMake(0, 1);
 		statusLabel1_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
 		statusLabel1_.textAlignment = UITextAlignmentCenter;
 		statusLabel1_.numberOfLines = 1;
@@ -390,6 +395,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 		// Status Label 2 is hidden
 		statusLabel2_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, backgroundView_.frame.size.height,backgroundView_.frame.size.width - 60.0f , backgroundView_.frame.size.height-1)];
+		statusLabel2_.shadowOffset = CGSizeMake(0, 1);
 		statusLabel2_.backgroundColor = [UIColor clearColor];
 		statusLabel2_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
 		statusLabel2_.textAlignment = UITextAlignmentCenter;
@@ -1105,16 +1111,25 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
                 self.statusLabel1.textColor = kLightThemeFinishedMessageTextColor;
                 self.statusLabel2.textColor = kLightThemeFinishedMessageTextColor;
                 self.finishedLabel.textColor = kLightThemeFinishedMessageTextColor;
+                self.statusLabel1.shadowColor = kLightThemeFinishedMessageShadowColor;
+                self.statusLabel2.shadowColor = kLightThemeFinishedMessageShadowColor;
+                self.finishedLabel.shadowColor = kLightThemeFinishedMessageShadowColor;
                 break;
             case MTMessageTypeError:
                 self.statusLabel1.textColor = kLightThemeErrorMessageTextColor;
                 self.statusLabel2.textColor = kLightThemeErrorMessageTextColor;
                 self.finishedLabel.textColor = kLightThemeErrorMessageTextColor;
+                self.statusLabel1.shadowColor = kLightThemeErrorMessageShadowColor;
+                self.statusLabel2.shadowColor = kLightThemeErrorMessageShadowColor;
+                self.finishedLabel.shadowColor = kLightThemeErrorMessageShadowColor;
                 break;
             default:
                 self.statusLabel1.textColor = kLightThemeTextColor;
                 self.statusLabel2.textColor = kLightThemeTextColor;
                 self.finishedLabel.textColor = kLightThemeTextColor;
+                self.statusLabel1.shadowColor = kLightThemeShadowColor;
+                self.statusLabel2.shadowColor = kLightThemeShadowColor;
+                self.finishedLabel.shadowColor = kLightThemeShadowColor;
                 break;
         }
 
