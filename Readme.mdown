@@ -1,6 +1,8 @@
 Read Me
 =====================
 
+<p style="color:red"> ATTENTION: Recently some apps got rejected (but some didn't) because of messing with the status bar hierarchy. Therefore be warned that using MTStatusBarOverlay could lead in an rejection of your app. As a result of this I will currently not put any more work into MTStatusBarOverlay until the situation is clear, whether this is still allowed or not. Sorry for that, I will keep you updated! </p>
+
 If you use MTStatusBarOverlay in your app, please drop me a line so that I can add your app here!
 
 UIStatusBarStyleDefault (left: full size, right: shrinked)
