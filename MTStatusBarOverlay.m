@@ -89,7 +89,7 @@ MAX([UIApplication sharedApplication].statusBarFrame.size.width, [UIApplication 
 // Progress
 ///////////////////////////////////////////////////////
 
-#define kProgressViewAlpha                          0.7f
+#define kProgressViewAlpha                          0.4f
 #define kProgressViewBackgroundColor                [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:1.0f]
 
 
@@ -1252,7 +1252,12 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
     if (self.progress < 1.0) {
         CGSize size = [label sizeThatFits:label.frame.size];
         CGFloat width = size.width * (float)(1.0 - self.progress);
-        CGFloat x = self.backgroundView.center.x + size.width/2.f - width;
+        CGFloat x = label.center.x + size.width/2.f - width;
+        
+        // if we werent able to determine a size, do nothing
+        if (size.width == 0) {
+            return;
+        }
 
         // progressView always covers only the visible portion of the text
         // it "shrinks" to the right with increased progress to reveal more
