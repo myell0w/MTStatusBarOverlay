@@ -765,6 +765,21 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	}];
 }
 
+- (void)hideTemporary {
+    // hide status bar overlay with animation
+	[UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration animations:^{
+		[self setHidden:YES useAlpha:YES];
+	}];
+}
+// this shows the status bar overlay, if there is text to show
+- (void)show {
+    if (self.visibleStatusLabel.text.length > 0) {
+        // show status bar overlay with animation
+        [UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration animations:^{
+            [self setHidden:NO useAlpha:YES];
+        }];
+    }
+}
 
 //===========================================================
 #pragma mark -
