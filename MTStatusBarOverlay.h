@@ -215,8 +215,15 @@ typedef enum MTMessageType {
 // clears the message queue and shows this message instantly
 - (void)postImmediateErrorMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated;
 
-// hides the status bar overlay
+// hides the status bar overlay and resets it
 - (void)hide;
+// hides the status bar overlay but doesn't reset it's values
+// this is useful if e.g. you have a screen where you don't have
+// a status bar, but the other screens have one
+// then you can hide it temporary and show it again afterwards
+- (void)hideTemporary;
+// this shows the status bar overlay, if there is text to show
+- (void)show;
 
 // saves the state in NSUserDefaults and synchronizes them
 - (void)saveState;
