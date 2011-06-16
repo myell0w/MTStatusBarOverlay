@@ -1175,6 +1175,9 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
                 self.finishedLabel.textColor = kDarkThemeTextColor;
                 break;
         }
+        self.statusLabel1.shadowColor = nil;
+        self.statusLabel2.shadowColor = nil;
+        self.finishedLabel.shadowColor = nil;
 
 		self.activityIndicator.activityIndicatorViewStyle = kDarkThemeActivityIndicatorViewStyle;
 		self.detailView.backgroundColor = kDarkThemeDetailViewBackgroundColor;
