@@ -738,7 +738,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	[self setDetailViewHidden:YES animated:YES];
 
 	// hide status bar overlay with animation
-	[UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration animations:^{
+	[UIView animateWithDuration:self.shrinked ? 0. : kAppearAnimationDuration animations:^{
 		[self setHidden:YES useAlpha:YES];
 	} completion:^(BOOL finished) {
 		// call delegate
@@ -750,7 +750,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 - (void)hideTemporary {
     // hide status bar overlay with animation
-	[UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration animations:^{
+	[UIView animateWithDuration:self.shrinked ? 0. : kAppearAnimationDuration animations:^{
 		[self setHidden:YES useAlpha:YES];
 	}];
 }
@@ -758,7 +758,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 - (void)show {
     if (self.visibleStatusLabel.text.length > 0) {
         // show status bar overlay with animation
-        [UIView animateWithDuration:self.shrinked ? 0 : kAppearAnimationDuration animations:^{
+        [UIView animateWithDuration:self.shrinked ? 0. : kAppearAnimationDuration animations:^{
             [self setHidden:NO useAlpha:YES];
         }];
     }
@@ -797,26 +797,26 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	CGFloat pi = (CGFloat)M_PI;
 	if (orientation == UIDeviceOrientationPortrait) {
 		self.transform = CGAffineTransformIdentity;
-		self.frame = CGRectMake(0,0,kScreenWidth,kStatusBarHeight);
+		self.frame = CGRectMake(0.f,0.f,kScreenWidth,kStatusBarHeight);
 		self.smallFrame = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
 	}else if (orientation == UIDeviceOrientationLandscapeLeft) {
-		self.transform = CGAffineTransformMakeRotation(pi * (90) / 180.0f);
+		self.transform = CGAffineTransformMakeRotation(pi * (90.f) / 180.0f);
 		self.frame = CGRectMake(kScreenWidth - kStatusBarHeight,0, kStatusBarHeight, kScreenHeight);
 		self.smallFrame = CGRectMake(kScreenHeight-kWidthSmall,0,kWidthSmall,kStatusBarHeight);
 	} else if (orientation == UIDeviceOrientationLandscapeRight) {
-		self.transform = CGAffineTransformMakeRotation(pi * (-90) / 180.0f);
-		self.frame = CGRectMake(0,0, kStatusBarHeight, kScreenHeight);
-		self.smallFrame = CGRectMake(kScreenHeight-kWidthSmall,0, kWidthSmall, kStatusBarHeight);
+		self.transform = CGAffineTransformMakeRotation(pi * (-90.f) / 180.0f);
+		self.frame = CGRectMake(0.f,0.f, kStatusBarHeight, kScreenHeight);
+		self.smallFrame = CGRectMake(kScreenHeight-kWidthSmall,0.f, kWidthSmall, kStatusBarHeight);
 	} else if (orientation == UIDeviceOrientationPortraitUpsideDown) {
 		self.transform = CGAffineTransformMakeRotation(pi);
-		self.frame = CGRectMake(0,kScreenHeight - kStatusBarHeight,kScreenWidth,kStatusBarHeight);
-		self.smallFrame = CGRectMake(self.frame.size.width - kWidthSmall, 0.0f, kWidthSmall, self.frame.size.height);
+		self.frame = CGRectMake(0.f,kScreenHeight - kStatusBarHeight,kScreenWidth,kStatusBarHeight);
+		self.smallFrame = CGRectMake(self.frame.size.width - kWidthSmall, 0.f, kWidthSmall, self.frame.size.height);
 	}
 
 	// if the statusBar is currently shrinked, update the frames for the new rotation state
 	if (shrinkedBeforeTransformation) {
 		// the oldBackgroundViewFrame is the frame of the whole StatusBar
-		self.oldBackgroundViewFrame = CGRectMake(0,0,UIInterfaceOrientationIsPortrait(orientation) ? kScreenWidth : kScreenHeight,kStatusBarHeight);
+		self.oldBackgroundViewFrame = CGRectMake(0.f,0.f,UIInterfaceOrientationIsPortrait(orientation) ? kScreenWidth : kScreenHeight,kStatusBarHeight);
 		// the backgroundView gets the newly computed smallFrame
 		self.backgroundView.frame = self.smallFrame;
 	}
@@ -853,20 +853,19 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 - (void)setDetailText:(NSString *)detailText {
-	// custom setter Memory Mgmt
 	if (detailText_ != detailText) {
         detailText_ = [detailText copy];
+        
+        // update text in label
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            self.detailTextView.text = detailText;
+            // update height of detailText-View
+            [self updateDetailTextViewHeight];
+        }];
+        
+        // update height of detailView
+        [self setDetailViewHidden:self.detailViewHidden animated:YES];
     }
-
-	// update text in label
-    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        self.detailTextView.text = detailText;
-        // update height of detailText-View
-        [self updateDetailTextViewHeight];
-    }];
-
-    // update height of detailView
-    [self setDetailViewHidden:self.detailViewHidden animated:YES];
 }
 
 - (void)setDetailViewMode:(MTDetailViewMode)detailViewMode {
@@ -903,7 +902,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 - (void)setShrinked:(BOOL)shrinked animated:(BOOL)animated {
-	[UIView animateWithDuration:animated ? kAnimationDurationShrink : 0
+	[UIView animateWithDuration:animated ? kAnimationDurationShrink : 0.
 					 animations:^{
 						 // shrink the overlay
 						 if (shrinked) {
@@ -928,15 +927,15 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 
 - (BOOL)isDetailViewHidden {
-	return self.detailView.hidden == YES || self.detailView.alpha == 0.0 ||
+	return self.detailView.hidden == YES || self.detailView.alpha == 0.f ||
     self.detailView.frame.origin.y + self.detailView.frame.size.height < kStatusBarHeight;
 }
 
 - (void)setDetailViewHidden:(BOOL)hidden animated:(BOOL)animated {
 	// hide detail view
 	if (hidden) {
-		[UIView animateWithDuration:animated ? kAnimationDurationFallDown : 0
-							  delay:0
+		[UIView animateWithDuration:animated ? kAnimationDurationFallDown : 0.
+							  delay:0.
 							options:UIViewAnimationOptionCurveEaseOut
 						 animations: ^{
 							 self.detailView.frame = CGRectMake(self.detailView.frame.origin.x, - self.detailView.frame.size.height,
@@ -946,8 +945,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	}
 	// show detail view
 	else {
-		[UIView animateWithDuration:animated ? kAnimationDurationFallDown : 0
-							  delay:0
+		[UIView animateWithDuration:animated ? kAnimationDurationFallDown : 0.
+							  delay:0.
 							options:UIViewAnimationOptionCurveEaseIn
 						 animations: ^{
 							 int y = 0;
@@ -992,7 +991,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	static NSString *cellID = @"HistoryCellID";
+	static NSString *cellID = @"MTStatusBarOverlayHistoryCellID";
 	UITableViewCell *cell = nil;
 
 	// step 1: is there a reusable cell?
@@ -1015,7 +1014,6 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
     return cell;
 }
-
 
 //===========================================================
 #pragma mark -
@@ -1248,13 +1246,13 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 - (void)updateProgressViewSizeForLabel:(UILabel *)label {
-    if (self.progress < 1.0) {
+    if (self.progress < 1.) {
         CGSize size = [label sizeThatFits:label.frame.size];
-        CGFloat width = size.width * (float)(1.0 - self.progress);
+        CGFloat width = size.width * (float)(1. - self.progress);
         CGFloat x = label.center.x + size.width/2.f - width;
         
         // if we werent able to determine a size, do nothing
-        if (size.width == 0) {
+        if (size.width == 0.f) {
             return;
         }
 
@@ -1326,14 +1324,14 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 - (void)setHidden:(BOOL)hidden useAlpha:(BOOL)useAlpha {
 	if (useAlpha) {
-		self.alpha = hidden ? 0.0f : 1.0f;
+		self.alpha = hidden ? 0.f : 1.f;
 	} else {
 		self.hidden = hidden;
 	}
 }
 
 - (BOOL)isReallyHidden {
-	return self.alpha == 0.0f || self.hidden;
+	return self.alpha == 0.f || self.hidden;
 }
 
 //===========================================================
