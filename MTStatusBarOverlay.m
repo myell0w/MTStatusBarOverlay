@@ -23,7 +23,6 @@
 #import <QuartzCore/QuartzCore.h>
 
 
-
 //===========================================================
 #pragma mark -
 #pragma mark Function Headers
@@ -234,10 +233,6 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 @implementation MTStatusBarOverlay
 
-//===========================================================
-#pragma mark -
-#pragma mark Synthesizing
-//===========================================================
 @synthesize backgroundView = backgroundView_;
 @synthesize detailView = detailView_;
 @synthesize statusBarBackgroundImageView = statusBarBackgroundImageView_;
@@ -370,6 +365,12 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		activityIndicator_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
 		activityIndicator_.frame = CGRectMake(6.0f, 3.0f, backgroundView_.frame.size.height - 6, backgroundView_.frame.size.height - 6);
 		activityIndicator_.hidesWhenStopped = YES;
+        
+        // iOS 5 doesn't correctly resize the activityIndicator. Bug?
+        if ([activityIndicator_ respondsToSelector:@selector(setColor:)]) {
+            [activityIndicator_.layer setValue:[NSNumber numberWithFloat:0.8f] forKeyPath:@"transform.scale"];
+        }
+        
 		[self addSubviewToBackgroundView:activityIndicator_];
 
 		// Finished-Label
