@@ -166,24 +166,24 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 @interface MTStatusBarOverlay ()
 
-@property (nonatomic, retain) UIActivityIndicatorView *activityIndicator;
-@property (nonatomic, retain) UIImageView *statusBarBackgroundImageView;
-@property (nonatomic, retain) UILabel *statusLabel1;
-@property (nonatomic, retain) UILabel *statusLabel2;
+@property (nonatomic, strong) UIActivityIndicatorView *activityIndicator;
+@property (nonatomic, strong) UIImageView *statusBarBackgroundImageView;
+@property (nonatomic, strong) UILabel *statusLabel1;
+@property (nonatomic, strong) UILabel *statusLabel2;
 @property (nonatomic, assign) UILabel *hiddenStatusLabel;
 @property (nonatomic, readonly) UILabel *visibleStatusLabel;
-@property (nonatomic, retain) UIImageView *progressView;
+@property (nonatomic, strong) UIImageView *progressView;
 @property (nonatomic, assign) CGRect oldBackgroundViewFrame;
 // overwrite property for read-write-access
 @property (assign, getter=isHideInProgress) BOOL hideInProgress;
 @property (assign, getter=isActive) BOOL active;
 // read out hidden-state using alpha-value and hidden-property
 @property (nonatomic, readonly, getter=isReallyHidden) BOOL reallyHidden;
-@property (nonatomic, retain) UITextView *detailTextView;
-@property (nonatomic, retain) NSMutableArray *messageQueue;
+@property (nonatomic, strong) UITextView *detailTextView;
+@property (nonatomic, strong) NSMutableArray *messageQueue;
 // overwrite property for read-write-access
-@property (nonatomic, retain) NSMutableArray *messageHistory;
-@property (nonatomic, retain) UITableView *historyTableView;
+@property (nonatomic, strong) NSMutableArray *messageHistory;
+@property (nonatomic, strong) UITableView *historyTableView;
 
 // intern method that posts a new entry to the message-queue
 - (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated immediate:(BOOL)immediate;
@@ -193,10 +193,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 - (void)showNextMessage;
 
 // is called when the user touches the statusbar
-- (IBAction)contentViewClicked:(UIGestureRecognizer *)gestureRecognizer;
+- (void)contentViewClicked:(UIGestureRecognizer *)gestureRecognizer;
 // is called when the user swipes down the statusbar
-- (IBAction)contentViewSwipedUp:(UIGestureRecognizer *)gestureRecognizer;
-- (IBAction)contentViewSwipedDown:(UIGestureRecognizer *)gestureRecognizer;
+- (void)contentViewSwipedUp:(UIGestureRecognizer *)gestureRecognizer;
+- (void)contentViewSwipedDown:(UIGestureRecognizer *)gestureRecognizer;
 
 // updates the current status bar background image for the given style and current size
 - (void)setStatusBarBackgroundForStyle:(UIStatusBarStyle)style;
@@ -1360,67 +1360,22 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 #pragma mark Singleton definitons
 //===========================================================
 
-static MTStatusBarOverlay *sharedMTStatusBarOverlay = nil;
-
 + (MTStatusBarOverlay *)sharedInstance {
-	@synchronized(self) {
-		if (sharedMTStatusBarOverlay == nil && [[UIView class] respondsToSelector:@selector(animateWithDuration:animations:)]) {
-			sharedMTStatusBarOverlay = [[self alloc] initWithFrame:CGRectZero];
-		}
-	}
+    static dispatch_once_t pred;
+    __strong static MTStatusBarOverlay *sharedOverlay = nil; 
+    
+    dispatch_once(&pred, ^{ 
+        sharedOverlay = [[MTStatusBarOverlay alloc] init]; 
+    }); 
 
-	return sharedMTStatusBarOverlay;
+	return sharedOverlay;
 }
 
 + (MTStatusBarOverlay *)sharedOverlay {
 	return [self sharedInstance];
 }
 
-+(MTStatusBarOverlay *)threadSafeSharedInstance {
-	[self performSelectorOnMainThread:@selector(sharedInstance) withObject:nil waitUntilDone:YES];
-
-	return [self sharedInstance];
-}
-
-+(MTStatusBarOverlay *)threadSafeSharedOverlay {
-	return [self threadSafeSharedInstance];
-}
-
-+ (id)allocWithZone:(NSZone *)zone {
-	@synchronized(self) {
-		if (sharedMTStatusBarOverlay == nil) {
-			sharedMTStatusBarOverlay = [super allocWithZone:zone];
-
-			return sharedMTStatusBarOverlay;
-		}
-	}
-
-	return nil;
-}
-
-- (id)copyWithZone:(NSZone *)zone {
-	return self;
-}
-
-- (id)retain {
-	return self;
-}
-
-- (NSUInteger)retainCount {
-	return NSUIntegerMax;
-}
-
-- (void)release {
-}
-
-- (id)autorelease {
-	return self;
-}
-
 @end
-
-
-
 
 
 //===========================================================
