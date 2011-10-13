@@ -564,7 +564,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		[self.messageQueue removeObjectsInArray:clearedMessages];
 
 		// call delegate
-		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)] && clearedMessages.count > 0) {
+		if ([self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)] && clearedMessages.count > 0) {
 			[self.delegate statusBarOverlayDidClearMessageQueue:clearedMessages];
 		}
 	}
@@ -742,7 +742,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		[self setHidden:YES useAlpha:YES];
 	} completion:^(BOOL finished) {
 		// call delegate
-		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
+		if [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
 			[self.delegate statusBarOverlayDidHide];
 		}
 	}];
@@ -1048,7 +1048,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
             }
         }
 
-		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidRecognizeGesture:)]) {
+		if ([self.delegate respondsToSelector:@selector(statusBarOverlayDidRecognizeGesture:)]) {
 			[self.delegate statusBarOverlayDidRecognizeGesture:gestureRecognizer];
 		}
 	}
@@ -1058,7 +1058,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
 		[self setDetailViewHidden:YES animated:YES];
 
-		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidRecognizeGesture:)]) {
+		if ([self.delegate respondsToSelector:@selector(statusBarOverlayDidRecognizeGesture:)]) {
 			[self.delegate statusBarOverlayDidRecognizeGesture:gestureRecognizer];
 		}
 	}
@@ -1068,7 +1068,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
 		[self setDetailViewHidden:NO animated:YES];
 
-		if (self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidRecognizeGesture:)]) {
+		if ([self.delegate respondsToSelector:@selector(statusBarOverlayDidRecognizeGesture:)]) {
 			[self.delegate statusBarOverlayDidRecognizeGesture:gestureRecognizer];
 		}
 	}
@@ -1229,8 +1229,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 - (void)callDelegateWithNewMessage:(NSString *)newMessage {
-	if (self.historyEnabled &&
-		self.delegate != nil && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
+	if (self.historyEnabled && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
 		NSString *oldMessage = nil;
 
 		if (self.messageHistory.count > 0) {
