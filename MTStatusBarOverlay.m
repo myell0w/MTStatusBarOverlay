@@ -38,7 +38,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 //===========================================================
 
 // the height of the status bar
-#define kStatusBarHeight 20
+#define kStatusBarHeight 20.f
 // width of the screen in portrait-orientation
 #define kScreenWidth [UIScreen mainScreen].bounds.size.width
 // height of the screen in portrait-orientation
@@ -47,7 +47,7 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 #define IsIPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 // macro for checking if we are on the iPad in iPhone-Emulation mode
 #define IsIPhoneEmulationMode (!IsIPad && \
-MAX([UIApplication sharedApplication].statusBarFrame.size.width, [UIApplication sharedApplication].statusBarFrame.size.height) > 480)
+MAX([UIApplication sharedApplication].statusBarFrame.size.width, [UIApplication sharedApplication].statusBarFrame.size.height) > 480.f)
 
 
 
@@ -136,11 +136,11 @@ MAX([UIApplication sharedApplication].statusBarFrame.size.width, [UIApplication 
 // Detail View
 ///////////////////////////////////////////////////////
 
-#define kHistoryTableRowHeight		25
+#define kHistoryTableRowHeight		25.f
 #define kMaxHistoryTableRowCount	5
 
 #define kDetailViewAlpha			0.9f
-#define kDetailViewWidth			(IsIPad ? 400 : 280)
+#define kDetailViewWidth			(IsIPad ? 400.f : 280.f)
 // default frame of detail view when it is hidden
 #define kDefaultDetailViewFrame CGRectMake((kScreenWidth - kDetailViewWidth)/2, -(kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHeight),\
 kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHeight)
@@ -154,7 +154,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 #define kStatusLabelSize				12.f
 
 // default-width of the small-mode
-#define kWidthSmall						26
+#define kWidthSmall						26.f
 
 
 
@@ -273,17 +273,17 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		statusBarFrame.size.height = statusBarFrame.size.height == 2*kStatusBarHeight ? kStatusBarHeight : statusBarFrame.size.height;
 		// if we are on the iPad but in iPhone-Mode (non-universal-app) correct the width
 		if(IsIPhoneEmulationMode) {
-			statusBarFrame.size.width = 320;
+			statusBarFrame.size.width = 320.f;
 		}
 
 		// Place the window on the correct level and position
-        self.windowLevel = UIWindowLevelStatusBar+1.0f;
+        self.windowLevel = UIWindowLevelStatusBar+1.f;
         self.frame = statusBarFrame;
-		self.alpha = 0.0f;
+		self.alpha = 0.f;
 		self.hidden = NO;
 
 		// Default Small size: just show Activity Indicator
-		smallFrame_ = CGRectMake(statusBarFrame.size.width - kWidthSmall, 0.0f, kWidthSmall, statusBarFrame.size.height);
+		smallFrame_ = CGRectMake(statusBarFrame.size.width - kWidthSmall, 0.f, kWidthSmall, statusBarFrame.size.height);
 
 		// Default-values
 		animation_ = MTStatusBarOverlayAnimationNone;
@@ -299,7 +299,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 		// add rounded corners to detail-view
 		detailView_.layer.masksToBounds = YES;
-		detailView_.layer.cornerRadius = 10.0f;
+		detailView_.layer.cornerRadius = 10.f;
 		detailView_.layer.borderWidth = 2.5f;
 		// add shadow
 		/*detailView_.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -363,7 +363,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 		// Activity Indicator
 		activityIndicator_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-		activityIndicator_.frame = CGRectMake(6.0f, 3.0f, backgroundView_.frame.size.height - 6, backgroundView_.frame.size.height - 6);
+		activityIndicator_.frame = CGRectMake(6.f, 3.f, backgroundView_.frame.size.height - 6.f, backgroundView_.frame.size.height - 6.f);
 		activityIndicator_.hidesWhenStopped = YES;
         
         // iOS 5 doesn't correctly resize the activityIndicator. Bug?
@@ -374,8 +374,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		[self addSubviewToBackgroundView:activityIndicator_];
 
 		// Finished-Label
-		finishedLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(4,1,backgroundView_.frame.size.height, backgroundView_.frame.size.height-1)];
-		finishedLabel_.shadowOffset = CGSizeMake(0, 1);
+		finishedLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(4.f,1.f,backgroundView_.frame.size.height, backgroundView_.frame.size.height-1.f)];
+		finishedLabel_.shadowOffset = CGSizeMake(0.f, 1.f);
 		finishedLabel_.backgroundColor = [UIColor clearColor];
 		finishedLabel_.hidden = YES;
 		finishedLabel_.text = kFinishedText;
@@ -384,9 +384,9 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		[self addSubviewToBackgroundView:finishedLabel_];
 
 		// Status Label 1 is first visible
-		statusLabel1_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, 0.0f, backgroundView_.frame.size.width - 60.0f,backgroundView_.frame.size.height-1)];
+		statusLabel1_ = [[UILabel alloc] initWithFrame:CGRectMake(30.f, 0.f, backgroundView_.frame.size.width - 60.f,backgroundView_.frame.size.height-1.f)];
 		statusLabel1_.backgroundColor = [UIColor clearColor];
-		statusLabel1_.shadowOffset = CGSizeMake(0, 1);
+		statusLabel1_.shadowOffset = CGSizeMake(0.f, 1.f);
 		statusLabel1_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
 		statusLabel1_.textAlignment = UITextAlignmentCenter;
 		statusLabel1_.numberOfLines = 1;
@@ -395,8 +395,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		[self addSubviewToBackgroundView:statusLabel1_];
 
 		// Status Label 2 is hidden
-		statusLabel2_ = [[UILabel alloc] initWithFrame:CGRectMake(30.0f, backgroundView_.frame.size.height,backgroundView_.frame.size.width - 60.0f , backgroundView_.frame.size.height-1)];
-		statusLabel2_.shadowOffset = CGSizeMake(0, 1);
+		statusLabel2_ = [[UILabel alloc] initWithFrame:CGRectMake(30.f, backgroundView_.frame.size.height,backgroundView_.frame.size.width - 60.f , backgroundView_.frame.size.height-1.f)];
+		statusLabel2_.shadowOffset = CGSizeMake(0.f, 1.f);
 		statusLabel2_.backgroundColor = [UIColor clearColor];
 		statusLabel2_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
 		statusLabel2_.textAlignment = UITextAlignmentCenter;
@@ -742,7 +742,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		[self setHidden:YES useAlpha:YES];
 	} completion:^(BOOL finished) {
 		// call delegate
-		if [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
+		if ([self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
 			[self.delegate statusBarOverlayDidHide];
 		}
 	}];
@@ -1220,7 +1220,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	}
 
     // if a duration is specified, hide after given duration
-    if (duration > 0) {
+    if (duration > 0.) {
         // hide after duration
         [self performSelector:@selector(hide) withObject:nil afterDelay:duration];
         // clear history after duration
