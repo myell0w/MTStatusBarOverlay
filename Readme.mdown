@@ -45,11 +45,13 @@ You can use the custom status bar like this:
 Adding MTStatusBarOverlay to your project
 ------------------
 MTStatusBarOverlay is compiled as a static library. You have two options for integrating it into you own project, after cloning the MTStatusBarOverlay git repository with the terminal-command: `git clone git://github.com/myell0w/MTStatusBarOverlay.git`
+Since MTStatusBarOverlay now uses ARC, you have to add "-fobjc-arc" to "Other Linker Flags" of your project, If you are using Xcode 4.2 or up with the iOS 5.0 SDK on a non-ARC target.
 
 #### First option: copy files
 1. Just copy over the files MTStatusBarOverlay.h and MTStatusBarOverlay.m to your project.
 2. import "MTStatusBarOverlay.h" everywhere where you want to use it
-3. There is no step 3 :)
+3. If you use MTStatusBarOverlay in a non-ARC project, add "-fobjc-arc" to the Compiler Flags of MTStatusBarOverlay.m in your target's "Build Phases" tab under Compile Sources.
+4. There is no step 4 :)
 
 #### Second option: Xcode dependent project
 1. Locate the "MTStatusBarOverlay.xcodeproj" file and drag itonto the root of your Xcode project's "Groups and Files"  sidebar.  A dialog will appear -- make sure "Copy items" is unchecked and "Reference Type" is "Relative to Project" before clicking "Add".
