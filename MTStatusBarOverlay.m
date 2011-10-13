@@ -169,8 +169,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 @property (nonatomic, strong) UIImageView *statusBarBackgroundImageView;
 @property (nonatomic, strong) UILabel *statusLabel1;
 @property (nonatomic, strong) UILabel *statusLabel2;
-@property (nonatomic, assign) UILabel *hiddenStatusLabel;
-@property (nonatomic, readonly) UILabel *visibleStatusLabel;
+@property (nonatomic, unsafe_unretained) UILabel *hiddenStatusLabel;
+@property (unsafe_unretained, nonatomic, readonly) UILabel *visibleStatusLabel;
 @property (nonatomic, strong) UIImageView *progressView;
 @property (nonatomic, assign) CGRect oldBackgroundViewFrame;
 // overwrite property for read-write-access
@@ -340,7 +340,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
         oldBackgroundViewFrame_ = backgroundView_.frame;
 
 		// Add gesture recognizers
-		UITapGestureRecognizer *tapGestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewClicked:)] autorelease];
+		UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewClicked:)];
 		//UISwipeGestureRecognizer *upGestureRecognizer = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewSwipedUp:)] autorelease];
 		//UISwipeGestureRecognizer *downGestureRecognizer = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(contentViewSwipedDown:)] autorelease];
 
@@ -352,8 +352,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		//[self addGestureRecognizer:downGestureRecognizer];
 
 		// Images used as background when status bar style is Default
-		defaultStatusBarImage_ = [[UIImage imageWithData:MTStatusBarBackgroundImageData(NO)] retain];
-		defaultStatusBarImageShrinked_ = [[UIImage imageWithData:MTStatusBarBackgroundImageData(YES)] retain];
+		defaultStatusBarImage_ = [UIImage imageWithData:MTStatusBarBackgroundImageData(NO)];
+		defaultStatusBarImageShrinked_ = [UIImage imageWithData:MTStatusBarBackgroundImageData(YES)];
 
 		// Background-Image of the Content View
 		statusBarBackgroundImageView_ = [[UIImageView alloc] initWithFrame:backgroundView_.frame];
@@ -430,29 +430,11 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	return self;
 }
 
-
 - (void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
-	[backgroundView_ release], backgroundView_ = nil;
-	[detailView_ release], detailView_ = nil;
-	[statusBarBackgroundImageView_ release], statusBarBackgroundImageView_ = nil;
-	[statusLabel1_ release], statusLabel1_ = nil;
-	[statusLabel2_ release], statusLabel2_ = nil;
-    [progressView_ release], progressView_ = nil;
-	[activityIndicator_ release], activityIndicator_ = nil;
-	[finishedLabel_ release], finishedLabel_ = nil;
-	[defaultStatusBarImage_ release], defaultStatusBarImage_ = nil;
-	[defaultStatusBarImageShrinked_ release], defaultStatusBarImageShrinked_ = nil;
-	[detailText_ release], detailText_ = nil;
-	[detailTextView_ release], detailTextView_ = nil;
-	[messageQueue_ release], messageQueue_ = nil;
-	[messageHistory_ release], messageHistory_ = nil;
 	delegate_ = nil;
-
-	[super dealloc];
 }
-
 
 //===========================================================
 #pragma mark -
@@ -873,7 +855,6 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 - (void)setDetailText:(NSString *)detailText {
 	// custom setter Memory Mgmt
 	if (detailText_ != detailText) {
-        [detailText_ release];
         detailText_ = [detailText copy];
     }
 
@@ -1019,7 +1000,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 	// step 2: no? -> create new cell
 	if (cell == nil) {
-		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID] autorelease];
+		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID];
 
 		cell.textLabel.font = [UIFont boldSystemFontOfSize:10];
 		cell.textLabel.textColor = [UIApplication sharedApplication].statusBarStyle == UIStatusBarStyleDefault ? kLightThemeHistoryTextColor : kDarkThemeHistoryTextColor;
