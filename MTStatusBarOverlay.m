@@ -408,7 +408,6 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		// the hidden status label at the beginning
 		hiddenStatusLabel_ = statusLabel2_;
 
-
         progress_ = 1.0;
         progressView_ = [[UIImageView alloc] initWithFrame:statusBarBackgroundImageView_.frame];
         progressView_.opaque = NO;
@@ -918,6 +917,14 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 							 self.statusLabel1.hidden = NO;
 							 self.statusLabel2.hidden = NO;
+                             
+                             CGRect frame = self.statusLabel1.frame;
+                             frame.size.width = self.backgroundView.frame.size.width-60.f;
+                             self.statusLabel1.frame = frame;
+                             
+                             frame = self.statusLabel2.frame;
+                             frame.size.width = self.backgroundView.frame.size.width-60.f;
+                             self.statusLabel2.frame = frame;
 						 }
 
 						 // update status bar background
