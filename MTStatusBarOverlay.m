@@ -580,6 +580,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 //===========================================================
 
 - (void)showNextMessage {
+    if (self.forcedToHide) {
+        return;
+    }
+    
 	// if there is no next message to show overlay is not active anymore
 	@synchronized(self.messageQueue) {
 		if([self.messageQueue count] < 1) {
@@ -639,7 +643,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	[self updateUIForMessageType:messageType duration:duration];
     
 	// if status bar is currently hidden, show it unless it is forced to hide
-	if (self.reallyHidden && !self.forcedToHide) {
+	if (self.reallyHidden) {
 		// clear currently visible status label
 		self.visibleStatusLabel.text = @"";
         
@@ -760,6 +764,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 // this shows the status bar overlay, if there is text to show
 - (void)show {
+    self.forcedToHide = NO;
+    
     if (self.visibleStatusLabel.text.length > 0) {
         // show status bar overlay with animation
         [UIView animateWithDuration:self.shrinked ? 0. : kAppearAnimationDuration animations:^{
@@ -767,7 +773,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
         }];
     }
     
-    self.forcedToHide = NO;
+    [self showNextMessage];
 }
 
 //===========================================================
