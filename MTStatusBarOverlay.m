@@ -183,6 +183,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 // overwrite property for read-write-access
 @property (nonatomic, strong) NSMutableArray *messageHistory;
 @property (nonatomic, strong) UITableView *historyTableView;
+@property (nonatomic, assign) BOOL forcedToHide;
 
 // intern method that posts a new entry to the message-queue
 - (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated immediate:(BOOL)immediate;
@@ -259,6 +260,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 @synthesize messageHistory = messageHistory_;
 @synthesize historyTableView = historyTableView_;
 @synthesize delegate = delegate_;
+@synthesize forcedToHide = forcedToHide_;
 
 //===========================================================
 #pragma mark -
@@ -289,6 +291,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		animation_ = MTStatusBarOverlayAnimationNone;
 		active_ = NO;
 		hidesActivity_ = NO;
+        forcedToHide_ = NO;
         
 		// the detail view that is shown when the user touches the status bar in animation mode "FallDown"
 		detailView_ = [[UIView alloc] initWithFrame:kDefaultDetailViewFrame];
@@ -541,11 +544,11 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
     
 	@synchronized (self.messageQueue) {
 		[self.messageQueue insertObject:messageDictionaryRepresentation atIndex:0];
-	}
-    
-	// if the overlay is currently not active, begin with showing of messages
-	if (!self.active) {
-        [self performSelectorOnMainThread:@selector(showNextMessage) withObject:nil waitUntilDone:NO];
+        
+        // if the overlay is currently not active, begin with showing of messages
+        if (!self.active) {
+            [self performSelectorOnMainThread:@selector(showNextMessage) withObject:nil waitUntilDone:YES];
+        }
 	}
 }
 
@@ -635,8 +638,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	[self setColorSchemeForStatusBarStyle:statusBarStyle messageType:messageType];
 	[self updateUIForMessageType:messageType duration:duration];
     
-	// if status bar is currently hidden, show it
-	if (self.reallyHidden) {
+	// if status bar is currently hidden, show it unless it is forced to hide
+	if (self.reallyHidden && !self.forcedToHide) {
 		// clear currently visible status label
 		self.visibleStatusLabel.text = @"";
         
@@ -748,6 +751,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 - (void)hideTemporary {
+    self.forcedToHide = YES;
+    
     // hide status bar overlay with animation
 	[UIView animateWithDuration:self.shrinked ? 0. : kAppearAnimationDuration animations:^{
 		[self setHidden:YES useAlpha:YES];
@@ -761,6 +766,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
             [self setHidden:NO useAlpha:YES];
         }];
     }
+    
+    self.forcedToHide = NO;
 }
 
 //===========================================================
