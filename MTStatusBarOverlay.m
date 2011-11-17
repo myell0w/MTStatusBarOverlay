@@ -23,19 +23,19 @@
 #import <QuartzCore/QuartzCore.h>
 
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Function Headers
-//===========================================================
+#pragma mark Functions
+////////////////////////////////////////////////////////////////////////
 
 NSData* MTStatusBarBackgroundImageData(BOOL shrinked);
 unsigned char* MTStatusBarBackgroundImageArray(BOOL shrinked);
 unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
 #pragma mark Defines
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 
 // the height of the status bar
 #define kStatusBarHeight 20.f
@@ -51,10 +51,10 @@ MAX([UIApplication sharedApplication].statusBarFrame.size.width, [UIApplication 
 
 
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Customize Section
-//===========================================================
+#pragma mark Customization
+////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////
 // Light Theme (for UIStatusBarStyleDefault)
@@ -158,10 +158,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Private Class Extension
-//===========================================================
+#pragma mark Class Extension
+////////////////////////////////////////////////////////////////////////
 
 @interface MTStatusBarOverlay ()
 
@@ -228,6 +228,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 - (void)rotateToStatusBarFrame:(NSValue *)statusBarFrameValue;
 - (void)didChangeStatusBarFrame:(NSNotification *)notification;
 
+// Fix to not overlay Notification Center
+- (void)applicationDidBecomeActive:(NSNotification *)notifaction;
+- (void)applicationWillResignActive:(NSNotification *)notifaction;
+
 @end
 
 
@@ -262,10 +266,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 @synthesize delegate = delegate_;
 @synthesize forcedToHide = forcedToHide_;
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
 #pragma mark Lifecycle
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -427,6 +431,14 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(didChangeStatusBarFrame:)
 													 name:UIApplicationWillChangeStatusBarFrameNotification object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                 selector:@selector(applicationDidBecomeActive:)
+                                                     name:UIApplicationDidBecomeActiveNotification object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                 selector:@selector(applicationWillResignActive:)
+                                                     name:UIApplicationWillResignActiveNotification object:nil];
     }
     
 	return self;
@@ -438,10 +450,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	delegate_ = nil;
 }
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Change status bar appearance
-//===========================================================
+#pragma mark Status Bar Appearance
+////////////////////////////////////////////////////////////////////////
 
 - (void)addSubviewToBackgroundView:(UIView *)view {
 	view.userInteractionEnabled = NO;
@@ -454,10 +466,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Save/Restore current state
-//===========================================================
+#pragma mark Save/Restore current State
+////////////////////////////////////////////////////////////////////////
 
 - (void)saveState {
     [self saveStateSynchronized:YES];
@@ -477,10 +489,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
     [self setShrinked:[[NSUserDefaults standardUserDefaults] boolForKey:kMTStatusBarOverlayStateShrinked] animated:NO];
 }
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Post Messages
-//===========================================================
+#pragma mark Message Posting
+////////////////////////////////////////////////////////////////////////
 
 - (void)postMessage:(NSString *)message {
 	[self postMessage:message animated:YES];
@@ -574,10 +586,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	[self postMessage:message type:messageType duration:duration animated:animated immediate:YES];
 }
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Show/Hide Status Bar
-//===========================================================
+#pragma mark Showing Next Message
+////////////////////////////////////////////////////////////////////////
 
 - (void)showNextMessage {
     if (self.forcedToHide) {
@@ -776,10 +788,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
     [self showNextMessage];
 }
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Rotation Stuff
-//===========================================================
+#pragma mark Rotation
+////////////////////////////////////////////////////////////////////////
 
 - (void)didChangeStatusBarFrame:(NSNotification *)notification {
 	NSValue * statusBarFrameValue = [notification.userInfo valueForKey:UIApplicationStatusBarFrameUserInfoKey];
@@ -851,10 +863,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	}
 }
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
 #pragma mark Setter/Getter
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 
 - (void)setProgress:(double)progress {
     // bound progress to 0.0 - 1.0
@@ -1003,12 +1015,12 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	return self.statusLabel1;
 }
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Table View Data Source
-//===========================================================
+#pragma mark UITableViewDataSource
+////////////////////////////////////////////////////////////////////////
 
-- (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	return self.messageHistory.count;
 }
 
@@ -1037,10 +1049,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
     return cell;
 }
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark UIGestureRecognizer Methods
-//===========================================================
+#pragma mark Gesture Recognizer
+////////////////////////////////////////////////////////////////////////
 
 - (IBAction)contentViewClicked:(UIGestureRecognizer *)gestureRecognizer {
 	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
@@ -1094,11 +1106,26 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	}
 }
 
+////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark UIApplication Notifications
+////////////////////////////////////////////////////////////////////////
 
-//===========================================================
+- (void)applicationWillResignActive:(NSNotification *)notifaction {
+    // We hide temporary when the application resigns active s.t the overlay
+    // doesn't overlay the Notification Center. Let's hope this helps AppStore 
+    // Approval ...
+    [self hideTemporary];
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notifaction {
+    [self show];
+}
+
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
 #pragma mark Private Methods
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 
 - (void)setStatusBarBackgroundForStyle:(UIStatusBarStyle)style {
 	// gray status bar?
@@ -1292,10 +1319,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
     }
 }
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
 #pragma mark History Tracking
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 
 - (BOOL)isHistoryEnabled {
 	return self.detailViewMode == MTDetailViewModeHistory;
@@ -1334,10 +1361,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	[self.historyTableView reloadData];
 }
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Custom Hide-Methods using alpha instead of hidden-property (for animation)
-//===========================================================
+#pragma mark Custom Hide Methods
+////////////////////////////////////////////////////////////////////////
 
 // used for performSelector:withObject
 - (void)setHiddenUsingAlpha:(BOOL)hidden {
@@ -1356,10 +1383,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	return self.alpha == 0.f || self.hidden;
 }
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Singleton definitons
-//===========================================================
+#pragma mark Singleton Definitions
+////////////////////////////////////////////////////////////////////////
 
 + (MTStatusBarOverlay *)sharedInstance {
     static dispatch_once_t pred;
@@ -1379,10 +1406,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 @end
 
 
-//===========================================================
+////////////////////////////////////////////////////////////////////////
 #pragma mark -
-#pragma mark Encoded Images
-//===========================================================
+#pragma mark Encoded images
+////////////////////////////////////////////////////////////////////////
 
 unsigned char Silver_Base_png[] = {
 	0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
