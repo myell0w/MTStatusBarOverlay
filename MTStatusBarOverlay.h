@@ -106,6 +106,8 @@ typedef enum MTMessageType {
 @property (nonatomic, strong, readonly) NSMutableArray *messageHistory;
 // DEPRECATED: enable/disable history-tracking of messages
 @property (nonatomic, assign, getter=isHistoryEnabled) BOOL historyEnabled;
+// the last message that was visible
+@property (nonatomic, strong, readonly) NSString *lastPostedMessage;
 // determines if immediate messages in the queue get removed or stay in the queue, when a new immediate message gets posted
 @property (nonatomic, assign) BOOL canRemoveImmediateMessagesFromQueue;
 // the mode of the detailView
