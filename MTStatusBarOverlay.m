@@ -514,6 +514,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	[self postImmediateMessage:message type:MTMessageTypeActivity duration:0 animated:animated];
 }
 
+- (void)postImmediateMessage:(NSString *)message duration:(NSTimeInterval)duration {
+    [self postImmediateMessage:message type:MTMessageTypeActivity duration:duration animated:YES];
+}
+
 - (void)postImmediateMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
     [self postImmediateMessage:message type:MTMessageTypeActivity duration:duration animated:animated];
 }
@@ -540,6 +544,14 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 - (void)postImmediateErrorMessage:(NSString *)message duration:(NSTimeInterval)duration animated:(BOOL)animated {
 	[self postImmediateMessage:message type:MTMessageTypeError duration:duration animated:animated];
+}
+
+- (void)postMessageDictionary:(NSDictionary *)messageDictionary {
+    [self postMessage:[messageDictionary valueForKey:kMTStatusBarOverlayMessageKey]
+                 type:[[messageDictionary valueForKey:kMTStatusBarOverlayMessageTypeKey] intValue]
+             duration:[[messageDictionary valueForKey:kMTStatusBarOverlayDurationKey] doubleValue]
+             animated:[[messageDictionary valueForKey:kMTStatusBarOverlayAnimationKey] boolValue]
+            immediate:[[messageDictionary valueForKey:kMTStatusBarOverlayImmediateKey] boolValue]];
 }
 
 - (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated immediate:(BOOL)immediate {
