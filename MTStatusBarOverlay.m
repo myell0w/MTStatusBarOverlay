@@ -32,6 +32,8 @@ NSData* MTStatusBarBackgroundImageData(BOOL shrinked);
 unsigned char* MTStatusBarBackgroundImageArray(BOOL shrinked);
 unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked);
 
+void mt_dispatch_sync_on_main_thread(dispatch_block_t block);
+
 ////////////////////////////////////////////////////////////////////////
 #pragma mark -
 #pragma mark Defines
@@ -557,25 +559,27 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 - (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated immediate:(BOOL)immediate {
-	// don't add to queue when message is empty
-	if (message.length == 0) {
-		return;
-	}
-    
-	NSDictionary *messageDictionaryRepresentation = [NSDictionary dictionaryWithObjectsAndKeys:message, kMTStatusBarOverlayMessageKey,
-													 [NSNumber numberWithInt:messageType], kMTStatusBarOverlayMessageTypeKey,
-													 [NSNumber numberWithDouble:duration], kMTStatusBarOverlayDurationKey,
-													 [NSNumber numberWithBool:animated],  kMTStatusBarOverlayAnimationKey,
-													 [NSNumber numberWithBool:immediate], kMTStatusBarOverlayImmediateKey, nil];
-    
-	@synchronized (self.messageQueue) {
-		[self.messageQueue insertObject:messageDictionaryRepresentation atIndex:0];
+    mt_dispatch_sync_on_main_thread(^{
+        // don't add to queue when message is empty
+        if (message.length == 0) {
+            return;
+        }
+        
+        NSDictionary *messageDictionaryRepresentation = [NSDictionary dictionaryWithObjectsAndKeys:message, kMTStatusBarOverlayMessageKey,
+                                                         [NSNumber numberWithInt:messageType], kMTStatusBarOverlayMessageTypeKey,
+                                                         [NSNumber numberWithDouble:duration], kMTStatusBarOverlayDurationKey,
+                                                         [NSNumber numberWithBool:animated],  kMTStatusBarOverlayAnimationKey,
+                                                         [NSNumber numberWithBool:immediate], kMTStatusBarOverlayImmediateKey, nil];
+        
+        @synchronized (self.messageQueue) {
+            [self.messageQueue insertObject:messageDictionaryRepresentation atIndex:0];
+        }
         
         // if the overlay is currently not active, begin with showing of messages
         if (!self.active) {
-            [self performSelectorOnMainThread:@selector(showNextMessage) withObject:nil waitUntilDone:YES];
+            [self showNextMessage];
         }
-	}
+    });
 }
 
 - (void)postImmediateMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated {
@@ -794,14 +798,16 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 - (void)show {
     self.forcedToHide = NO;
     
-    if (self.visibleStatusLabel.text.length > 0) {
-        // show status bar overlay with animation
-        [UIView animateWithDuration:self.shrinked ? 0. : kAppearAnimationDuration animations:^{
-            [self setHidden:NO useAlpha:YES];
-        }];
+    if (self.reallyHidden) {
+        if (self.visibleStatusLabel.text.length > 0) {
+            // show status bar overlay with animation
+            [UIView animateWithDuration:self.shrinked ? 0. : kAppearAnimationDuration animations:^{
+                [self setHidden:NO useAlpha:YES];
+            }];
+        }
+        
+        [self showNextMessage];
     }
-    
-    [self showNextMessage];
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -902,11 +908,9 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
         detailText_ = [detailText copy];
         
         // update text in label
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            self.detailTextView.text = detailText;
-            // update height of detailText-View
-            [self updateDetailTextViewHeight];
-        }];
+        self.detailTextView.text = detailText;
+        // update height of detailText-View
+        [self updateDetailTextViewHeight];
         
         // update height of detailView
         [self setDetailViewHidden:self.detailViewHidden animated:YES];
@@ -1691,4 +1695,12 @@ unsigned int MTStatusBarBackgroundImageLength(BOOL shrinked) {
 			return Silver_Base_2x_png_len;
 		}
 	}
+}
+
+void mt_dispatch_sync_on_main_thread(dispatch_block_t block) {
+    if ([NSThread isMainThread]) {
+        block();
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), block);
+    }
 }
