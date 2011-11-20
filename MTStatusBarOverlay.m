@@ -886,7 +886,12 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 
 - (void)setProgress:(double)progress {
     // bound progress to 0.0 - 1.0
-    progress_ = MAX(0.0, MIN(progress, 1.0));
+    progress = MAX(0.0, MIN(progress, 1.0));
+    
+    // do not decrease progress if it is no reset
+    if (progress == 0.0 || progress > progress_) {
+        progress_ = progress;
+    }
     
     // update UI on main thread
     [self performSelectorOnMainThread:@selector(updateProgressViewSizeForLabel:) withObject:self.visibleStatusLabel waitUntilDone:NO];
