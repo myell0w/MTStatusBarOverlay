@@ -186,7 +186,6 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 @property (nonatomic, strong) NSMutableArray *messageHistory;
 @property (nonatomic, strong) UITableView *historyTableView;
 @property (nonatomic, assign) BOOL forcedToHide;
-@property (nonatomic, strong, readwrite) NSString *lastPostedMessage;
 
 // intern method that posts a new entry to the message-queue
 - (void)postMessage:(NSString *)message type:(MTMessageType)messageType duration:(NSTimeInterval)duration animated:(BOOL)animated immediate:(BOOL)immediate;
