@@ -92,9 +92,10 @@ UIStatusBarStyleBlackOpaque, Progress visible
 Apps using MTStatusBarOverlay
 ------------------------
 * [Öffnungszeiten Österreich](http://www.oeffnungszeitenapp.at/ "oeffnungszeitenapp.at")
-* Municipal Denmark
+* GoDenmark
 * [Anytune](http://bit.ly/anytune-itunes-preview "Anytune")
 * [Nowplayer](http://itunes.apple.com/us/app/nowplayer/id438805892?mt=8&ls=1 "Nowplayer")
 * [Amano Media](http://www.amanomedia.at/ "Amano Media")
 * [EconTalk Companion](http://itunes.apple.com/us/app/econtalk-companion/id456671102?mt=8 "EconTalk Companion")
+* [Dropshop](http://itunes.apple.com/us/app/dropshop/id425751374?l=sv&ls=1&mt=8 "Dropshop")
 * lots of other Apps I don't know :)
