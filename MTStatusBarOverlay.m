@@ -595,7 +595,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		[self.messageQueue removeObjectsInArray:clearedMessages];
         
 		// call delegate
-		if ([self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)] && clearedMessages.count > 0) {
+		if ([self.delegate respondsToSelector:@selector(statusBarOverlayDidClearMessageQueue:)] && clearedMessages.count > 0) {
 			[self.delegate statusBarOverlayDidClearMessageQueue:clearedMessages];
 		}
 	}
@@ -1300,7 +1300,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 - (void)callDelegateWithNewMessage:(NSString *)newMessage {
-	if ([self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
+	if ([self.delegate respondsToSelector:@selector(statusBarOverlayDidSwitchFromOldMessage:toNewMessage:)]) {
 		NSString *oldMessage = nil;
         
 		if (self.messageHistory.count > 0) {
