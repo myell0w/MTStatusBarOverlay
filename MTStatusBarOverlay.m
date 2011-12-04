@@ -1300,7 +1300,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 - (void)callDelegateWithNewMessage:(NSString *)newMessage {
-	if (self.historyEnabled && [self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
+	if ([self.delegate respondsToSelector:@selector(statusBarOverlayDidHide)]) {
 		NSString *oldMessage = nil;
         
 		if (self.messageHistory.count > 0) {
@@ -1363,20 +1363,21 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 }
 
 - (void)addMessageToHistory:(NSString *)message {
-	if (self.historyEnabled	&& message != nil
+	if (message != nil
 		&& [message stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0) {
-		NSIndexPath *newHistoryMessageIndexPath = [NSIndexPath indexPathForRow:self.messageHistory.count inSection:0];
-        
 		// add message to history-array
 		[self.messageHistory addObject:message];
         
-		[self setDetailViewHidden:self.detailViewHidden animated:YES];
-        
-		// update history table-view
-		[self.historyTableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newHistoryMessageIndexPath]
-									 withRowAnimation:UITableViewRowAnimationFade];
-		[self.historyTableView scrollToRowAtIndexPath:newHistoryMessageIndexPath
-									 atScrollPosition:UITableViewScrollPositionTop animated:YES];
+        if (self.historyEnabled) {
+            NSIndexPath *newHistoryMessageIndexPath = [NSIndexPath indexPathForRow:self.messageHistory.count inSection:0];
+            [self setDetailViewHidden:self.detailViewHidden animated:YES];
+            
+            // update history table-view
+            [self.historyTableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newHistoryMessageIndexPath]
+                                         withRowAnimation:UITableViewRowAnimationFade];
+            [self.historyTableView scrollToRowAtIndexPath:newHistoryMessageIndexPath
+                                         atScrollPosition:UITableViewScrollPositionTop animated:YES];
+        }
 	}
 }
 
