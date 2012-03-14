@@ -125,7 +125,7 @@ MAX([UIApplication sharedApplication].statusBarFrame.size.width, [UIApplication 
 ///////////////////////////////////////////////////////
 
 // Text that is displayed in the finished-Label when the finish was successful
-#define kFinishedText		@"✔"
+#define kFinishedText		@"✓"
 #define kFinishedFontSize	22.f
 
 // Text that is displayed when an error occured
@@ -390,7 +390,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		finishedLabel_.hidden = YES;
 		finishedLabel_.text = kFinishedText;
 		finishedLabel_.textAlignment = UITextAlignmentCenter;
-		finishedLabel_.font = [UIFont boldSystemFontOfSize:kFinishedFontSize];
+		finishedLabel_.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:kFinishedFontSize];
+        finishedLabel_.adjustsFontSizeToFitWidth = YES;
 		[self addSubviewToBackgroundView:finishedLabel_];
         
 		// Status Label 1 is first visible
@@ -1201,6 +1202,11 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
         }
         
 		self.activityIndicator.activityIndicatorViewStyle = kLightThemeActivityIndicatorViewStyle;
+        
+        if ([self.activityIndicator respondsToSelector:@selector(setColor:)]) {
+            [self.activityIndicator setColor:kLightThemeTextColor];
+        }
+        
 		self.detailView.backgroundColor = kLightThemeDetailViewBackgroundColor;
 		self.detailView.layer.borderColor = [kLightThemeDetailViewBorderColor CGColor];
 		self.historyTableView.separatorColor = kLightThemeDetailViewBorderColor;
@@ -1232,6 +1238,11 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
         self.finishedLabel.shadowColor = nil;
         
 		self.activityIndicator.activityIndicatorViewStyle = kDarkThemeActivityIndicatorViewStyle;
+        
+        if ([self.activityIndicator respondsToSelector:@selector(setColor:)]) {
+            [self.activityIndicator setColor:nil];
+        }
+        
 		self.detailView.backgroundColor = kDarkThemeDetailViewBackgroundColor;
 		self.detailView.layer.borderColor = [kDarkThemeDetailViewBorderColor CGColor];
 		self.historyTableView.separatorColor = kDarkThemeDetailViewBorderColor;
@@ -1268,7 +1279,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 			[self.activityIndicator stopAnimating];
             
 			// update font and text
-			self.finishedLabel.font = [UIFont boldSystemFontOfSize:kFinishedFontSize];
+			self.finishedLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:kFinishedFontSize];
 			self.finishedLabel.text = kFinishedText;
             self.progress = 1.0;
 			break;
