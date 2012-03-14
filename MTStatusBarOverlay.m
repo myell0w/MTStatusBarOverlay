@@ -1078,9 +1078,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 #pragma mark Gesture Recognizer
 ////////////////////////////////////////////////////////////////////////
 
-- (IBAction)contentViewClicked:(UIGestureRecognizer *)gestureRecognizer {
+- (void)contentViewClicked:(UIGestureRecognizer *)gestureRecognizer {
 	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
-        
         // if we are currently in a special state, restore to normal
         // and ignore current set animation in that case
         if (self.shrinked) {
@@ -1110,7 +1109,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	}
 }
 
-- (IBAction)contentViewSwipedUp:(UIGestureRecognizer *)gestureRecognizer {
+- (void)contentViewSwipedUp:(UIGestureRecognizer *)gestureRecognizer {
 	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
 		[self setDetailViewHidden:YES animated:YES];
         
@@ -1120,7 +1119,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	}
 }
 
-- (IBAction)contentViewSwipedDown:(UIGestureRecognizer *)gestureRecognizer {
+- (void)contentViewSwipedDown:(UIGestureRecognizer *)gestureRecognizer {
 	if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
 		[self setDetailViewHidden:NO animated:YES];
         
@@ -1369,7 +1368,7 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		[self.messageHistory addObject:message];
         
         if (self.historyEnabled) {
-            NSIndexPath *newHistoryMessageIndexPath = [NSIndexPath indexPathForRow:self.messageHistory.count inSection:0];
+            NSIndexPath *newHistoryMessageIndexPath = [NSIndexPath indexPathForRow:self.messageHistory.count-1 inSection:0];
             [self setDetailViewHidden:self.detailViewHidden animated:YES];
             
             // update history table-view
