@@ -367,7 +367,6 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
         
 		// Background-Image of the Content View
 		statusBarBackgroundImageView_ = [[UIImageView alloc] initWithFrame:backgroundView_.frame];
-		statusBarBackgroundImageView_.backgroundColor = [UIColor blackColor];
 		statusBarBackgroundImageView_.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 		[self addSubviewToBackgroundView:statusBarBackgroundImageView_];
         
@@ -1161,11 +1160,12 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		} else {
 			self.statusBarBackgroundImageView.image = [self.defaultStatusBarImage stretchableImageWithLeftCapWidth:2.0f topCapHeight:0.0f];
 		}
+		statusBarBackgroundImageView_.backgroundColor = [UIColor clearColor];
 	}
-    
 	// black status bar? -> no image
 	else {
 		self.statusBarBackgroundImageView.image = nil;
+		statusBarBackgroundImageView_.backgroundColor = [UIColor blackColor];
 	}
 }
 
