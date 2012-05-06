@@ -775,7 +775,10 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 	[self setDetailViewHidden:YES animated:YES];
     
 	// hide status bar overlay with animation
-	[UIView animateWithDuration:self.shrinked ? 0. : kAppearAnimationDuration animations:^{
+    [UIView animateWithDuration:self.shrinked ? 0. : kAppearAnimationDuration
+                          delay:0 
+                        options:UIViewAnimationOptionAllowUserInteraction 
+                     animations:^{
 		[self setHidden:YES useAlpha:YES];
 	} completion:^(BOOL finished) {
 		// call delegate
