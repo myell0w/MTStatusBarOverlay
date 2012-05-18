@@ -234,6 +234,9 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 - (void)applicationDidBecomeActive:(NSNotification *)notifaction;
 - (void)applicationWillResignActive:(NSNotification *)notifaction;
 
+// returns the current frame for the detail view depending on the interface orientation
+- (CGRect)backgroundViewFrameForStatusBarInterfaceOrientation;
+
 @end
 
 
@@ -344,7 +347,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		[self addSubview:detailView_];
         
         // Create view that stores all the content
-        backgroundView_ = [[UIView alloc] initWithFrame:statusBarFrame];
+        CGRect backgroundFrame = [self backgroundViewFrameForStatusBarInterfaceOrientation];
+        backgroundView_ = [[UIView alloc] initWithFrame:backgroundFrame];
 		backgroundView_.clipsToBounds = YES;
 		backgroundView_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         oldBackgroundViewFrame_ = backgroundView_.frame;
@@ -442,6 +446,9 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
         [[NSNotificationCenter defaultCenter] addObserver:self 
                                                  selector:@selector(applicationWillResignActive:)
                                                      name:UIApplicationWillResignActiveNotification object:nil];
+        
+        // initial rotation, fixes the issue with a wrong bar appearance in landscape only mode
+        [self rotateToStatusBarFrame:nil];
     }
     
 	return self;
@@ -860,6 +867,8 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		self.frame = CGRectMake(0.f,kScreenHeight - kStatusBarHeight,kScreenWidth,kStatusBarHeight);
 		self.smallFrame = CGRectMake(self.frame.size.width - kWidthSmall, 0.f, kWidthSmall, self.frame.size.height);
 	}
+    
+    self.backgroundView.frame = [self backgroundViewFrameForStatusBarInterfaceOrientation];
     
 	// if the statusBar is currently shrinked, update the frames for the new rotation state
 	if (shrinkedBeforeTransformation) {
@@ -1354,6 +1363,15 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
     } else {
         self.progressView.hidden = YES;
     }
+}
+
+- (CGRect)backgroundViewFrameForStatusBarInterfaceOrientation{
+    
+    UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    return (UIInterfaceOrientationIsLandscape(interfaceOrientation) ? 
+            CGRectMake(0, 0, kScreenHeight, kStatusBarHeight) : 
+            CGRectMake(0, 0, kScreenWidth, kStatusBarHeight));
 }
 
 ////////////////////////////////////////////////////////////////////////
