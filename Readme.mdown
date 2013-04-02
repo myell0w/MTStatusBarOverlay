@@ -55,7 +55,7 @@ Since MTStatusBarOverlay now uses ARC, you have to add "-fobjc-arc" to "Other Li
 5. There is no step 5 :)
 
 #### Second option: Xcode dependent project
-1. Locate the "MTStatusBarOverlay.xcodeproj" file and drag itonto the root of your Xcode project's "Groups and Files"  sidebar.  A dialog will appear -- make sure "Copy items" is unchecked and "Reference Type" is "Relative to Project" before clicking "Add".
+1. Locate the "MTStatusBarOverlay.xcodeproj" file and drag it onto the root of your Xcode project's "Groups and Files"  sidebar.  A dialog will appear -- make sure "Copy items" is unchecked and "Reference Type" is "Relative to Project" before clicking "Add".
 2. Add MTStatusBarOverlay as a direct dependency (Xcode 3) or target dependency (Xcode 4) of your target
 3. Drag libMTStatusBarOverlay.a onto the section 'Link Binary with Libraries' of your target
 4. Finally, you need to tell your project where to find the MTStatusBarOverlay-header. Open your "Project Settings" and go to the "Build" tab. Look for "Header Search Paths" and double-click it.  Add the relative path from your project's directory to the MTStatusBarOverlay-directory.
@@ -89,10 +89,16 @@ UIStatusBarStyleBlackOpaque, Progress visible
 ![History tracking:](https://img.skitch.com/20110223-rm4mjnn7w2yp4qeuactjfiiah5.png "History tracking")
 
 
+MonoTouch
+------------------------
+There's also a port to MonoTouch available at [https://github.com/thecoachfr/StatusBarOverlayMonoTouch](https://github.com/thecoachfr/StatusBarOverlayMonoTouch)
+
+
 Apps using MTStatusBarOverlay
 ------------------------
 * [Öffnungszeiten Österreich](http://www.oeffnungszeitenapp.at/ "oeffnungszeitenapp.at")
 * GoDenmark
+* [Glide](http://www.glide.me "Glide - instant video messaging")
 * [Anytune](http://bit.ly/anytune-itunes-preview "Anytune")
 * [Nowplayer](http://itunes.apple.com/us/app/nowplayer/id438805892?mt=8&ls=1 "Nowplayer")
 * [Amano Media](http://www.amanomedia.at/ "Amano Media")
