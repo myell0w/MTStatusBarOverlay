@@ -1230,19 +1230,19 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		// set color of labels depending on messageType
         switch(messageType) {
             case MTMessageTypeFinish:
-                self.statusLabel1.textColor = kDarkThemeFinishedMessageTextColor;
-                self.statusLabel2.textColor = kDarkThemeFinishedMessageTextColor;
-                self.finishedLabel.textColor = kDarkThemeFinishedMessageTextColor;
+                self.statusLabel1.textColor = self.customTextColor ? self.customTextColor: kDarkThemeFinishedMessageTextColor;
+                self.statusLabel2.textColor = self.customTextColor ? self.customTextColor: kDarkThemeFinishedMessageTextColor;
+                self.finishedLabel.textColor = self.customTextColor ? self.customTextColor: kDarkThemeFinishedMessageTextColor;
                 break;
             case MTMessageTypeError:
-                self.statusLabel1.textColor = kDarkThemeErrorMessageTextColor;
-                self.statusLabel2.textColor = kDarkThemeErrorMessageTextColor;
-                self.finishedLabel.textColor = kDarkThemeErrorMessageTextColor;
+                self.statusLabel1.textColor = self.customTextColor ? self.customTextColor: kDarkThemeErrorMessageTextColor;
+                self.statusLabel2.textColor = self.customTextColor ? self.customTextColor: kDarkThemeErrorMessageTextColor;
+                self.finishedLabel.textColor = self.customTextColor ? self.customTextColor: kDarkThemeErrorMessageTextColor;
                 break;
             default:
-                self.statusLabel1.textColor = kDarkThemeTextColor;
-                self.statusLabel2.textColor = kDarkThemeTextColor;
-                self.finishedLabel.textColor = kDarkThemeTextColor;
+                self.statusLabel1.textColor = self.customTextColor ? self.customTextColor: kDarkThemeTextColor;
+                self.statusLabel2.textColor = self.customTextColor ? self.customTextColor: kDarkThemeTextColor;
+                self.finishedLabel.textColor = self.customTextColor ? self.customTextColor: kDarkThemeTextColor;
                 break;
         }
         self.statusLabel1.shadowColor = nil;
