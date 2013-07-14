@@ -392,7 +392,11 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		finishedLabel_.backgroundColor = [UIColor clearColor];
 		finishedLabel_.hidden = YES;
 		finishedLabel_.text = kFinishedText;
+#ifdef __IPHONE_6_0
+		finishedLabel_.textAlignment = NSTextAlignmentCenter;
+#else
 		finishedLabel_.textAlignment = UITextAlignmentCenter;
+#endif
 		finishedLabel_.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:kFinishedFontSize];
         finishedLabel_.adjustsFontSizeToFitWidth = YES;
 		[self addSubviewToBackgroundView:finishedLabel_];
@@ -402,9 +406,14 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		statusLabel1_.backgroundColor = [UIColor clearColor];
 		statusLabel1_.shadowOffset = CGSizeMake(0.f, 1.f);
 		statusLabel1_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
-		statusLabel1_.textAlignment = UITextAlignmentCenter;
 		statusLabel1_.numberOfLines = 1;
+#ifdef __IPHONE_6_0
+		statusLabel1_.textAlignment = NSTextAlignmentCenter;
+		statusLabel1_.lineBreakMode = NSLineBreakByTruncatingTail;
+#else
+		statusLabel1_.textAlignment = UITextAlignmentCenter;
 		statusLabel1_.lineBreakMode = UILineBreakModeTailTruncation;
+#endif
 		statusLabel1_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[self addSubviewToBackgroundView:statusLabel1_];
         
@@ -413,9 +422,14 @@ kDetailViewWidth, kHistoryTableRowHeight*kMaxHistoryTableRowCount + kStatusBarHe
 		statusLabel2_.shadowOffset = CGSizeMake(0.f, 1.f);
 		statusLabel2_.backgroundColor = [UIColor clearColor];
 		statusLabel2_.font = [UIFont boldSystemFontOfSize:kStatusLabelSize];
-		statusLabel2_.textAlignment = UITextAlignmentCenter;
 		statusLabel2_.numberOfLines = 1;
+#ifdef __IPHONE_6_0
+		statusLabel2_.textAlignment = NSTextAlignmentCenter;
+		statusLabel2_.lineBreakMode = NSLineBreakByTruncatingTail;
+#else
+		statusLabel2_.textAlignment = UITextAlignmentCenter;
 		statusLabel2_.lineBreakMode = UILineBreakModeTailTruncation;
+#endif
 		statusLabel2_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[self addSubviewToBackgroundView:statusLabel2_];
         
