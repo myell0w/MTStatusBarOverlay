@@ -39,12 +39,14 @@ void mt_dispatch_sync_on_main_thread(dispatch_block_t block);
 #pragma mark Defines
 ////////////////////////////////////////////////////////////////////////
 
+// macro to check if running on at least iOS 8
+#define kMTIsOperatingSystemAtLeast8 [[NSProcessInfo processInfo] respondsToSelector:@selector(isOperatingSystemAtLeastVersion:)] ? [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){8.0, 0.0, 0.0}] : NO
 // the height of the status bar
 #define kStatusBarHeight 20.f
-// width of the screen in portrait-orientation
-#define kScreenWidth [UIScreen mainScreen].bounds.size.width
-// height of the screen in portrait-orientation
-#define kScreenHeight [UIScreen mainScreen].bounds.size.height
+// width of the screen in present orientation
+#define kScreenWidth ((kMTIsOperatingSystemAtLeast8) ? [UIScreen mainScreen].nativeBounds.size.width/[UIScreen mainScreen].nativeScale : [UIScreen mainScreen].bounds.size.width)
+// height of the screen in present orientation
+#define kScreenHeight ((kMTIsOperatingSystemAtLeast8) ? [UIScreen mainScreen].nativeBounds.size.height/[UIScreen mainScreen].nativeScale : [UIScreen mainScreen].bounds.size.height)
 // macro for checking if we are on the iPad
 #define IsIPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 // macro for checking if we are on the iPad in iPhone-Emulation mode
