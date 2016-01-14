@@ -2,11 +2,10 @@ Read Me
 =====================
 
 [![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+This project is out of date, I'd advise you to use a more modern alternative out there.
 
 
 UIStatusBarStyleDefault (left: full size, right: shrinked)
-
-![Default style](https://img.skitch.com/20101223-r1ddre3u4sjmn4htkqw3bhp84j.jpg "Default style")
 
 Description
 -----------------
@@ -68,41 +67,3 @@ Known Limitations
 ----------------------- 
 * When using UIStatusBarStyleBlackTranslutient the overlay is black opaque
 * User interaction in detail view is not possible yet
-
-
-More Screenshots
-------------------------
-
-UIStatusBarStyleBlackOpaque (left: activity indicator, right: finished-indicator)
-
-![Black style](https://img.skitch.com/20101223-rj8s32db61cb29w7k3fbpahktg.jpg "Black style")
-
-UIStatusBarStyleDefault, Landscape
-
-![Default style landscape](https://img.skitch.com/20101223-8ibm6egd7mu3fd8andgmtw9by5.jpg "Default style landscape")
-
-UIStatusBarStyleDefault, detail view visible
-
-![History tracking:](https://img.skitch.com/20101226-b1k5hjbmfyepd2mh6nbdbgw6a4.jpg "History tracking")
-
-UIStatusBarStyleBlackOpaque, Progress visible
-
-![History tracking:](https://img.skitch.com/20110223-rm4mjnn7w2yp4qeuactjfiiah5.png "History tracking")
-
-
-MonoTouch
-------------------------
-There's also a port to MonoTouch available at [https://github.com/thecoachfr/StatusBarOverlayMonoTouch](https://github.com/thecoachfr/StatusBarOverlayMonoTouch)
-
-
-Apps using MTStatusBarOverlay
-------------------------
-* [Öffnungszeiten Österreich](http://www.oeffnungszeitenapp.at/ "oeffnungszeitenapp.at")
-* GoDenmark
-* [Glide](http://www.glide.me "Glide - instant video messaging")
-* [Anytune](http://bit.ly/anytune-itunes-preview "Anytune")
-* [Nowplayer](http://itunes.apple.com/us/app/nowplayer/id438805892?mt=8&ls=1 "Nowplayer")
-* [Amano Media](http://www.amanomedia.at/ "Amano Media")
-* [EconTalk Companion](http://itunes.apple.com/us/app/econtalk-companion/id456671102?mt=8 "EconTalk Companion")
-* [Dropshop](http://itunes.apple.com/us/app/dropshop/id425751374?l=sv&ls=1&mt=8 "Dropshop")
-* lots of other Apps I don't know :)
