@@ -1,7 +1,8 @@
 Read Me
 =====================
 
-**If you use MTStatusBarOverlay in your app, please drop me a line so that I can add your app here!**
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
 
 UIStatusBarStyleDefault (left: full size, right: shrinked)
 
